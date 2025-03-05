@@ -1,0 +1,1 @@
+docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined -ti --name TPE_Arqui agodio/itba-so:2.0

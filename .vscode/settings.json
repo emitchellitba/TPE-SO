@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "naiveconsole.h": "c",
+        "stdint.h": "c",
+        "stdarg.h": "c",
+        "stdlibrary.h": "c",
+        "lib.h": "c",
+        "keyboarddriver.h": "c",
+        "time.h": "c",
+        "drawings.h": "c",
+        "time_rtc.h": "c",
+        "syscalldispatcher.h": "c",
+        "videodriver.h": "c",
+        "interrupts.h": "c"
+    }
+}
