@@ -12,7 +12,7 @@ all: $(MODULE)
 
 $(MODULE): $(OBJECTS) $(OBJECTS_ASM) _loader.o
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld $(OBJECTS) $(OBJECTS_ASM) _loader.o -o ../$(MODULE)
-	$(LD) $(LDFLAGS) -T sampleCodeModule.ld --oformat=elf64-x86-64 -o ../0000-sampleCodeModule.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+	$(LD) $(LDFLAGS) -T sampleCodeModule.ld --oformat=elf64-x86-64 _loader.o -o ../0000-sampleCodeModule.elf $(OBJECTS) $(OBJECTS_ASM)
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
