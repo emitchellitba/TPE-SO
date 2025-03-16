@@ -153,11 +153,11 @@ gdb.execute(f'set disassembly-flavor intel')
 
 
 # Disable unwanted sections
-gdb.execute(f'dashboard breakpoints')
+# gdb.execute(f'dashboard breakpoints')
 gdb.execute(f'dashboard threads')
 # gdb.execute(f'dashboard variables')
 gdb.execute(f'dashboard history')
-gdb.execute(f'dashboard stack')
+# gdb.execute(f'dashboard stack')
 
 
 # para debug docker
