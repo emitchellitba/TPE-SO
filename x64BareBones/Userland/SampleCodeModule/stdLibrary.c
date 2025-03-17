@@ -145,11 +145,11 @@ void scanf(const char * format, ...) {
     va_list args;
     va_start(args, format);
 
-    char input_buffer[BUFF_SIZE];
+    char input_buffer2[BUFF_SIZE];
 
     int index = 0, count = 0;
 
-    get_input(input_buffer);
+    get_input(input_buffer2);
 
     for (int i = 0; format[i] != '\0'; i++) {
         if (format[i] == '%' && format[i + 1] != '\0') {
@@ -158,21 +158,21 @@ void scanf(const char * format, ...) {
                 int *int_arg = va_arg(args, int *);
                 *int_arg = 0;
 
-                while (input_buffer[index] >= '0' && input_buffer[index] <= '9') {
-                    *int_arg = (*int_arg * 10) + (input_buffer[index] - '0');
+                while (input_buffer2[index] >= '0' && input_buffer2[index] <= '9') {
+                    *int_arg = (*int_arg * 10) + (input_buffer2[index] - '0');
                     index++;
                 }
                 count++;
             } else if (format[i] == 's') {
                 char *str_arg = va_arg(args, char *);
                 
-                while (input_buffer[index] != ' ' && input_buffer[index] != '\n' && input_buffer[index] != '\0') {
-                    *str_arg++ = input_buffer[index++];
+                while (input_buffer2[index] != ' ' && input_buffer2[index] != '\n' && input_buffer2[index] != '\0') {
+                    *str_arg++ = input_buffer2[index++];
                 }
                 *str_arg = '\0'; 
                 count++;
             }
-        } else if (format[i] == input_buffer[index]) {
+        } else if (format[i] == input_buffer2[index]) {
             index++; 
         } else {
             break; 
