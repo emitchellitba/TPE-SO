@@ -11,4 +11,4 @@
 .bash_history
 settings.json
 
-kernel/kernel.elf
+Kernel/*.elf
