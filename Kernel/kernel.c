@@ -89,6 +89,7 @@ void * initializeKernelBinary()
 int main()
 {	
 	load_idt();
+	
 
 	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
 	while(1){

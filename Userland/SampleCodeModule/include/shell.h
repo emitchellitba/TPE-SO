@@ -1,7 +1,7 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-typedef enum {HELP = 0, DATE, EXC_1, EXC_2, SNAKE, ZOOM_IN, ZOOM_OUT, COLOR_FONT, COLOR_BG, CLEAR, EXIT, REGISTERS} command_id;
+typedef enum {HELP = 0, DATE, ZOOM_IN, ZOOM_OUT, COLOR_FONT, COLOR_BG, CLEAR, EXIT, REGISTERS} command_id;
 
 extern void opCodeExc();
 

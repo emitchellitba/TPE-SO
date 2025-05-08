@@ -1,17 +1,16 @@
 #include <shell.h>
 #include <stdLibrary.h>
-#include <snake.h>
 
 #define BUFF_SIZE 500
 #define CANT_CMDS 12
 #define SPECIAL_KEY_MAX_VALUE 5
     
 char *reg_strings[] = {" RAX: ", " RBX: ", " RCX: ", " RDX: ", " RSI: ", " RDI: ", " RBP: ", " RSP: ", " R8: ", " R9: ", " R10: ", " R11: ", " R12: ", " R13: ", " R14: ", " R15: ", " RIP: "};
-char* command_strings[] = {"help", "date", "exception 1", "exception 2", "snake", "zoom in", "zoom out", "color font", "color background","clear", "exit", "registers"};
+char* command_strings[] = {"help", "date", "zoom in", "zoom out", "color font", "color background","clear", "exit", "registers"};
 static uint8_t on = 1;
 
 typedef void (*TerminalCommand)();
-static TerminalCommand commands[] = {help, print_local_date_time, exception1, exception2, start_snake, zoom_in, zoom_out, change_font_color, change_bg_color, clear, exit, get_registers};
+static TerminalCommand commands[] = {help, print_local_date_time, zoom_in, zoom_out, change_font_color, change_bg_color, clear, exit, get_registers};
 void show_prompt();
 extern void get_regist(uint64_t registers);
 
@@ -22,7 +21,11 @@ void start_shell() {
         get_input(input_buffer);
         to_lower(input_buffer);
         command_id command = process_input(input_buffer);
-        if(command != -1) {commands[command]();}
+        if(command != -1) {
+            commands[command]();
+        } else {
+            printf("Unknown Command\n");
+        }
     }
 }
 
@@ -73,13 +76,13 @@ void help() {
 }
 
 void print_global_date_time() {
-    date_time * dt;
+    date_time * dt = {0};
     load_date_time(dt);
     printf("%d/%d/%d %d:%d:%d\n", dt->day, dt->month, dt->year, dt->hour, dt->min, dt->sec);
 }
 
 void print_local_date_time() {
-    date_time * dt;
+    date_time * dt = {0};
     load_date_time(dt);
     printf("%d/%d/%d %d:%d:%d\n", dt->day, dt->month, dt->year, dt->hour, dt->min, dt->sec);
 }
@@ -97,14 +100,6 @@ void exit() {
 
     printf("\n[Process completed]\n");
     on = 0;
-}
-
-void exception1(){
-    int a = 1/0 ;
-}
-
-void exception2(){
-    opCodeExc();
 }
 
 void get_registers()
