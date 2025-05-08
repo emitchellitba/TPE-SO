@@ -1,5 +1,5 @@
-#ifndef _exceptions_
-#define _exceptions_
+#ifndef _EXCEPTIONS_H_
+#define _EXCEPTIONS_H_
 
 #include <stdint.h>
 

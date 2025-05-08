@@ -3,9 +3,9 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
-#include "videodriver.h"
-#include "keyboardDriver.h"
-#include "idtLoader.h"
+#include <videodriver.h>
+#include <keyboardDriver.h>
+#include <idtLoader.h>
 #include <soundDriver.h>
 
 

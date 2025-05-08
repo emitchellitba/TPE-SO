@@ -1,16 +1,17 @@
 #ifndef _TIME_H_
 #define _TIME_H_
-#include<stdint.h>
+#include <stdint.h>
 
-typedef struct{
+typedef struct
+{
     uint8_t sec;
     uint8_t min;
     uint8_t hour;
     uint8_t day;
     uint8_t month;
     uint8_t year;
-}date_time;
-    
+} date_time;
+
 // extern int getSec();
 // extern int getMin();
 // extern int getHour();
