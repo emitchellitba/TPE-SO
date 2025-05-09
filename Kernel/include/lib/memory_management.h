@@ -1,8 +1,8 @@
 #ifndef MEMORY_MANAGEMENT_H
 #define MEMORY_MANAGEMENT_H
 
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
@@ -21,7 +21,8 @@ MemoryManagerADT kmm_init(void *const restrict memory_to_manage);
  *
  * Returns a pointer to the allocated memory.
  */
-void *kmalloc(MemoryManagerADT const restrict memory_manager, const size_t to_allocate);
+void *kmalloc(MemoryManagerADT const restrict memory_manager,
+              const size_t to_allocate);
 
 #define HEAP_SIZE 0x1000000 // 16MB
 

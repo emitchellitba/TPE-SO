@@ -3,11 +3,9 @@
 
 #include <stdint.h>
 
-
 void exceptionDispatcher(int exception);
 void printRegisters();
 static void zero_division();
 static void invalid_operation_code();
 
-
-#endif 
+#endif
