@@ -1,0 +1,3 @@
+[submodule ".c-aptain-hook"]
+	path = .c-aptain-hook
+	url = https://github.com/donosonaumczuk/c-aptain-hook.git
