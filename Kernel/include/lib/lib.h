@@ -5,10 +5,10 @@
 
 typedef unsigned long size_t;
 
-void * memset(void * destination, int32_t character, uint64_t length);
-void * memcpy(void * destination, const void * source, uint64_t length);
+void *memset(void *destination, int32_t character, uint64_t length);
+void *memcpy(void *destination, const void *source, uint64_t length);
 char *cpuVendor(char *result);
-int str_len(const char * str);
+int str_len(const char *str);
 extern void main_ret();
 int abs(int x);
 

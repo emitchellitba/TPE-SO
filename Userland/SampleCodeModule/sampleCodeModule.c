@@ -1,7 +1,6 @@
 #include <shell.h>
 
 int main() {
-	start_shell();
-    return 0;
+  start_shell();
+  return 0;
 }
-

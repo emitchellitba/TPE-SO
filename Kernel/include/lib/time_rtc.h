@@ -2,14 +2,13 @@
 #define _TIME_H_
 #include <stdint.h>
 
-typedef struct
-{
-    uint8_t sec;
-    uint8_t min;
-    uint8_t hour;
-    uint8_t day;
-    uint8_t month;
-    uint8_t year;
+typedef struct {
+  uint8_t sec;
+  uint8_t min;
+  uint8_t hour;
+  uint8_t day;
+  uint8_t month;
+  uint8_t year;
 } date_time;
 
 // extern int getSec();

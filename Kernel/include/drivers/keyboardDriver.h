@@ -3,13 +3,11 @@
 
 #include <lib.h>
 
-typedef enum {
-    LEFT = 1, UP, DOWN, RIGHT
-} ARROWS;
+typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 
 void press_key();
 unsigned char getLastKey();
 extern uint8_t esc;
-void load_buffer(char * buffer, size_t count);
+void load_buffer(char *buffer, size_t count);
 
 #endif

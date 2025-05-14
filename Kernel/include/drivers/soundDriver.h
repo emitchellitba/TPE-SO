@@ -7,5 +7,4 @@ static void play_sound(int nFrequence);
 static void no_sound();
 void beep(int ticks, int nFrequence);
 
-
-#endif 
+#endif

@@ -11,5 +11,4 @@
 
 void load_idt();
 
-
 #endif // _IDTLOADER_H_
