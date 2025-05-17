@@ -3,6 +3,7 @@
 
 #include "CuTest.h"
 #include "dummy_mm.h"
+#include "dummy_mm_test.h"
 
 void RunAllTests(void) {
 	CuString *output = CuStringNew();

@@ -8,6 +8,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(LINKER) $(LINKER_FLAGS) $(OBJECTS) -o ../$(TARGET).out
+	@rm -rf $(OBJECTS) # Clean .o files after generating the .out
 
 %.o : %.c
 	$(COMPILER) $< $(COMPILER_FLAGS) -o $@

@@ -26,4 +26,5 @@ void *kmalloc(MemoryManagerADT const restrict memory_manager,
 
 #define HEAP_SIZE 0x1000000 // 16MB
 
-#endif
+#endif // DUMMY_MM_H
+

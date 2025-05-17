@@ -3,7 +3,7 @@
 // In this memory manager, a block is a byte of memory (char).
 
 typedef struct MemoryManagerCDT {
-  char *next_address
+  char *next_address;
 } MemoryManagerCDT;
 
 MemoryManagerADT kmm_init(void *const restrict memory_to_manage) {
