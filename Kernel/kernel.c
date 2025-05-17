@@ -1,6 +1,8 @@
+#include "heap.h"
 #include <idtLoader.h>
 #include <keyboardDriver.h>
 #include <lib.h>
+#include <memory_manager.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
 #include <soundDriver.h>
@@ -44,6 +46,7 @@ void *initializeKernelBinary() {
 }
 
 int main() {
+
   load_idt();
 
   ((EntryPoint)sampleCodeModuleAddress)();

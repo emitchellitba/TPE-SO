@@ -32,6 +32,19 @@ void ncPrintChar(char character) {
     currentVideo += 2;
     *currentVideo = ' ';
     currentVideo += 2;
+  } else if (character == '\n') {
+    do {
+      *currentVideo = ' ';
+      currentVideo += 2;
+    } while ((uint64_t)(currentVideo - video) % (width * 2) != 0);
+  } else if (character == '\r') {
+    currentVideo -= (uint64_t)(currentVideo - video) % (width * 2);
+  } else if (character == '\b') {
+    currentVideo -= 2;
+    *currentVideo = ' ';
+    currentVideo += 2;
+  } else if (character == '\0') {
+    return;
   } else {
     *currentVideo = character;
     currentVideo += 2;
