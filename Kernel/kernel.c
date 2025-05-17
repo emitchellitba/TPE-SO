@@ -7,6 +7,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <videodriver.h>
+#include <memory_manager.h>
+#include "heap.h"
+
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -43,10 +46,15 @@ void *initializeKernelBinary() {
   return getStackBase();
 }
 
+
 int main() {
-  load_idt();
 
-  ((EntryPoint)sampleCodeModuleAddress)();
 
-  return 0;
+    
+
+    load_idt();
+
+    ((EntryPoint)sampleCodeModuleAddress)();
+
+    return 0;
 }
