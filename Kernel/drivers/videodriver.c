@@ -1,10 +1,4 @@
-#include "videodriver.h"
-#include "colors.h"
-#include "fonts.h"
-#include <lib.h>
-#include <stdint.h>
-#include <sysCallDispatcher.h>
-
+#include <videodriver.h>
 #define CHAR_WIDTH (8 * size)
 #define CHAR_HEIGHT (16 * size)
 #define CANT_COLORS 6

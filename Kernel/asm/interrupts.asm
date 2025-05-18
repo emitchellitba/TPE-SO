@@ -19,7 +19,7 @@ GLOBAL _exception6Handler
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
-EXTERN syscallDispatcher
+EXTERN syscall_dispatcher
 EXTERN getStackBase
 
 EXTERN register_array
@@ -169,7 +169,7 @@ _irq60Handler:
 	mov rsi, rdi
 	mov rdi, rax
 
-	call syscallDispatcher
+	call syscall_dispatcher
 
 	popState
 	

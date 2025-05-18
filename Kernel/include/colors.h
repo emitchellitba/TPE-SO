@@ -1,3 +1,6 @@
+#ifndef COLORS_H
+#define COLORS_H
+
 #include <stdint.h>
 
 enum COLORS {
@@ -10,3 +13,7 @@ enum COLORS {
   YELLOW = 0x0000FFFF,
   LIGHT_BLACK = 0x000D1B2A
 };
+
+typedef uint32_t color;
+
+#endif // COLORS_H

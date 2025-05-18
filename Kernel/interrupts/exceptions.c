@@ -1,10 +1,4 @@
-#define ZERO_EXCEPTION_ID 0
-#define INVALID_OPERATION_CODE_ID 6
-#define CANT_REGS 17
-
-#include <lib.h>
-#include <sysCallDispatcher.h>
-#include <videodriver.h>
+#include <exceptions.h>
 
 static void zero_division();
 static void invalid_operation_code();

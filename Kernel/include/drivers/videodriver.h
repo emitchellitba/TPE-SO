@@ -1,7 +1,9 @@
 #ifndef _VIDEODRIVER_H_
 #define _VIDEODRIVER_H_
 
-#include <../interrupts/sysCallDispatcher.h>
+#include <colors.h>
+#include <fonts.h>
+#include <lib.h>
 #include <stdint.h>
 
 #define SCREEN_WIDTH_PIXELS 1024
@@ -11,8 +13,6 @@ typedef struct {
   int x;
   int y;
 } Segment;
-
-typedef uint32_t color;
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 void printStd(const char *c, size_t count);

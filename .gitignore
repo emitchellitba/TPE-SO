@@ -1,5 +1,6 @@
 # Ignore object files
 *.o
+*.out
 
 # Ignore image files
 *.img
