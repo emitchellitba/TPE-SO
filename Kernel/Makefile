@@ -50,7 +50,7 @@ $(LOADEROBJECT):
 
 
 clean:
-	rm -rf asm/*.o drivers/*.o interrupts/*.o lib/*.o memory/*.o *.o *.bin kernel.elf kernel.bin
+	rm -rf asm/*.o drivers/*.o interrupts/*.o lib/*.o memory/*.o *.o *.bin kernel.bin
 
 .PHONY: all clean
 

@@ -11,6 +11,8 @@
 *.bin
 .bash_history
 settings.json
+.gdbinit
+.gdb_history
 
 Kernel/*.elf
 .vscode
