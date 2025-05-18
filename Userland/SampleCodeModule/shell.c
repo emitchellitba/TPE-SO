@@ -1,29 +1,34 @@
+#include <libu.h>
 #include <shell.h>
 #include <stdLibrary.h>
 
 #define BUFF_SIZE 500
-#define CANT_CMDS 9
 #define SPECIAL_KEY_MAX_VALUE 5
 
 char *reg_strings[] = {
     " RAX: ", " RBX: ", " RCX: ", " RDX: ", " RSI: ", " RDI: ",
     " RBP: ", " RSP: ", " R8: ",  " R9: ",  " R10: ", " R11: ",
     " R12: ", " R13: ", " R14: ", " R15: ", " RIP: "};
-char *command_strings[] = {"help",     "date",       "zoom in",
-                           "zoom out", "color font", "color background",
-                           "clear",    "exit",       "registers"};
+
+char *command_strings[] = {
+    "help",  "date", "zoom in",   "zoom out", "color font", "color background",
+    "clear", "exit", "registers", "kmsg"};
+
+#define NUM_CMDS (sizeof(command_strings) / sizeof(command_strings[0]))
+
 static uint8_t on = 1;
 
 typedef void (*TerminalCommand)();
-static TerminalCommand commands[] = {help,
-                                     print_local_date_time,
-                                     zoom_in,
-                                     zoom_out,
-                                     change_font_color,
-                                     change_bg_color,
-                                     clear,
-                                     exit,
-                                     get_registers};
+static TerminalCommand commands[NUM_CMDS] = {help,
+                                             print_local_date_time,
+                                             zoom_in,
+                                             zoom_out,
+                                             change_font_color,
+                                             change_bg_color,
+                                             clear,
+                                             exit,
+                                             get_registers,
+                                             show_kmsg};
 void show_prompt();
 extern void get_regist(uint64_t registers);
 
@@ -70,7 +75,7 @@ void get_input(char *buffer) {
 
 command_id process_input(char *input) {
   int index = -1;
-  for (int i = 0; i < CANT_CMDS && (index == -1); i++) {
+  for (int i = 0; i < NUM_CMDS && (index == -1); i++) {
     if (str_cmp(input, command_strings[i]) == 0)
       index = i;
   }
@@ -79,7 +84,7 @@ command_id process_input(char *input) {
 
 void help() {
   printf("Command list:\n");
-  for (int i = 0; i < CANT_CMDS; i++) {
+  for (int i = 0; i < NUM_CMDS; i++) {
     printf("\t- %s\n", command_strings[i]);
   }
 }
