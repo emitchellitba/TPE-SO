@@ -24,6 +24,6 @@ $(MODULE): $(OBJECTS) $(OBJECTS_ASM) _loader.o
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o ../$(MODULE)
+	rm -rf *.o lib/*.o ../$(MODULE)
 
 .PHONY: all clean print
