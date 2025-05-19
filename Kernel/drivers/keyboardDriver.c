@@ -100,12 +100,6 @@ void press_key() {
   }
 }
 
-unsigned char getLastKey() {
-  char buf[1];
-  ringbuf_read(kbuff, 1, buf);
-  return buf[0];
-}
-
 void load_buffer(char *buffer, size_t count) {
   ringbuf_read(kbuff, count, buffer);
 }
