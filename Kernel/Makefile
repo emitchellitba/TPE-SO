@@ -28,6 +28,7 @@ STATICLIBS=
 
 INCLUDE_DIRS=$(shell find ./include -type d)
 INCLUDE_FLAGS=$(foreach dir,$(INCLUDE_DIRS),-I$(dir))
+ASM_INCLUDE_FLAGS=-Iasm
 
 
 all: $(KERNEL)
@@ -42,7 +43,7 @@ $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_DRI
 
 
 %.o : %.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
+	$(ASM) $(ASMFLAGS) $(ASM_INCLUDE_FLAGS) $< -o $@
 
 
 $(LOADEROBJECT):

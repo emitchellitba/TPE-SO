@@ -1,3 +1,0 @@
-#!/bin/sh
-find Kernel Userland -name '*.c' -o -name '*.h' | xargs clang-format -i
-git add Kernel Userland
