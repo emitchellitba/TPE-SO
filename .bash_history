@@ -27,3 +27,22 @@ cd ccEun1nR.s
 rm *
 ls
 exit
+cd root/
+gdb
+clear
+gdb
+gdb
+exit
+cd root/
+gdb
+gdb
+exit
+cd root/
+gdb
+exit
+cd root/
+gdb
+exit
+cd root
+gdb
+exit
