@@ -16,3 +16,4 @@ settings.json
 
 Kernel/*.elf
 .vscode
+hooks/*

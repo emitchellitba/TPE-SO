@@ -1,4 +1,5 @@
 #include <keyboardDriver.h>
+#include <ringbuf.h>
 #include <stdint.h>
 
 #define LEFT_SHIFT_PRESSED 0x2A
@@ -12,12 +13,11 @@
 #define RIGHT_ARROW 0x4D
 #define DOWN_ARROW 0x50
 #define ESC 5
+#define KBUFF_SIZE 8192
 
-static char buffer[5000];
+struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
-unsigned int lastIndexBuffer = 0;
-unsigned int readIndexBuffer = 0;
 unsigned int arrow = 0;
 extern unsigned int getScanCode();
 
@@ -74,11 +74,12 @@ void press_key() {
   }
 
   if (scanCode <= 0x80) {
-    if (arrow != 0) {
-      buffer[lastIndexBuffer++] = arrow;
+    if (arrow) {
+      ringbuf_write(kbuff, 1, &arrow);
       arrow = 0;
     } else if (esc) {
-      buffer[lastIndexBuffer++] = ESC;
+      char aux = ESC;
+      ringbuf_write(kbuff, 1, &aux);
     } else if (!(scanCode == LEFT_SHIFT_PRESSED ||
                  scanCode == RIGHT_SHIFT_PRESSED ||
                  scanCode == LEFT_SHIFT_RELEASED ||
@@ -94,28 +95,11 @@ void press_key() {
           col = 1;
         }
       }
-      buffer[lastIndexBuffer++] = printableAscii[scanCode][col];
+      ringbuf_write(kbuff, 1, &printableAscii[scanCode][col]);
     }
-    lastIndexBuffer %= 5000;
   }
-}
-
-unsigned char getLastKey() {
-  // si no hay caracteres por leer, devuelvo -1
-  if (readIndexBuffer == lastIndexBuffer)
-    return -1;
-  if (buffer[readIndexBuffer] > 0x80) {
-    readIndexBuffer++;
-    return 0;
-  }
-  return buffer[readIndexBuffer++];
 }
 
 void load_buffer(char *buffer, size_t count) {
-  char current;
-  int myCount = 0;
-  while ((current = getLastKey()) != -1 && myCount < count) {
-    if (current != 0)
-      buffer[myCount++] = current;
-  }
+  ringbuf_read(kbuff, count, buffer);
 }
