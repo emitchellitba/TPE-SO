@@ -38,7 +38,7 @@ $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_DRI
 
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
+	$(GCC) $(GCCFLAGS) $(CFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
 
 
 %.o : %.asm

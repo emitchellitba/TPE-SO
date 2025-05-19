@@ -1,4 +1,4 @@
-#include <dummy_mm.h>
+#include <memory_manager.h>
 
 // In this memory manager, a block is a byte of memory (char).
 
@@ -26,4 +26,16 @@ void *kmalloc(MemoryManagerADT const restrict memory_manager,
 
   memory_manager->next_address += to_allocate;
   return ptr;
+}
+
+void kmm_free(void *ptr) {
+  // This function is not implemented in this dummy memory manager.
+  // In a real memory manager, it would free the allocated memory.
+  return;
+}
+
+void kmm_dump_state() {
+  // This function is not implemented in this dummy memory manager.
+  // In a real memory manager, it would print the state of the memory.
+  return;
 }
