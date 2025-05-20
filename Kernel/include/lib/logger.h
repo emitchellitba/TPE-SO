@@ -6,15 +6,15 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#define LOG_NONE 0
-#define LOG_EMERG 1
-#define LOG_ALERT 2
-#define LOG_CRIT 3
-#define LOG_ERR 4
-#define LOG_WARNING 5
-#define LOG_NOTICE 6
-#define LOG_INFO 7
-#define LOG_DEBUG 8
+#define LOG_NONE 0    // No logging (No definir log functions con este nivel)
+#define LOG_EMERG 1   // System is unusable
+#define LOG_ALERT 2   // Action must be taken immediately
+#define LOG_CRIT 3    // Critical conditions
+#define LOG_ERR 4     // Error conditions
+#define LOG_WARNING 5 // Warning conditions
+#define LOG_NOTICE 6  // Normal but significant condition
+#define LOG_INFO 7    // Informational
+#define LOG_DEBUG 8   // Debug-level messages
 
 int vprintk(const char *fmt, va_list args);
 int printk(const char *fmt, ...);
