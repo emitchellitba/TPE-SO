@@ -26,10 +26,10 @@ void buddy_kmm_free(void *ptr);
 void buddy_kmm_dump_state(void);
 
 // Optionally, alias the advanced functions to the generic names:
-#define kmm_init adv_kmm_init
-#define kmalloc adv_kmalloc
-#define kmm_free adv_kmm_free
-#define kmm_dump_state adv_kmm_dump_state
+#define kmm_init buddy_kmm_init
+#define kmalloc buddy_kmalloc
+#define kmm_free buddy_kmm_free
+#define kmm_dump_state buddy_kmm_dump_state
 
 #endif
 
