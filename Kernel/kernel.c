@@ -1,5 +1,10 @@
 #include <kernel.h>
+
+#include <logger.h>
 #include <memory_manager.h>
+
+static int kernel_log_level = LOG_DEBUG;
+LOGGER_DEFINE(kernel, kernel_log, kernel_log_level)
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -40,6 +45,12 @@ void *initializeKernelBinary() {
 int main() {
   load_idt();
   MemoryManagerADT kernel_mem = kmm_init(heapModuleAddress);
+
+#if defined(USE_SIMPLE_MM)
+  kernel_log(LOG_INFO, "Simple memory manager initialized\n");
+#elif defined(USE_BUDDY_MM)
+  kernel_log(LOG_INFO, "Buddy memory manager initialized\n");
+#endif
 
   ((EntryPoint)sampleCodeModuleAddress)();
 
