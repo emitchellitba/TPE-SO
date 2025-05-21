@@ -44,7 +44,7 @@ void *initializeKernelBinary() {
 
 int main() {
   load_idt();
-  MemoryManagerADT kernel_mem = kmm_init(heapModuleAddress);
+  memory_manager_adt kernel_mem = kmm_init(heapModuleAddress);
 
 #if defined(USE_SIMPLE_MM)
   kernel_log(LOG_INFO, "Simple memory manager initialized\n");

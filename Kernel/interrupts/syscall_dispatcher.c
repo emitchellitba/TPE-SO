@@ -108,7 +108,7 @@ int64_t sys_free_draw(va_list args) {
               "free_draw(x=%ld, y=%ld, drawing=%p, colors=%p, size=%ld)\n", x,
               y, drawing, colors, size);
   // TODO: Borrar todos estos casteos y hacer tipos consistentes
-  free_draw((int)x, (int)y, (int(*)[28])drawing, colors, (int)size);
+  free_draw((int)x, (int)y, (int (*)[28])drawing, colors, (int)size);
   return 0;
 }
 

@@ -1,34 +1,33 @@
 #include "heap.h"
+#include "../include/lib/memory_manager.h"
 #include <naiveConsole.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define HEAP_SIZE (2 * 1024 * 1024) // 2MB
-#define HEAP_BASE 0x00200000
 static uint8_t *heap = (uint8_t *)HEAP_BASE;
 
-typedef struct BlockHeader {
+typedef struct block_header_t {
   size_t size;
   int is_free;
-  struct BlockHeader *next;
-} BlockHeader;
+  struct block_header_t *next;
+} block_header_t;
 
 #define ALIGN4(x) (((x) + 3) & ~3)
-#define HEADER_SIZE (sizeof(BlockHeader))
+#define HEADER_SIZE (sizeof(block_header_t))
 
-static BlockHeader *free_list = NULL;
+static block_header_t *free_list = NULL;
 
 void init_heap() {
-  free_list = (BlockHeader *)heap;
+  free_list = (block_header_t *)heap;
   free_list->size = HEAP_SIZE;
   free_list->is_free = 1;
   free_list->next = NULL;
 }
 
-void split_block(BlockHeader *block, size_t size) {
-  BlockHeader *new_block = (BlockHeader *)((uint8_t *)block + size);
+void split_block(block_header_t *block, size_t size) {
+  block_header_t *new_block = (block_header_t *)((uint8_t *)block + size);
   new_block->size = block->size - size;
   new_block->is_free = 1;
   new_block->next = block->next;
@@ -41,7 +40,7 @@ void *my_malloc(size_t size) {
   if (size == 0)
     return NULL;
   size = ALIGN4(size + HEADER_SIZE);
-  BlockHeader *current = free_list;
+  block_header_t *current = free_list;
 
   while (current != NULL) {
     if (current->is_free && current->size >= size) {
@@ -57,7 +56,7 @@ void *my_malloc(size_t size) {
 }
 
 void coalesce() {
-  BlockHeader *current = free_list;
+  block_header_t *current = free_list;
   while (current && current->next) {
     if (current->is_free && current->next->is_free) {
       current->size += current->next->size;
@@ -72,13 +71,13 @@ void my_free(void *ptr) {
   if (!ptr)
     return;
 
-  BlockHeader *block = (BlockHeader *)((uint8_t *)ptr - HEADER_SIZE);
+  block_header_t *block = (block_header_t *)((uint8_t *)ptr - HEADER_SIZE);
   block->is_free = 1;
   coalesce();
 }
 
 void print_memory_state() {
-  BlockHeader *current = (BlockHeader *)heap;
+  block_header_t *current = (block_header_t *)heap;
   int block_num = 0;
   int free_blocks = 0;
   int used_blocks = 0;
