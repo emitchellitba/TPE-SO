@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <ds/ringbuf.h>
+#include "../ds/ringbuf.h"
 
 #include <stdarg.h>
 #include <stdint.h>

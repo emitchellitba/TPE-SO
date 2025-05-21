@@ -6,7 +6,7 @@
 
 void queue_test();
 
-MemoryManagerADT kernel_mem;
+memory_manager_adt kernel_mem;
 
 static int kernel_log_level = LOG_DEBUG;
 LOGGER_DEFINE(kernel, kernel_log, kernel_log_level)
