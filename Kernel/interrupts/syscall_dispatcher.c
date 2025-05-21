@@ -10,6 +10,16 @@ extern uint64_t register_array[];
 
 typedef int64_t (*syscall_func_t)(va_list);
 
+/*
+SYSCALLS FALTANTES
+● Crear y finalizar un proceso. deberá soportar el pasaje de parámetros.
+● Obtener el ID del proceso que llama.
+● Listar todos los procesos: nombre, ID, prioridad, stack y base pointer,
+foreground y cualquier otra variable que consideren necesaria. ● Matar un
+proceso arbitrario. ● Modificar la prioridad de un proceso arbitrario. ●
+Bloquear y desbloquear un proceso arbitrario. ● Renunciar al CPU. ● Esperar a
+que los hijos terminen.*/
+
 static syscall_func_t syscall_table[] = {
     sys_read,            // 0
     sys_write,           // 1
@@ -22,7 +32,19 @@ static syscall_func_t syscall_table[] = {
     sys_zoom,            // 8
     sys_fill_out_buffer, // 9
     sys_beep,            // 10
-    sys_read_kmsg        // 11
+    sys_read_kmsg,       // 11
+    sys_pipe_open,       // 12
+    sys_pipe_close,      // 13
+    sys_fork,            // 14
+    sys_ps,              // 15
+                         // sys_kill,
+                         // sys_wait,           // 16
+                         // sys_set_priority,   // 17
+                         // sys_block,         // 18
+                         // sys_unblock,       // 19
+                         // sys_renounce,      // 20
+                         // sys_getpid,        // 21
+                         // sys_getppid,       // 22
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -53,6 +75,8 @@ int64_t sys_read(va_list args) {
 }
 
 int64_t sys_write(va_list args) {
+  /* 1 y 2 son fds para STDOUT Y STDERR */
+
   FDS fd = va_arg(args, int);
   const uint8_t *buffer = va_arg(args, const uint8_t *);
   uint64_t count = va_arg(args, uint64_t);
@@ -173,6 +197,28 @@ int64_t sys_read_kmsg(va_list args) {
   }
 
   return (int64_t)to_read;
+}
+
+int64_t sys_pipe_open(va_list args) {
+  int64_t pipe_id = va_arg(args, int64_t);
+  syscall_log(LOG_INFO, "pipe_open(pipe_id=%ld)\n", pipe_id);
+  // return pipe_open(pipe_id);
+}
+
+int64_t sys_pipe_close(va_list args) {
+  int64_t pipe_id = va_arg(args, int64_t);
+  syscall_log(LOG_INFO, "pipe_close(pipe_id=%ld)\n", pipe_id);
+  // return pipe_close(pipe_id);
+}
+
+int64_t sys_fork(va_list args) {
+  syscall_log(LOG_INFO, "fork()\n");
+  // return fork();
+}
+
+int64_t sys_ps(va_list args) {
+  syscall_log(LOG_INFO, "ps()\n");
+  // return ps();
 }
 
 static void fill_out_buffer(uint64_t *buffer) {

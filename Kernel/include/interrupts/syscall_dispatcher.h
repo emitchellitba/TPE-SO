@@ -27,5 +27,9 @@ int64_t sys_zoom(va_list args);
 int64_t sys_fill_out_buffer(va_list args);
 int64_t sys_beep(va_list args);
 int64_t sys_read_kmsg(va_list args);
+int64_t sys_pipe_open(va_list args);
+int64_t sys_pipe_close(va_list args);
+int64_t sys_fork(va_list args);
+int64_t sys_ps(va_list args);
 
 #endif

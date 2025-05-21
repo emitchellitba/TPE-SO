@@ -1,7 +1,12 @@
 #include <kernel.h>
 
+#include <ds/queue.h>
 #include <logger.h>
 #include <memory_manager.h>
+
+void queue_test();
+
+MemoryManagerADT kernel_mem;
 
 static int kernel_log_level = LOG_DEBUG;
 LOGGER_DEFINE(kernel, kernel_log, kernel_log_level)
@@ -44,7 +49,7 @@ void *initializeKernelBinary() {
 
 int main() {
   load_idt();
-  MemoryManagerADT kernel_mem = kmm_init(heapModuleAddress);
+  kernel_mem = kmm_init(heapModuleAddress);
 
 #if defined(USE_SIMPLE_MM)
   kernel_log(LOG_INFO, "Simple memory manager initialized\n");
@@ -52,7 +57,47 @@ int main() {
   kernel_log(LOG_INFO, "Buddy memory manager initialized\n");
 #endif
 
+  queue_test();
+
   ((EntryPoint)sampleCodeModuleAddress)();
 
   return 0;
+}
+
+void queue_test() {
+  /* Con el dummy no hay kfree pero no pasa nada */
+
+  struct queue *queue = QUEUE_NEW();
+  queue->flags |= QUEUE_TRACE; // Enable tracing
+
+  struct qnode *node1 = enqueue(queue, (void *)0x1);
+  struct qnode *node2 = enqueue(queue, (void *)0x2);
+  struct qnode *node3 = enqueue(queue, (void *)0x3);
+
+  kernel_log(LOG_DEBUG, "Queue count after enqueue: %d\n", queue->count); // 3
+
+  void *val = dequeue(queue);
+  kernel_log(LOG_DEBUG, "Dequeued: %p\n", val); // 0x1
+
+  queue_remove(queue, (void *)0x2);
+  kernel_log(LOG_DEBUG, "Queue count after remove: %d\n", queue->count); // 1
+
+  queue_node_remove(queue, node3);
+  kernel_log(LOG_DEBUG, "Queue count after node_remove: %d\n",
+             queue->count); // 0
+
+  struct qnode *node4 = enqueue(queue, (void *)0x4);
+  kernel_log(LOG_DEBUG, "Enqueued node4: %p\n", node4); // 0x4
+
+  while (queue->count > 0) {
+    void *v = dequeue(queue);
+    kernel_log(LOG_DEBUG, "Dequeued: %p\n", v); // 0x4
+  }
+
+  dequeue(queue); // Esto no deberia hacer nada
+  kernel_log(LOG_DEBUG, "Queue count after dequeue: %d\n", queue->count); // 0
+
+  kernel_log(LOG_DEBUG, "Queue count at end: %d\n", queue->count); // 0
+
+  // kfree(queue);
 }

@@ -7,16 +7,7 @@
 
 typedef struct MemoryManagerCDT *MemoryManagerADT;
 
-#if defined(USE_SIMPLE_MM)
-
-// Simple memory manager declarations
-MemoryManagerADT kmm_init(void *const restrict memory_to_manage);
-void *kmalloc(MemoryManagerADT const restrict memory_manager,
-              const size_t to_allocate);
-void kmm_free(void *ptr);
-void kmm_dump_state(void);
-
-#elif defined(USE_BUDDY_MM)
+#if defined(USE_BUDDY_MM)
 
 // Advanced memory manager declarations
 MemoryManagerADT buddy_kmm_init(void *const restrict memory_to_manage);
@@ -31,6 +22,17 @@ void buddy_kmm_dump_state(void);
 #define kmm_free buddy_kmm_free
 #define kmm_dump_state buddy_kmm_dump_state
 
+#else
+
+// Simple memory manager declarations
+MemoryManagerADT kmm_init(void *const restrict memory_to_manage);
+void *kmalloc(MemoryManagerADT const restrict memory_manager,
+              const size_t to_allocate);
+void kmm_free(void *ptr);
+void kmm_dump_state(void);
+
 #endif
+
+#define KMEMORY_DECLARE extern MemoryManagerADT kernel_mem;
 
 #endif // MEMORY_MANAGER_H
