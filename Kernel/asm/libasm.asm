@@ -8,8 +8,9 @@ GLOBAL getDay
 GLOBAL getMonth
 GLOBAL getYear
 GLOBAL getScanCode
-GLOBAL outb
 GLOBAL inb
+GLOBAL outb
+GLOBAL call_timer_tick
 GLOBAL register_array
 GLOBAL load_registers_array
 
@@ -139,6 +140,10 @@ outb:
 	mov rdx, rdi
 	mov rax, rsi
 	out dx, al
+	ret
+
+call_time_tick:
+	int 20h
 	ret
 
 load_registers_array:
