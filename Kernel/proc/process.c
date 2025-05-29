@@ -1,3 +1,4 @@
+#include "process.h"
 #include "../include/lib/memory_manager.h"
 #include <ds/queue.h>
 #include <lib/logger.h>
@@ -5,6 +6,10 @@
 
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
+
+// #define MAX_PROCESSES 64
+// static struct proc *process_table[MAX_PROCESSES];
+// static int process_count = 0;
 
 struct queue *procs = QUEUE_NEW();
 pid_t last_pid = 0;
@@ -23,6 +28,8 @@ int proc_new(proc_t **ref) {
   int err = 0;
   proc_t *proc = (proc_t *)kmalloc(kernel_mem, sizeof(proc_t));
 
+  enqueue(procs, proc);
+
   if (!proc) {
     proc_log(LOG_ERR, "Error allocating process\n");
     err = -NOMEMERR;
@@ -39,7 +46,8 @@ int proc_new(proc_t **ref) {
 /**
  * Inicializa el stack y la informacion del proceso
  */
-int proc_init(proc_t *proc, const char *name, proc_t *parent) {
+int proc_init(proc_t *proc, const char *name, proc_t *parent,
+              proc_main_function entry) {
   int err = 0;
 
   if (!proc) {
@@ -56,10 +64,11 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent) {
     err = -NOMEMERR;
     return err;
   }
-  proc->stack_pointer = proc->stack_start + STACK_SIZE;
+  proc->stack_pointer = (uint64_t *)((char *)proc->stack_start + STACK_SIZE);
 
   proc->name = name;
   proc->parent = parent;
+  proc->entry = entry;
 
   struct queue wait_queue = {0};
   proc->wait_queue = wait_queue;

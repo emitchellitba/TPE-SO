@@ -1,18 +1,5 @@
 #include <kernel.h>
 
-#include <ds/queue.h>
-#include <exec.h>
-#include <logger.h>
-#include <memory_manager.h>
-#include <proc/process.h>
-#include <scheduler.h>
-
-extern int init_main(int argc, char **argv);
-extern void proc_ready(struct proc *p);
-extern void call_timer_tick();
-extern void _cli();
-extern void _sti();
-
 void queue_test();
 
 memory_manager_adt kernel_mem;
@@ -69,31 +56,25 @@ int main() {
 
   _cli();
 
-  // initialize_scheduler();
+  initialize_scheduler();
 
   int err = 0;
-  proc_t *init;
 
+  struct proc *init = NULL;
   if ((err = proc_new(&init))) {
     kernel_log(LOG_CRIT, "failed to allocate process structure for init");
   }
 
   const char *init_p = "init";
 
-  proc_init(init, init_p, NULL);
+  proc_init(init, init_p, NULL, init_main);
 
-  init->entry = (uint64_t)init_main;
+  char *argv[] = {(char *)init_p};
+  execv(init, 1, argv);
 
-  char *argv[] = {(char *)init_p, "arg1"};
-  execv(init, 2, argv);
+  proc_ready(init);
 
-  // proc_ready(init);
-
-  _sti();
-
-  // call_timer_tick();
-
-  ((EntryPoint)sampleCodeModuleAddress)();
+  call_timer_tick();
 
   return 0;
 }

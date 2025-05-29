@@ -12,6 +12,7 @@ typedef struct scheduler_cdt {
 } scheduler_cdt;
 
 scheduler_t scheduler = NULL;
+struct queue ready_queue = {0};
 
 uint64_t scheduler_handler(uint64_t last_rsp) {
   if (!scheduler || !scheduler->init) {
@@ -34,7 +35,9 @@ void initialize_scheduler() {
     printk("CRITICAL: Failed to allocate memory for scheduler\n");
     return;
   }
-  scheduler->ready_processes = QUEUE_NEW();
+
+  scheduler->ready_processes = &ready_queue;
+
   if (!scheduler->ready_processes) {
     printk("CRITICAL: Failed to create ready processes queue\n");
     kmm_free(scheduler, kernel_mem);
@@ -83,35 +86,18 @@ void schedule() {
   }
 }
 
-int process_wrapper() {
+int process_wrapper(uint64_t user_argc, char **user_argv) {
   proc_t *current_p = scheduler->current_process;
 
-  // int user_argc;
-  // char **user_argv;
+  if (current_p && current_p->entry) {
+    current_p->entry(user_argc, user_argv);
+  } else {
+    printk("Error: No entry point or process for wrapper!\n");
+    // sys_exit(-1);
+  }
 
-  // // Assembly to pop/read argc and argv from [RSP] and [RSP+8]
-  // // asm volatile(
-  // //     "movq (%%rsp), %0\n\t" // Read argc from current stack pointer
-  // //     "movq 8(%%rsp), %1"    // Read argv from current stack pointer + 8
-  // //     : "=r"(user_argc), "=r"(user_argv)::"memory");
-
-  // // Adjust stack pointer if values were read, not popped, or if more things
-  // are on stack
-  // // For simplicity, assume they are just read for now.
-
-  // if (current_p && current_p->entry)
-  // {
-  //     int exit_code = current_p->entry(user_argc, user_argv);
-  //     // Call a system call or kernel function to terminate the process
-  //     // sys_exit(exit_code);
-  //     printk("Process %s exited with %d\n", current_p->name, exit_code);
-  // }
-  // else
-  // {
-  //     printk("Error: No entry point or process for wrapper!\n");
-  //     // sys_exit(-1);
-  // }
-
-  while (1) {
+  while (1) // No se deberia llegar a este punto pues un sys_exit debe ocurrir
+            // antes
+  {
   }
 }

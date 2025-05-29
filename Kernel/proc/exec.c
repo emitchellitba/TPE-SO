@@ -69,7 +69,9 @@ static char *push_argc_argv_to_stack(char *proc_stack_current_addr, int argc,
 // Esta funcion prepara el stack del proceso para que contenga el frame inicial
 // de iretq
 static uint64_t *setup_initial_stack_frame(struct proc *proc,
-                                           uint64_t *current_stack_top) {
+                                           uint64_t *current_stack_top,
+                                           int argc,
+                                           uint64_t *user_argv_on_stack) {
   uint64_t *stack = current_stack_top;
 
   // Orden: SS, RSP, RFLAGS, CS, RIP (para iretq)
@@ -79,6 +81,16 @@ static uint64_t *setup_initial_stack_frame(struct proc *proc,
   *(--stack) = X86_RFLAGS;
   *(--stack) = X86_CS;
   *(--stack) = (uint64_t)process_wrapper; // RIP (Entry point)
+
+  for (int i = 0; i < 15; ++i) {
+    if (i == 5) {
+      *(--stack) = (uint64_t)argc;
+    } else if (i == 6) {
+      *(--stack) = (uint64_t)user_argv_on_stack;
+    } else {
+      *(--stack) = 0;
+    }
+  }
 
   return stack;
 }
@@ -138,7 +150,8 @@ int execv(struct proc *proc, int argc, char *const argv[]) {
 
   proc->stack_pointer = (uint64_t *)proc_stack_current_addr;
 
-  proc->stack_pointer = setup_initial_stack_frame(proc, proc->stack_pointer);
+  proc->stack_pointer = setup_initial_stack_frame(proc, proc->stack_pointer,
+                                                  argc, user_argv_on_stack);
 
   return 0;
 }

@@ -216,7 +216,8 @@ int64_t sys_pipe_close(va_list args) {
 int64_t sys_new_proc(va_list args) {
   char *name = va_arg(args, char *);
   int (*entry)(void) = va_arg(args, int (*)(void));
-  // char **argv = va_arg(args, char **);
+  int argc = va_arg(args, int);
+  char **argv = va_arg(args, char **);
   syscall_log(LOG_INFO, "new_proc(name=%s, entry=%ld)\n", name, entry
               /* argv */);
 
@@ -228,21 +229,11 @@ int64_t sys_new_proc(va_list args) {
     return -1;
   }
 
-  proc_init(new_proc, name, NULL);
+  proc_init(new_proc, name, NULL, entry);
 
-  syscall_log(LOG_INFO, "stack_start=%p\n", new_proc->stack_start);
-  syscall_log(LOG_INFO, "stack_pointer=%p\n", new_proc->stack_pointer);
-  syscall_log(LOG_INFO, "entry=%p\n", entry);
+  execv(new_proc, argc, argv);
 
-  uint64_t *stack = new_proc->stack_pointer;
-  *(--stack) = 0x80;
-  *(--stack) = new_proc->stack_pointer;
-  *(--stack) = 0x202; // RFLAGS
-  *(--stack) = 0x8;   // CS
-  *(--stack) = entry; // RIP
-  new_proc->stack_pointer = stack;
-
-  /** Mismo que en kernel.c, aca hay que llamar a exec */
+  proc_ready(new_proc);
 
   return 0;
 }

@@ -59,7 +59,6 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-
 	pushState
 	
 	mov rsi, rsp

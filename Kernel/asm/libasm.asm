@@ -10,7 +10,6 @@ GLOBAL getYear
 GLOBAL getScanCode
 GLOBAL inb
 GLOBAL outb
-GLOBAL call_timer_tick
 GLOBAL register_array
 GLOBAL load_registers_array
 
@@ -140,10 +139,6 @@ outb:
 	mov rdx, rdi
 	mov rax, rsi
 	out dx, al
-	ret
-
-call_timer_tick:
-	int 20h
 	ret
 
 load_registers_array:

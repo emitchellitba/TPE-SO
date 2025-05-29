@@ -1,6 +1,7 @@
 #ifndef _SYSCALLS_H_
 #define _SYSCALLS_H_
 
+#include <exec.h>
 #include <interrupts.h>
 #include <keyboardDriver.h>
 #include <lib.h>

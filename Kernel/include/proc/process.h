@@ -83,6 +83,7 @@ typedef struct proc {
 } proc_t;
 
 int proc_new(proc_t **ref);
-int proc_init(proc_t *proc, const char *name, proc_t *parent);
+int proc_init(proc_t *proc, const char *name, proc_t *parent,
+              proc_main_function entry);
 
 #endif // PROC_H
