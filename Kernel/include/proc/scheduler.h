@@ -1,9 +1,16 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-typedef struct scheduler_cdt * scheduler_t; 
+#include "../include/ds/queue.h"
+#include <logger.h>
+#include <proc/process.h>
+
+typedef struct scheduler_cdt *scheduler_t;
 
 void initialize_scheduler();
-void* schedule(void* last_rps);
+void proc_ready(struct proc *p);
+void schedule();
+int process_wrapper();
+uint64_t scheduler_handler(uint64_t last_rsp);
 
 #endif

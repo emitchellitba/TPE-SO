@@ -1,8 +1,17 @@
 #include <kernel.h>
 
 #include <ds/queue.h>
+#include <exec.h>
 #include <logger.h>
 #include <memory_manager.h>
+#include <proc/process.h>
+#include <scheduler.h>
+
+extern int init_main(int argc, char **argv);
+extern void proc_ready(struct proc *p);
+extern void call_timer_tick();
+extern void _cli();
+extern void _sti();
 
 void queue_test();
 
@@ -49,15 +58,40 @@ void *initializeKernelBinary() {
 
 int main() {
   load_idt();
+
   kernel_mem = kmm_init(heapModuleAddress);
 
-#if defined(USE_SIMPLE_MM)
-  kernel_log(LOG_INFO, "Simple memory manager initialized\n");
-#elif defined(USE_BUDDY_MM)
+#if defined(USE_BUDDY_MM)
   kernel_log(LOG_INFO, "Buddy memory manager initialized\n");
+#else
+  kernel_log(LOG_INFO, "Simple memory manager initialized\n");
 #endif
 
-  queue_test();
+  _cli();
+
+  // initialize_scheduler();
+
+  int err = 0;
+  proc_t *init;
+
+  if ((err = proc_new(&init))) {
+    kernel_log(LOG_CRIT, "failed to allocate process structure for init");
+  }
+
+  const char *init_p = "init";
+
+  proc_init(init, init_p, NULL);
+
+  init->entry = (uint64_t)init_main;
+
+  char *argv[] = {(char *)init_p, "arg1"};
+  execv(init, 2, argv);
+
+  // proc_ready(init);
+
+  _sti();
+
+  // call_timer_tick();
 
   ((EntryPoint)sampleCodeModuleAddress)();
 

@@ -10,10 +10,6 @@ GLOBAL esc
 
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
-GLOBAL _irq02Handler
-GLOBAL _irq03Handler
-GLOBAL _irq04Handler
-GLOBAL _irq05Handler
 GLOBAL _irq60Handler
 
 GLOBAL _exception0Handler
@@ -23,7 +19,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN syscall_dispatcher
 EXTERN getStackBase
-EXTERN schedule
+EXTERN scheduler_handler
 EXTERN register_array
 EXTERN load_registers_array
 
@@ -71,7 +67,7 @@ _irq00Handler:
 	call irqDispatcher
 	
 	mov rdi, rsp
-	call schedule
+	call scheduler_handler
 	mov rsp, rax
 
 	;Send EOI
@@ -85,22 +81,6 @@ _irq00Handler:
 ;Keyboard
 _irq01Handler:
 	irqHandlerMaster 1
-
-;Cascade pic never called
-_irq02Handler:
-	irqHandlerMaster 2
-
-;Serial Port 2 and 4
-_irq03Handler:
-	irqHandlerMaster 3
-
-;Serial Port 1 and 3
-_irq04Handler:
-	irqHandlerMaster 4
-
-;USB
-_irq05Handler:
-	irqHandlerMaster 5
 
 ;SyscallHandler
 _irq60Handler:

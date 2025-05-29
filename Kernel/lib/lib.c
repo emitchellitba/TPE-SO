@@ -61,6 +61,15 @@ int str_len(const char *str) {
   return len;
 }
 
+char *str_cpy(char *dest, const char *src) {
+  char *start = dest;
+  while (*src != '\0') {
+    *dest++ = *src++;
+  }
+  *dest = '\0';
+  return start;
+}
+
 int abs(int x) { return x < 0 ? -x : x; }
 
 uint16_t getSecs() { return getSec(); }

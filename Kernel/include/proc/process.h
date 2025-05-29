@@ -4,6 +4,14 @@
 #include "../ds/queue.h"
 #include <stdint.h>
 
+/** TODO: Crear una seccion para codigos de errores */
+#define NOMEMERR 1;
+#define INVALARGSERR 2;
+
+#define STACK_SIZE (8192U) /* 8 KiB */
+
+typedef int (*proc_main_function)(int argc, char **argv);
+
 /*
   IDEA FUNCIONAMIENTO PROCESOS:
 
@@ -41,20 +49,18 @@ typedef int priority_t;
 #define ZOMBIE 3
 #define BLOCKED 4
 
-#define STACK_SIZE (8192U) /* 8 KiB */
-
 typedef struct proc {
   pid_t pid;
-  char *name;
+  const char *name;
   struct proc *parent; // Puntero al proceso padre
 
-  uint64_t stack_start;   // Comienzo del stack: direccion mas alta
-  uint64_t stack_pointer; // Posicion actual del stack
+  uint64_t *stack_start;   // Comienzo del stack: direccion mas alta
+  uint64_t *stack_pointer; // Posicion actual del stack
 
-  char **argv;
-  uint64_t argc;
+  // char **argv;
+  // uint64_t argc;
 
-  uint64_t entry; // Direccion de inicio del proceso
+  proc_main_function entry; // Direccion de inicio del proceso
 
   struct queue
       wait_queue; // Cola de procesos hijos que hay que esperar con wait
@@ -75,5 +81,8 @@ typedef struct proc {
   // struct queue *sig_queue; // Cola de señales
   // struct sigaction sigaction[SIG_MAX + 1]; // Array de handlers
 } proc_t;
+
+int proc_new(proc_t **ref);
+int proc_init(proc_t *proc, const char *name, proc_t *parent);
 
 #endif // PROC_H

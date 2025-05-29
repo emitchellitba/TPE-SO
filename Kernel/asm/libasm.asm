@@ -142,7 +142,7 @@ outb:
 	out dx, al
 	ret
 
-call_time_tick:
+call_timer_tick:
 	int 20h
 	ret
 

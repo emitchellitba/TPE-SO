@@ -1,3 +1,4 @@
+#include <proc/process.h>
 #include <syscall_dispatcher.h>
 
 static void fill_out_buffer(uint64_t *buffer);
@@ -35,8 +36,9 @@ static syscall_func_t syscall_table[] = {
     sys_read_kmsg,       // 11
     sys_pipe_open,       // 12
     sys_pipe_close,      // 13
-    sys_fork,            // 14
-    sys_ps,              // 15
+    sys_ps,              // 14
+    sys_new_proc,        // 15
+    sys_kill_proc,       // 16
                          // sys_kill,
                          // sys_wait,           // 16
                          // sys_set_priority,   // 17
@@ -211,9 +213,44 @@ int64_t sys_pipe_close(va_list args) {
   // return pipe_close(pipe_id);
 }
 
-int64_t sys_fork(va_list args) {
-  syscall_log(LOG_INFO, "fork()\n");
-  // return fork();
+int64_t sys_new_proc(va_list args) {
+  char *name = va_arg(args, char *);
+  int (*entry)(void) = va_arg(args, int (*)(void));
+  // char **argv = va_arg(args, char **);
+  syscall_log(LOG_INFO, "new_proc(name=%s, entry=%ld)\n", name, entry
+              /* argv */);
+
+  int err = 0;
+  proc_t *new_proc;
+
+  if ((err = proc_new(&new_proc))) {
+    syscall_log(LOG_CRIT, "failed to allocate process structure for init");
+    return -1;
+  }
+
+  proc_init(new_proc, name, NULL);
+
+  syscall_log(LOG_INFO, "stack_start=%p\n", new_proc->stack_start);
+  syscall_log(LOG_INFO, "stack_pointer=%p\n", new_proc->stack_pointer);
+  syscall_log(LOG_INFO, "entry=%p\n", entry);
+
+  uint64_t *stack = new_proc->stack_pointer;
+  *(--stack) = 0x80;
+  *(--stack) = new_proc->stack_pointer;
+  *(--stack) = 0x202; // RFLAGS
+  *(--stack) = 0x8;   // CS
+  *(--stack) = entry; // RIP
+  new_proc->stack_pointer = stack;
+
+  /** Mismo que en kernel.c, aca hay que llamar a exec */
+
+  return 0;
+}
+
+int64_t sys_kill_proc(va_list args) {
+  int64_t pid = va_arg(args, int64_t);
+  syscall_log(LOG_INFO, "kill_proc(pid=%ld)\n", pid);
+  // return kill_proc(pid);
 }
 
 int64_t sys_ps(va_list args) {

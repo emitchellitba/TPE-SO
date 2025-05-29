@@ -46,3 +46,21 @@ exit
 cd root
 gdb
 exit
+cat /etc/hosts
+quit
+q
+exit
+cat /etc/hosts
+cat /hosts
+exit
+clear
+ls
+cd root
+ls
+gdb
+ls
+gdb
+cat .gdbitni
+cat .gdbinit
+quit
+exit

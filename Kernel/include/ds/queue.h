@@ -4,6 +4,7 @@
 #include "../lib/logger.h"
 #include "../lib/memory_manager.h"
 #include <stddef.h>
+#include <string.h>
 
 KMEMORY_DECLARE
 
@@ -64,10 +65,10 @@ static inline struct qnode *enqueue(struct queue *queue, void *value) {
   if (!queue)
     return NULL;
 
-  int trace = queue->flags & QUEUE_TRACE;
+  // int trace = queue->flags & QUEUE_TRACE;
 
-  if (trace)
-    printk("qtrace: enqueue(%p, %p)\n", queue, value);
+  // if (trace)
+  // printk("qtrace: enqueue(%p, %p)\n", queue, value);
 
   struct qnode *node;
 
@@ -77,8 +78,8 @@ static inline struct qnode *enqueue(struct queue *queue, void *value) {
 
   memset(node, 0, sizeof(struct qnode));
 
-  if (trace)
-    printk("qtrace: allocated node %p\n", node);
+  // if (trace)
+  // printk("qtrace: allocated node %p\n", node);
 
   node->value = value;
 

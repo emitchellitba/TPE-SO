@@ -1,7 +1,7 @@
 # Este archivo permite debuggear el proyecto usando gdb con una interfaz gráfica simple
 add-auto-load-safe-path /home/dmayansky/so/TPE-SO/.gdbinit
 
-target remote 172.20.10.5:1234
+target remote host.docker.internal:1234
 add-symbol-file Kernel/kernel.elf 0x100000
 add-symbol-file Userland/0000-sampleCodeModule.elf 0x400000
 

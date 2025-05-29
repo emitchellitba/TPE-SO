@@ -19,10 +19,7 @@ extern int getYear();
 unsigned long ticks = 0; // Variable global para contar los ticks del PIT
 
 // Manejador de interrupción del PIT
-void timer_handler() {
-  ticks++; // Incrementa el contador cada vez que ocurre una interrupción del
-           // PIT
-}
+void timer_handler() { ticks++; }
 
 void sleep(int ticksToWait) {
   unsigned long start_time = ticks;

@@ -6,70 +6,69 @@
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
 
-/**
- * Manejo de PIDS: Por ahora podemos simplemente usar un int con el ultimo pid
- * utilizado y cada nuevo proceso le asignamos el pid siguiente. En el futuro,
- * podemos usar una estructura como un bitmap para asignar los pids.
- */
-
 struct queue *procs = QUEUE_NEW();
 pid_t last_pid = 0;
 
 pid_t proc_pid_alloc() { return last_pid++; }
 
-int proc_new(proc_t **ref, char *name, proc_t *parent, uint64_t entry,
-             char **argv, uint64_t argc) {
-  pid_t new_pid = proc_pid_alloc();
-
+/**
+ * Se encarga de alocar la estructura basica del proceso
+ *
+ * Recibe un puntero a un puntero de proceso e informacion
+ * sobre el proceso
+ *
+ * Retorna 0 si se pudo crear el proceso, 1 si hubo error
+ */
+int proc_new(proc_t **ref) {
+  int err = 0;
   proc_t *proc = (proc_t *)kmalloc(kernel_mem, sizeof(proc_t));
+
   if (!proc) {
     proc_log(LOG_ERR, "Error allocating process\n");
-    return -1;
+    err = -NOMEMERR;
+    return err;
   }
 
-  /** Alloc stack mem for process */
-  proc->stack_start = (uint64_t)kmalloc(kernel_mem, STACK_SIZE);
-  if (!proc->stack_start) {
-    proc_log(LOG_ERR, "Error allocating stack memory for process\n");
-    kmm_free(proc, kernel_mem);
-    return -1;
+  if (ref) {
+    *ref = proc;
   }
-  proc->stack_pointer = proc->stack_start + STACK_SIZE;
-
-  memset(proc, 0, sizeof(proc_t));
-  proc->pid = new_pid;
-  proc->name = name;
-  proc->status = READY;
-  proc->parent = parent;
-  proc->entry = (uint64_t)entry;
-
-  /** Copy argv in kernel heap */
-
-  char **argv_copy =
-      (char **)kmalloc(kernel_mem, sizeof(char *) * argc /* + 1 */);
-  if (!argv_copy) {
-    proc_log(LOG_ERR, "Error allocating argv memory for process\n");
-    kmm_free(proc->stack_start, kernel_mem);
-    kmm_free(proc, kernel_mem);
-    return -1;
-  }
-
-  /** TODO: COPY ARGS INTO ARGV */
-
-  proc->argv = argv_copy;
-  proc->argc = argc;
-
-  struct queue wait_queue = {0};
-  proc->wait_queue = wait_queue;
-
-  proc->exit = -1;
 
   return 0;
 }
 
-struct proc *proc_pid_find(pid_t pid);
+/**
+ * Inicializa el stack y la informacion del proceso
+ */
+int proc_init(proc_t *proc, const char *name, proc_t *parent) {
+  int err = 0;
 
-int proc_init(struct proc *proc);
+  if (!proc) {
+    proc_log(LOG_ERR, "Error initializing process\n");
+    err = -INVALARGSERR;
+    return err;
+  }
+
+  proc->pid = proc_pid_alloc();
+
+  proc->stack_start = (uint64_t *)kmalloc(kernel_mem, STACK_SIZE);
+  if (!proc->stack_start) {
+    proc_log(LOG_ERR, "Error allocating stack memory for process\n");
+    err = -NOMEMERR;
+    return err;
+  }
+  proc->stack_pointer = proc->stack_start + STACK_SIZE;
+
+  proc->name = name;
+  proc->parent = parent;
+
+  struct queue wait_queue = {0};
+  proc->wait_queue = wait_queue;
+
+  proc->status = READY;
+  proc->exit = -1;
+
+  return 0;
+}
 
 void proc_kill(struct proc *proc);
 

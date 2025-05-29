@@ -29,7 +29,8 @@ int64_t sys_beep(va_list args);
 int64_t sys_read_kmsg(va_list args);
 int64_t sys_pipe_open(va_list args);
 int64_t sys_pipe_close(va_list args);
-int64_t sys_fork(va_list args);
+int64_t sys_new_proc(va_list args);
+int64_t sys_kill_proc(va_list args);
 int64_t sys_ps(va_list args);
 
 #endif
