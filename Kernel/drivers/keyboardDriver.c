@@ -2,6 +2,8 @@
 #include <ringbuf.h>
 #include <stdint.h>
 
+extern void _hlt(void); // Add this line
+
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_PRESSED 0x36
@@ -100,6 +102,11 @@ void press_key() {
   }
 }
 
-void load_buffer(char *buffer, size_t count) {
-  ringbuf_read(kbuff, count, buffer);
+int load_buffer(char *buffer, size_t count) {
+    int bytes_read = 0;
+    // Wait until there is something to read
+    while ((bytes_read = ringbuf_read(kbuff, count, buffer)) == 0) {
+        _hlt(); // Halt CPU until next interrupt (e.g., keyboard)
+    }
+    return bytes_read;
 }

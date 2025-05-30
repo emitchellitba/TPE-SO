@@ -7,6 +7,6 @@ typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 
 void press_key();
 extern uint8_t esc;
-void load_buffer(char *buffer, size_t count);
+int load_buffer(char *buffer, size_t count);
 
 #endif

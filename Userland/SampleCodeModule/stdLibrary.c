@@ -181,11 +181,7 @@ char get_entry() {
 }
 
 char get_char() {
-  char c = get_entry();
-  while (c == '\0') {
-    c = get_entry();
-  }
-  return c;
+  return get_entry();
 }
 
 void put_char(const char c) {
