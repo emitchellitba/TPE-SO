@@ -9,6 +9,7 @@
 #define INVALARGSERR 2;
 
 #define STACK_SIZE (8192U) /* 8 KiB */
+#define QUANTUM_DEFAULT 4
 
 typedef int (*proc_main_function)(int argc, char **argv);
 
@@ -39,8 +40,8 @@ typedef int (*proc_main_function)(int argc, char **argv);
   de manera completa).
 */
 
-typedef int pid_t;
-typedef int priority_t;
+typedef uint8_t pid_t;
+typedef uint8_t priority_t;
 
 /** Estados de un proceso */
 #define DEAD 0 // Este estado puede ser innecesario
@@ -69,7 +70,8 @@ typedef struct proc {
   int exit;
 
   int status; // Estado del proceso (0 = running, 1 = ready, 2 = zombie)
-  priority_t priority;
+  priority_t has_quantum;
+  priority_t priority;   
 
   // TODO: Agregar fds (ver como agregarlos)
 

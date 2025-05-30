@@ -97,7 +97,7 @@ static uint64_t *setup_initial_stack_frame(struct proc *proc,
 
 /**
  * Esta funcion es la que se encarga de ejecutar un proceso, recibe el argc y
- * argv y se encarga de inicializar el proceso y encolarlo en el scheduler
+ * argv y se encarga de inicializar el proceso
  */
 int execv(struct proc *proc, int argc, char *const argv[]) {
   printk("execv called\n");

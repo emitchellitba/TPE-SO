@@ -7,14 +7,21 @@
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
 
-// #define MAX_PROCESSES 64
-// static struct proc *process_table[MAX_PROCESSES];
+#define MAX_PROCESSES 64
+static struct proc *process_table[MAX_PROCESSES] = {NULL};
 // static int process_count = 0;
+// por cómo lo implementé, no es necesario un contador de procesos ya que
+// los procesos hacen un first-fit en la tabla de procesos
 
-struct queue *procs = QUEUE_NEW();
-pid_t last_pid = 0;
-
-pid_t proc_pid_alloc() { return last_pid++; }
+pid_t proc_pid_alloc() { 
+  for (pid_t i = 0; i < MAX_PROCESSES; i++) {
+    if (process_table[i] == NULL) {
+      return i; // Retorna el primer PID disponible
+    }
+  }
+  proc_log(LOG_ERR, "No available PIDs\n");
+  return -1; // No hay PIDs disponibles
+}
 
 /**
  * Se encarga de alocar la estructura basica del proceso
@@ -25,16 +32,25 @@ pid_t proc_pid_alloc() { return last_pid++; }
  * Retorna 0 si se pudo crear el proceso, 1 si hubo error
  */
 int proc_new(proc_t **ref) {
+  pid_t pid;
+  if((pid = proc_pid_alloc()) < 0) {
+    proc_log(LOG_ERR, "Error allocating PID for new process\n");
+    return -NOMEMERR; // No hay PIDs disponibles
+  }
+
+  // Alocamos memoria para el proceso
   int err = 0;
   proc_t *proc = (proc_t *)kmalloc(kernel_mem, sizeof(proc_t));
-
-  enqueue(procs, proc);
 
   if (!proc) {
     proc_log(LOG_ERR, "Error allocating process\n");
     err = -NOMEMERR;
     return err;
   }
+
+  process_table[pid] = proc;
+  proc->pid = pid;
+  proc_log(LOG_DEBUG, "Process created with PID %d\n", pid);
 
   if (ref) {
     *ref = proc;
@@ -55,8 +71,6 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
     err = -INVALARGSERR;
     return err;
   }
-
-  proc->pid = proc_pid_alloc();
 
   proc->stack_start = (uint64_t *)kmalloc(kernel_mem, STACK_SIZE);
   if (!proc->stack_start) {
