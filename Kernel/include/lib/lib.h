@@ -9,7 +9,7 @@ typedef enum { STDIN = 0, STDOUT, STDERR } FDS;
 
 void *memset(void *destination, int32_t character, uint64_t length);
 void *memcpy(void *destination, const void *source, uint64_t length);
-char *cpuVendor(char *result);
+char *cpu_vendor(char *result);
 int str_len(const char *str);
 char *str_cpy(char *dest, const char *src);
 extern void main_ret();

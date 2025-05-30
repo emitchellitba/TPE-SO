@@ -33,5 +33,6 @@ int64_t sys_pipe_close(va_list args);
 int64_t sys_new_proc(va_list args);
 int64_t sys_kill_proc(va_list args);
 int64_t sys_ps(va_list args);
+int64_t sys_change_priority(va_list args);
 
 #endif

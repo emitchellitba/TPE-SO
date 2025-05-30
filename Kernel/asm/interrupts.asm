@@ -19,7 +19,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN syscall_dispatcher
 EXTERN getStackBase
-EXTERN scheduler_handler
+EXTERN schedule
 EXTERN register_array
 EXTERN load_registers_array
 
@@ -66,7 +66,7 @@ _irq00Handler:
 	call irqDispatcher
 	
 	mov rdi, rsp
-	call scheduler_handler
+	call schedule
 	mov rsp, rax
 
 	;Send EOI

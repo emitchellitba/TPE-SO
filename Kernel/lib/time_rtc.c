@@ -7,12 +7,12 @@
 extern void _hlt();
 extern void outb(int PORT, int n);
 extern int bcd_to_dec(int num);
-extern int getSec();
-extern int getMin();
-extern int getHour();
-extern int getDay();
-extern int getMonth();
-extern int getYear();
+extern int get_sec();
+extern int get_min();
+extern int get_hour();
+extern int get_day();
+extern int get_month();
+extern int get_year();
 
 // static int frequency = 18;
 
@@ -38,12 +38,12 @@ void set_pit_frequency(uint32_t frequency) {
 }
 
 void get_time(date_time *dt) {
-  dt->sec = bcd_to_dec(getSec());
-  dt->min = bcd_to_dec(getMin());
-  dt->hour = bcd_to_dec(getHour());
-  dt->day = bcd_to_dec(getDay());
-  dt->month = bcd_to_dec(getMonth());
-  dt->year = bcd_to_dec(getYear());
+  dt->sec = bcd_to_dec(get_sec());
+  dt->min = bcd_to_dec(get_min());
+  dt->hour = bcd_to_dec(get_hour());
+  dt->day = bcd_to_dec(get_day());
+  dt->month = bcd_to_dec(get_month());
+  dt->year = bcd_to_dec(get_year());
 }
 
 int bcd_to_dec(int num) { return ((num >> 4) * 10) + (num & 0x0F); }

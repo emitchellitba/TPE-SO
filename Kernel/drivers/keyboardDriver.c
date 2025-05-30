@@ -21,7 +21,7 @@ struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
 unsigned int arrow = 0;
-extern unsigned int getScanCode();
+extern unsigned int get_scan_code();
 
 static unsigned char printableAscii[58][2] = {
     {0, 0},     {27, 27},    {'1', '!'},   {'2', '@'}, {'3', '#'},   {'4', '$'},
@@ -37,7 +37,7 @@ static unsigned char printableAscii[58][2] = {
 };
 
 void press_key() {
-  unsigned int scanCode = getScanCode();
+  unsigned int scanCode = get_scan_code();
   unsigned int col = 0;
 
   switch (scanCode) {
@@ -104,9 +104,10 @@ void press_key() {
 
 int load_buffer(char *buffer, size_t count) {
     int bytes_read = 0;
-    // Wait until there is something to read
+
     while ((bytes_read = ringbuf_read(kbuff, count, buffer)) == 0) {
         _hlt(); // Halt CPU until next interrupt (e.g., keyboard)
     }
+
     return bytes_read;
 }

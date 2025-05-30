@@ -9,8 +9,7 @@ typedef struct scheduler_cdt *scheduler_t;
 
 void initialize_scheduler();
 void proc_ready(struct proc *p);
-void schedule();
+uint64_t schedule(uint64_t last_rsp);
 int process_wrapper();
-uint64_t scheduler_handler(uint64_t last_rsp);
 
 #endif

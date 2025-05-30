@@ -1,13 +1,13 @@
 %include "macros.inc"
 
-GLOBAL cpuVendor
-GLOBAL getSec
-GLOBAL getMin
-GLOBAL getHour
-GLOBAL getDay
-GLOBAL getMonth
-GLOBAL getYear
-GLOBAL getScanCode
+GLOBAL cpu_vendor
+GLOBAL get_sec
+GLOBAL get_min
+GLOBAL get_hour
+GLOBAL get_day
+GLOBAL get_month
+GLOBAL get_year
+GLOBAL get_scan_code
 GLOBAL inb
 GLOBAL outb
 GLOBAL register_array
@@ -15,7 +15,7 @@ GLOBAL load_registers_array
 
 section .text
 	
-cpuVendor:
+cpu_vendor:
 	push rbp
 	mov rbp, rsp
 
@@ -40,7 +40,7 @@ cpuVendor:
 	ret
 
 
-getSec:
+get_sec:
 	push rbp
 	mov rbp, rsp
 
@@ -52,7 +52,7 @@ getSec:
 	pop rbp
 	ret
 
-getMin: 
+get_min: 
 	push rbp
 	mov rbp, rsp
 
@@ -64,7 +64,7 @@ getMin:
 	pop rbp
 	ret
 
-getHour:
+get_hour:
 	push rbp
 	mov rbp, rsp
 
@@ -76,7 +76,7 @@ getHour:
 	pop rbp
 	ret
 
-getDay:
+get_day:
 	push rbp
 	mov rbp, rsp
 
@@ -88,7 +88,7 @@ getDay:
 	pop rbp
 	ret
 
-getMonth: 
+get_month: 
 	push rbp
 	mov rbp, rsp
 
@@ -100,7 +100,7 @@ getMonth:
 	pop rbp
 	ret
 
-getYear:
+get_year:
 	push rbp
 	mov rbp, rsp
 
@@ -112,7 +112,7 @@ getYear:
 	pop rbp
 	ret
 
-getScanCode: 
+get_scan_code: 
 	push rbp
 	mov rbp, rsp
 	mov rax, 0

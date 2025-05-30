@@ -39,14 +39,14 @@ static syscall_func_t syscall_table[] = {
     sys_ps,              // 14
     sys_new_proc,        // 15
     sys_kill_proc,       // 16
-                         // sys_kill,
-                         // sys_wait,           // 16
-                         // sys_set_priority,   // 17
-                         // sys_block,         // 18
-                         // sys_unblock,       // 19
-                         // sys_renounce,      // 20
-                         // sys_getpid,        // 21
-                         // sys_getppid,       // 22
+    sys_change_priority, // 17
+                         // sys_wait,           // 18
+                         // sys_set_priority,   // 19
+                         // sys_block,         // 20
+                         // sys_unblock,       // 21
+                         // sys_renounce,      // 22
+                         // sys_getpid,        // 23
+                         // sys_getppid,       // 24
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -253,4 +253,12 @@ static void fill_out_buffer(uint64_t *buffer) {
   for (int64_t i = 0; i < 17; i++) {
     buffer[i] = register_array[i];
   }
+}
+
+int64_t sys_change_priority(va_list args) {
+  int64_t pid = va_arg(args, int64_t);
+  priority_t new_priority = va_arg(args, priority_t);
+  syscall_log(LOG_INFO, "change_priority(pid=%ld, new_priority=%d)\n", pid,
+              new_priority);
+  return change_priority(pid, new_priority);
 }
