@@ -64,7 +64,7 @@ _irq00Handler:
 	mov rsi, rsp
 	mov rdi, 0h
 	call irqDispatcher
-	
+
 	mov rdi, rsp
 	call schedule
 	mov rsp, rax

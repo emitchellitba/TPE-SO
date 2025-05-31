@@ -9,7 +9,7 @@
 #define INVALARGSERR 2;
 
 #define STACK_SIZE (8192U) /* 8 KiB */
-#define QUANTUM_DEFAULT 4
+#define QUANTUM_DEFAULT 2
 
 typedef int (*proc_main_function)(int argc, char **argv);
 

@@ -4,6 +4,7 @@
 
 #define SHELL_ENTRY_POINT_ADDRESS ((int (*)(int, char **))0x400000)
 
+extern void call_timer_tick();
 extern int64_t kernel_syscall_create_process(const char *name,
                                              int (*entry_point)(int, char **),
                                              int argc, char *argv[]);

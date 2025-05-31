@@ -70,6 +70,7 @@ uint64_t schedule(uint64_t last_rsp) {
   if (!scheduler || !scheduler->init || !scheduler->ready_processes)
     return last_rsp;
 
+  scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
   struct queue *ready_queue = scheduler->ready_processes;
 
   if(ready_queue->count == 0) {
@@ -84,7 +85,6 @@ uint64_t schedule(uint64_t last_rsp) {
     } else {
       if (!(--scheduler->current_process->has_quantum)) {
         scheduler->current_process->status = READY;
-        scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
         proc_ready(scheduler->current_process);
         
         enqueue_next_process();
@@ -116,4 +116,9 @@ uint64_t change_priority(pid_t pid, priority_t new_priority) {
 
   scheduler->current_process->priority = new_priority;
   return 0;
+}
+
+void yield() {
+  scheduler->current_process->has_quantum = 0; // Forzar cambio de proceso
+  call_timer_tick(); // Llamar al tick del timer para que se ejecute el scheduler
 }
