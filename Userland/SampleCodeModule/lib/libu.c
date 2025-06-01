@@ -17,5 +17,8 @@
 DEFINE_WRAPPER(read_kmsg, (char *log, size_t size), (log, size))
 DEFINE_WRAPPER(get_procs, (proc_info_t * procs, size_t size), (procs, size))
 DEFINE_WRAPPER(load_program, (char *name, int entry), (name, entry))
+DEFINE_WRAPPER(rm_program, (char *name), (name))
+DEFINE_WRAPPER(get_programs, (char **buffer, int max_count),
+               (buffer, max_count))
 DEFINE_WRAPPER(spawn_process, (char *name, int argc, char **argv),
                (name, argc, argv))

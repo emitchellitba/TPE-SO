@@ -72,3 +72,18 @@ int show_processes_cmd() {
 
   return 0;
 }
+
+int show_programs_cmd() {
+  int pid;
+  char *argv[] = {"ls", NULL};
+  int argc = 1;
+
+  pid = spawn_process("ls", argc, argv);
+
+  if (pid < 0) {
+    printf("Error spawning process 'ls'\n");
+    return -1;
+  }
+
+  return 0;
+}

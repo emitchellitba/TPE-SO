@@ -17,7 +17,7 @@ static int load_programs() {
   load_program(SHELL_PROGRAM_NAME, (uint64_t)&shell_main);
   // Load ps
   load_program("ps", (uint64_t)&ps_main);
-  // load_program("files", (uint64_t)&ls_cmd);
+  load_program("ls", (uint64_t)&ls_main);
 }
 
 int init_main(int argc, char **argv) {

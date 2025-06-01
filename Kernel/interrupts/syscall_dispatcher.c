@@ -39,7 +39,7 @@ static syscall_func_t syscall_table[] = {
     sys_get_procs,       // 14
     sys_load_program,    // 15
     sys_rm_program,      // 16
-    sys_ls_programs,     // 17
+    sys_get_programs,    // 17
     sys_spawn_process,   // 18
     sys_kill_proc,       // 19
     sys_change_priority, // 20
@@ -216,6 +216,18 @@ int64_t sys_pipe_close(va_list args) {
   // return pipe_close(pipe_id);
 }
 
+int64_t sys_get_procs(va_list args) {
+  proc_info_t *buffer = va_arg(args, proc_info_t *);
+  uint64_t count = va_arg(args, uint64_t);
+
+  int out_count = 0;
+
+  proc_list(buffer, count, &out_count);
+
+  syscall_log(LOG_INFO, "ps()\n");
+  return out_count;
+}
+
 int64_t sys_load_program(va_list args) {
   char *name = va_arg(args, char *);
   uint64_t entry = va_arg(args, uint64_t);
@@ -237,14 +249,30 @@ int64_t sys_rm_program(va_list args) {
   char *name = va_arg(args, char *);
   syscall_log(LOG_INFO, "rm_program(name=%s)\n", name);
 
+  int err = 0;
+  if ((err = fs_rm(name))) {
+    syscall_log(LOG_CRIT, "failed to remove program %s\n", name);
+    return -ENOENT;
+  }
+
+  syscall_log(LOG_INFO, "program %s removed successfully\n", name);
   return 0;
 }
 
-int64_t sys_ls_programs(va_list args) {
+int64_t sys_get_programs(va_list args) {
+  /* recibe un buffer de strings y una cantidad maxima */
+  char(*buffer)[MAX_FILE_NAME_LEN] = va_arg(args, char(*)[MAX_FILE_NAME_LEN]);
+  int max_count = va_arg(args, int);
   syscall_log(LOG_INFO, "ls_programs()\n");
-  // return ls_programs();
 
-  return 0;
+  int out_count = 0;
+
+  if (fs_list_programs(buffer, max_count, &out_count) < 0) {
+    syscall_log(LOG_CRIT, "failed to list programs\n");
+    return -EFAULT;
+  }
+
+  return out_count;
 }
 
 int64_t sys_spawn_process(va_list args) {
@@ -281,18 +309,6 @@ int64_t sys_kill_proc(va_list args) {
   int64_t pid = va_arg(args, int64_t);
   syscall_log(LOG_INFO, "kill_proc(pid=%ld)\n", pid);
   // return kill_proc(pid);
-}
-
-int64_t sys_get_procs(va_list args) {
-  proc_info_t *buffer = va_arg(args, proc_info_t *);
-  uint64_t count = va_arg(args, uint64_t);
-
-  int out_count = 0;
-
-  proc_list(buffer, count, &out_count);
-
-  syscall_log(LOG_INFO, "ps()\n");
-  return out_count;
 }
 
 static void fill_out_buffer(uint64_t *buffer) {

@@ -10,7 +10,8 @@ command_entry_t command_table[] = {{"help", help_cmd},
                                    {"exit", exit_cmd},
                                    {"registers", get_registers_cmd},
                                    {"kmsg", show_kmsg_cmd},
-                                   {"ps", show_processes_cmd}};
+                                   {"ps", show_processes_cmd},
+                                   {"programs", show_programs_cmd}};
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))
 

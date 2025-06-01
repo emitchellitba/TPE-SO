@@ -18,6 +18,7 @@
 
 // TODO: Ver si los errores deberian estar aca
 #define ENOENT 2
+#define EFAULT 9
 #define ENOMEM 12
 
 int64_t syscall_dispatcher(uint64_t rax, ...);
@@ -39,7 +40,7 @@ int64_t sys_pipe_close(va_list args);
 int64_t sys_get_procs(va_list args);
 int64_t sys_load_program(va_list args);
 int64_t sys_rm_program(va_list args);
-int64_t sys_ls_programs(va_list args);
+int64_t sys_get_programs(va_list args);
 int64_t sys_spawn_process(va_list args);
 int64_t sys_kill_proc(va_list args);
 int64_t sys_ps(va_list args);

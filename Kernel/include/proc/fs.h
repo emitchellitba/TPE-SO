@@ -16,5 +16,8 @@ typedef struct {
 
 int fs_load(const char *name, fs_entry_point_t entry_point);
 fs_entry_point_t fs_get_entry(const char *name);
+int fs_rm(const char *name);
+int fs_list_programs(char buffer[][MAX_FILE_NAME_LEN], int max_count,
+                     int *out_count);
 
 #endif // _FS_H

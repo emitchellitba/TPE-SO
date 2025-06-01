@@ -2,6 +2,7 @@
 #define _INIT_H
 
 #include <libu.h>
+#include <ls.h>
 #include <ps.h>
 #include <shell.h>
 #include <stdLibrary.h>
