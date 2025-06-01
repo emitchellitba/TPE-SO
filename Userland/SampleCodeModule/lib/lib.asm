@@ -47,6 +47,14 @@ GLOBAL make_sound
 	pop rax
 %endmacro
 
+%macro do_syscall_direct 1
+    pushState
+		mov rax, %1
+    int 80h
+    popState
+    ret
+%endmacro
+
 %macro do_syscall 4
     pushState
     mov rax, %1
@@ -143,3 +151,15 @@ get_regist:
 ;-------------------------------------------------------------------------------
 EXPORT_FUNC read_kmsg
     do_syscall 0x0B, 0, rsi, rdi
+
+;-------------------------------------------------------------------------------
+; 0x0F - new_proc
+;-------------------------------------------------------------------------------
+; Argumentos:
+;   1 - name
+;   2 - entry point
+;   3 - argc
+;   4 - argv
+;-------------------------------------------------------------------------------
+EXPORT_FUNC new_proc
+	do_syscall_direct 0x0F

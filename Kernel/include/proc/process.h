@@ -71,7 +71,7 @@ typedef struct proc {
 
   int status; // Estado del proceso (0 = running, 1 = ready, 2 = zombie)
   priority_t has_quantum;
-  priority_t priority;   
+  priority_t priority;
 
   // TODO: Agregar fds (ver como agregarlos)
 

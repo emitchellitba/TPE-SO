@@ -215,7 +215,7 @@ int64_t sys_pipe_close(va_list args) {
 
 int64_t sys_new_proc(va_list args) {
   char *name = va_arg(args, char *);
-  int (*entry)(void) = va_arg(args, int (*)(void));
+  uint64_t entry = va_arg(args, uint64_t);
   int argc = va_arg(args, int);
   char **argv = va_arg(args, char **);
   syscall_log(LOG_INFO, "new_proc(name=%s, entry=%ld)\n", name, entry

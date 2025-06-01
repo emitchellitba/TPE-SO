@@ -11,7 +11,7 @@ LOGGER_DEFINE(proc, proc_log, proc_log_level)
 static struct proc *process_table[MAX_PROCESSES] = {NULL};
 static int process_count = 0;
 
-pid_t proc_pid_alloc() { 
+pid_t proc_pid_alloc() {
   for (pid_t i = 0; i < MAX_PROCESSES; i++) {
     if (process_table[i] == NULL) {
       return i; // Retorna el primer PID disponible
@@ -30,8 +30,8 @@ pid_t proc_pid_alloc() {
  * Retorna 0 si se pudo crear el proceso, 1 si hubo error
  */
 int proc_new(proc_t **ref) {
-  
-  if(process_count >= MAX_PROCESSES) {
+
+  if (process_count >= MAX_PROCESSES) {
     proc_log(LOG_ERR, "Maximum number of processes reached\n");
     return NOMEMERR; // No hay espacio para más procesos
   }
@@ -92,7 +92,8 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   return 0;
 }
 
-// Recordar que al terminar el proceso se debe poner en NULL la posición del array process_table
+// Recordar que al terminar el proceso se debe poner en NULL la posición del
+// array process_table
 void proc_kill(struct proc *proc);
 
 /** Cuando un proceso termina se debe llamar a esta funcion que se encarga... */

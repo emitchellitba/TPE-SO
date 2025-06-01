@@ -67,7 +67,7 @@ int main() {
 
   const char *init_p = "init";
 
-  proc_init(init, init_p, NULL, init_main);
+  proc_init(init, init_p, NULL, sampleCodeModuleAddress);
 
   char *argv[] = {(char *)init_p};
   execv(init, 1, argv);

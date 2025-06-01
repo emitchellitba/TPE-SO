@@ -15,12 +15,5 @@
 // DEFINE_WRAPPER(make_sound, (int64_t time, int64_t nFrequence), (time,
 // nFrequence))
 DEFINE_WRAPPER(read_kmsg, (char *log, size_t size), (log, size))
-
-#define BUFF_SIZE 1024
-
-void show_kmsg() {
-  char log[BUFF_SIZE];
-  size_t size = BUFF_SIZE;
-  int n = read_kmsg(log, size);
-  printf("%s", log);
-}
+DEFINE_WRAPPER(new_proc, (char *name, int entry, int argc, char *argv[]),
+               (name, entry, argc, argv))

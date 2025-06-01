@@ -103,11 +103,11 @@ void press_key() {
 }
 
 int load_buffer(char *buffer, size_t count) {
-    int bytes_read = 0;
+  int bytes_read = 0;
 
-    while ((bytes_read = ringbuf_read(kbuff, count, buffer)) == 0) {
-        _hlt(); // Halt CPU until next interrupt (e.g., keyboard)
-    }
+  while ((bytes_read = ringbuf_read(kbuff, count, buffer)) == 0) {
+    _hlt(); // Halt CPU until next interrupt (e.g., keyboard)
+  }
 
-    return bytes_read;
+  return bytes_read;
 }

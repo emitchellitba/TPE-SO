@@ -1,4 +1,4 @@
-#include "stdLibrary.h"
+#include <stdLibrary.h>
 #include <stdarg.h>
 
 #define MAX_BUFF 1000
@@ -8,9 +8,6 @@
 extern void read(char *buffer, size_t count);
 extern void write_stdin(const char *str, size_t count);
 extern void get_date_time(const date_time *dt);
-extern void screen_clear();
-extern void change_color(uint8_t background);
-extern void zoom(int in);
 
 void printf(const char *str, ...) {
   va_list args;
@@ -180,9 +177,7 @@ char get_entry() {
   return buffer[0];
 }
 
-char get_char() {
-  return get_entry();
-}
+char get_char() { return get_entry(); }
 
 void put_char(const char c) {
   write_stdin(&c, 1);
@@ -190,12 +185,6 @@ void put_char(const char c) {
 }
 
 void load_date_time(date_time *dt) { get_date_time(dt); }
-
-void clear() { screen_clear(); }
-
-void zoom_in() { zoom(1); }
-
-void zoom_out() { zoom(0); }
 
 int str_cmp(const char *str1, const char *str2) {
   while (*str1 != '\0' && *str2 != '\0') {
@@ -234,7 +223,3 @@ void to_lower(char *str) {
     }
   }
 }
-
-void change_font_color() { change_color(0); }
-
-void change_bg_color() { change_color(1); }

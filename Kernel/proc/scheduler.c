@@ -47,7 +47,7 @@ void proc_ready(struct proc *p) {
 static void kernel_idle() {
   scheduler->idle_flag = 1;
 
-  //Chequeo si hay procesos listos
+  // Chequeo si hay procesos listos
   while (scheduler->ready_processes->count == 0) {
     _hlt();
   }
@@ -55,10 +55,12 @@ static void kernel_idle() {
 
 // Encolar el siguiente proceso listo de manera segura
 void enqueue_next_process() {
-  scheduler->current_process = (struct proc *)dequeue(scheduler->ready_processes);
+  scheduler->current_process =
+      (struct proc *)dequeue(scheduler->ready_processes);
   if (scheduler->current_process) {
     scheduler->current_process->status = RUNNING;
-    scheduler->current_process->has_quantum = scheduler->current_process->priority;
+    scheduler->current_process->has_quantum =
+        scheduler->current_process->priority;
     scheduler->idle_flag = 0;
   } else { /* No deberia pasar nunca pero por seguridad llama a idle */
     printk("CRITICAL: ready_processes-> count mismanaged\n");
@@ -73,20 +75,21 @@ uint64_t schedule(uint64_t last_rsp) {
   scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
   struct queue *ready_queue = scheduler->ready_processes;
 
-  if(ready_queue->count == 0) {
-    if(!scheduler->current_process) {
+  if (ready_queue->count == 0) {
+    if (!scheduler->current_process) {
       kernel_idle();
     } else {
-      scheduler->current_process->has_quantum = scheduler->current_process->priority;
+      scheduler->current_process->has_quantum =
+          scheduler->current_process->priority;
     }
   } else {
-    if(!scheduler->current_process) {
+    if (!scheduler->current_process) {
       enqueue_next_process();
     } else {
       if (!(--scheduler->current_process->has_quantum)) {
         scheduler->current_process->status = READY;
         proc_ready(scheduler->current_process);
-        
+
         enqueue_next_process();
       }
     }
@@ -120,5 +123,6 @@ uint64_t change_priority(pid_t pid, priority_t new_priority) {
 
 void yield() {
   scheduler->current_process->has_quantum = 0; // Forzar cambio de proceso
-  call_timer_tick(); // Llamar al tick del timer para que se ejecute el scheduler
+  call_timer_tick(); // Llamar al tick del timer para que se ejecute el
+                     // scheduler
 }
