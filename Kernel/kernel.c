@@ -58,21 +58,13 @@ int main() {
 
   initialize_scheduler();
 
-  int err = 0;
+  char *name = "init";
+  fs_load(name, (fs_entry_point_t)sampleCodeModuleAddress);
 
-  struct proc *init = NULL;
-  if ((err = proc_new(&init))) {
-    kernel_log(LOG_CRIT, "failed to allocate process structure for init");
-  }
+  char *argv[] = {name, NULL};
+  int argc = 1;
 
-  const char *init_p = "init";
-
-  proc_init(init, init_p, NULL, sampleCodeModuleAddress);
-
-  char *argv[] = {(char *)init_p};
-  execv(init, 1, argv);
-
-  proc_ready(init);
+  syscall_dispatcher(0x10, (uint64_t)name, argc, argv);
 
   call_timer_tick();
 

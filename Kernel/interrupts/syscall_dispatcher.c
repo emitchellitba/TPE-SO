@@ -37,9 +37,10 @@ static syscall_func_t syscall_table[] = {
     sys_pipe_open,       // 12
     sys_pipe_close,      // 13
     sys_ps,              // 14
-    sys_new_proc,        // 15
-    sys_kill_proc,       // 16
-    sys_change_priority, // 17
+    sys_load_program,    // 15
+    sys_spawn_process,   // 16
+    sys_kill_proc,       // 17
+    sys_change_priority, // 18
                          // sys_wait,           // 18
                          // sys_set_priority,   // 19
                          // sys_block,         // 20
@@ -213,20 +214,42 @@ int64_t sys_pipe_close(va_list args) {
   // return pipe_close(pipe_id);
 }
 
-int64_t sys_new_proc(va_list args) {
+int64_t sys_load_program(va_list args) {
   char *name = va_arg(args, char *);
   uint64_t entry = va_arg(args, uint64_t);
+  syscall_log(LOG_INFO, "load_program(name=%s, entry=%ld)\n", name, entry);
+
+  int err = 0;
+
+  if ((err = fs_load(name, (fs_entry_point_t)entry))) {
+    syscall_log(LOG_CRIT, "failed to load program %s with entry %ld\n", name,
+                entry);
+    return -1;
+  }
+
+  syscall_log(LOG_INFO, "program %s loaded successfully\n", name);
+  return 0;
+}
+
+int64_t sys_spawn_process(va_list args) {
+  char *name = va_arg(args, char *);
   int argc = va_arg(args, int);
   char **argv = va_arg(args, char **);
-  syscall_log(LOG_INFO, "new_proc(name=%s, entry=%ld)\n", name, entry
-              /* argv */);
+  syscall_log(LOG_INFO, "execv(name=%s, argc=%d, argv=%p)\n", name, argc, argv);
 
   int err = 0;
   proc_t *new_proc;
 
+  fs_entry_point_t entry = fs_get_entry(name);
+
+  if (!entry) {
+    syscall_log(LOG_CRIT, "program %s not found\n", name);
+    return -ENOENT;
+  }
+
   if ((err = proc_new(&new_proc))) {
     syscall_log(LOG_CRIT, "failed to allocate process structure for init");
-    return -1;
+    return -ENOMEM;
   }
 
   proc_init(new_proc, name, NULL, entry);
@@ -235,7 +258,7 @@ int64_t sys_new_proc(va_list args) {
 
   proc_ready(new_proc);
 
-  return 0;
+  return new_proc->pid;
 }
 
 int64_t sys_kill_proc(va_list args) {

@@ -4,6 +4,7 @@
 #include "heap.h"
 #include <ds/queue.h>
 #include <exec.h>
+#include <fs.h>
 #include <idtLoader.h>
 #include <keyboardDriver.h>
 #include <lib.h>
