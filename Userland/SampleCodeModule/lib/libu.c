@@ -15,6 +15,7 @@
 // DEFINE_WRAPPER(make_sound, (int64_t time, int64_t nFrequence), (time,
 // nFrequence))
 DEFINE_WRAPPER(read_kmsg, (char *log, size_t size), (log, size))
+DEFINE_WRAPPER(get_procs, (proc_info_t * procs, size_t size), (procs, size))
 DEFINE_WRAPPER(load_program, (char *name, int entry), (name, entry))
 DEFINE_WRAPPER(spawn_process, (char *name, int argc, char **argv),
                (name, argc, argv))

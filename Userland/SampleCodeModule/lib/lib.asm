@@ -11,58 +11,66 @@ GLOBAL get_regist
 GLOBAL make_sound
 ; TODO: Hacer que todas las syscalls usen EXPORT_FUNC
 
+%macro pushStateNoRAX 0
+    push rbx
+    push rcx
+    push rdx
+    push rbp
+    push rdi
+    push rsi
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+%endmacro
+
+%macro popStateNoRAX 0
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rsi
+    pop rdi
+    pop rbp
+    pop rdx
+    pop rcx
+    pop rbx
+%endmacro
+
 %macro pushState 0
-	push rax
-	push rbx
-	push rcx
-	push rdx
-	push rbp
-	push rdi
-	push rsi
-	push r8
-	push r9
-	push r10
-	push r11
-	push r12
-	push r13
-	push r14
-	push r15
+    push rax
+    pushStateNoRAX
 %endmacro
 
 %macro popState 0
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop r11
-	pop r10
-	pop r9
-	pop r8
-	pop rsi
-	pop rdi
-	pop rbp
-	pop rdx
-	pop rcx
-	pop rbx
-	pop rax
+    popStateNoRAX
+    pop rax
 %endmacro
 
 %macro do_syscall_direct 1
-    pushState
+    pushStateNoRAX
 		mov rax, %1
     int 80h
-    popState
+    popStateNoRAX
     ret
 %endmacro
 
 %macro do_syscall 4
-    pushState
+    pushStateNoRAX
     mov rax, %1
     mov rdx, %2
     mov rsi, %3
     mov rdi, %4
     int 80h
-    popState
+    popStateNoRAX
     ret
 %endmacro
 
@@ -153,6 +161,16 @@ EXPORT_FUNC read_kmsg
     do_syscall 0x0B, 0, rsi, rdi
 
 ;-------------------------------------------------------------------------------
+; 0x0E - get_procs
+;-------------------------------------------------------------------------------
+; Argumentos:
+;   1 - buffer
+;   2 - count
+;-------------------------------------------------------------------------------
+EXPORT_FUNC get_procs
+		do_syscall_direct 0x0E
+
+;-------------------------------------------------------------------------------
 ; 0x0F - load_program
 ;-------------------------------------------------------------------------------
 ; Argumentos:
@@ -163,7 +181,26 @@ EXPORT_FUNC load_program
 		do_syscall_direct 0x0F
 
 ;-------------------------------------------------------------------------------
-; 0x10 - spawn_process
+; 0x10 - rm_program
+;-------------------------------------------------------------------------------
+; Argumentos:
+;   1 - name
+;-------------------------------------------------------------------------------
+EXPORT_FUNC rm_program
+	do_syscall_direct 0x10
+
+;-------------------------------------------------------------------------------
+; 0x11 - get_programs
+;-------------------------------------------------------------------------------
+; Argumentos:
+;   1 - buffer
+;   2 - count
+;-------------------------------------------------------------------------------
+EXPORT_FUNC get_programs
+	do_syscall_direct 0x11
+
+;-------------------------------------------------------------------------------
+; 0x12 - spawn_process
 ;-------------------------------------------------------------------------------
 ; Argumentos:
 ;   1 - name
@@ -171,4 +208,4 @@ EXPORT_FUNC load_program
 ;   3 - argv
 ;-------------------------------------------------------------------------------
 EXPORT_FUNC spawn_process
-	do_syscall_direct 0x10
+	do_syscall_direct 0x12

@@ -36,11 +36,13 @@ static syscall_func_t syscall_table[] = {
     sys_read_kmsg,       // 11
     sys_pipe_open,       // 12
     sys_pipe_close,      // 13
-    sys_ps,              // 14
+    sys_get_procs,       // 14
     sys_load_program,    // 15
-    sys_spawn_process,   // 16
-    sys_kill_proc,       // 17
-    sys_change_priority, // 18
+    sys_rm_program,      // 16
+    sys_ls_programs,     // 17
+    sys_spawn_process,   // 18
+    sys_kill_proc,       // 19
+    sys_change_priority, // 20
                          // sys_wait,           // 18
                          // sys_set_priority,   // 19
                          // sys_block,         // 20
@@ -231,6 +233,20 @@ int64_t sys_load_program(va_list args) {
   return 0;
 }
 
+int64_t sys_rm_program(va_list args) {
+  char *name = va_arg(args, char *);
+  syscall_log(LOG_INFO, "rm_program(name=%s)\n", name);
+
+  return 0;
+}
+
+int64_t sys_ls_programs(va_list args) {
+  syscall_log(LOG_INFO, "ls_programs()\n");
+  // return ls_programs();
+
+  return 0;
+}
+
 int64_t sys_spawn_process(va_list args) {
   char *name = va_arg(args, char *);
   int argc = va_arg(args, int);
@@ -267,9 +283,16 @@ int64_t sys_kill_proc(va_list args) {
   // return kill_proc(pid);
 }
 
-int64_t sys_ps(va_list args) {
+int64_t sys_get_procs(va_list args) {
+  proc_info_t *buffer = va_arg(args, proc_info_t *);
+  uint64_t count = va_arg(args, uint64_t);
+
+  int out_count = 0;
+
+  proc_list(buffer, count, &out_count);
+
   syscall_log(LOG_INFO, "ps()\n");
-  // return ps();
+  return out_count;
 }
 
 static void fill_out_buffer(uint64_t *buffer) {

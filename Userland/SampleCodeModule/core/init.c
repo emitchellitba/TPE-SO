@@ -2,7 +2,7 @@
 
 #define SHELL_PROGRAM_NAME "shell"
 
-int run_shell(int argc, char *argv[], int *pid) {
+static int run_shell(int argc, char *argv[], int *pid) {
   *pid = spawn_process(SHELL_PROGRAM_NAME, argc, argv);
 
   if (*pid < 0) {
@@ -13,8 +13,15 @@ int run_shell(int argc, char *argv[], int *pid) {
   return 0;
 }
 
-int init_main(int argc, char **argv) {
+static int load_programs() {
   load_program(SHELL_PROGRAM_NAME, (uint64_t)&shell_main);
+  // Load ps
+  load_program("ps", (uint64_t)&ps_main);
+  // load_program("files", (uint64_t)&ls_cmd);
+}
+
+int init_main(int argc, char **argv) {
+  load_programs();
 
   char *shell_argv_data[] = {SHELL_PROGRAM_NAME, NULL};
   int shell_argc = 1;

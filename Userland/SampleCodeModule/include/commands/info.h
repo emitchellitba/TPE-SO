@@ -16,5 +16,6 @@ int help_cmd();
 int print_global_date_time();
 int print_local_date_time_cmd();
 int show_kmsg_cmd();
+int show_processes_cmd();
 
 #endif // _INFO_H_

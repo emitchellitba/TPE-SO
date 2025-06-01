@@ -2,6 +2,7 @@
 #define PROC_H
 
 #include "../ds/queue.h"
+#include <lib.h>
 #include <stdint.h>
 
 /** TODO: Crear una seccion para codigos de errores */
@@ -12,6 +13,15 @@
 #define QUANTUM_DEFAULT 2
 
 typedef int (*proc_main_function)(int argc, char **argv);
+
+typedef struct {
+  int pid;
+  int ppid;
+  char name[32];
+  int state;
+  int priority;
+} proc_info_t;
+// TODO: MOVER ESTE proc_info_t a una librera compartida entre kernel y userland
 
 /*
   IDEA FUNCIONAMIENTO PROCESOS:
@@ -87,5 +97,6 @@ typedef struct proc {
 int proc_new(proc_t **ref);
 int proc_init(proc_t *proc, const char *name, proc_t *parent,
               proc_main_function entry);
+int proc_list(proc_info_t *buffer, int max_count, int *out_count);
 
 #endif // PROC_H

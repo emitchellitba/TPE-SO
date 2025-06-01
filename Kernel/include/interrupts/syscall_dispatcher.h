@@ -7,6 +7,7 @@
 #include <keyboardDriver.h>
 #include <lib.h>
 #include <logger.h>
+#include <process.h>
 #include <soundDriver.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -35,7 +36,10 @@ int64_t sys_beep(va_list args);
 int64_t sys_read_kmsg(va_list args);
 int64_t sys_pipe_open(va_list args);
 int64_t sys_pipe_close(va_list args);
+int64_t sys_get_procs(va_list args);
 int64_t sys_load_program(va_list args);
+int64_t sys_rm_program(va_list args);
+int64_t sys_ls_programs(va_list args);
 int64_t sys_spawn_process(va_list args);
 int64_t sys_kill_proc(va_list args);
 int64_t sys_ps(va_list args);

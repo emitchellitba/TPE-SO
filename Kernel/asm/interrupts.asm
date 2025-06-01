@@ -83,7 +83,7 @@ _irq01Handler:
 
 ;SyscallHandler
 _irq60Handler:
-	pushState
+	pushStateNoRAX
 
 	mov r9, r8
 	mov r8, rcx
@@ -94,7 +94,7 @@ _irq60Handler:
 
 	call syscall_dispatcher
 
-	popState
+	popStateNoRAX
 	
 	iretq
 

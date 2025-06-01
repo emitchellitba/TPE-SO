@@ -13,4 +13,12 @@ typedef struct command_entry {
   terminal_command func;
 } command_entry_t;
 
+typedef struct {
+  int pid;
+  int ppid;
+  char name[32];
+  int state;
+  int priority;
+} proc_info_t;
+
 #endif // LIBU_H

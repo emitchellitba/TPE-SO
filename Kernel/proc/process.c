@@ -1,8 +1,7 @@
-#include "process.h"
 #include "../include/lib/memory_manager.h"
 #include <ds/queue.h>
 #include <lib/logger.h>
-#include <proc/process.h>
+#include <process.h>
 
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
@@ -11,7 +10,7 @@ LOGGER_DEFINE(proc, proc_log, proc_log_level)
 static struct proc *process_table[MAX_PROCESSES] = {NULL};
 static int process_count = 0;
 
-pid_t proc_pid_alloc() {
+static pid_t proc_pid_alloc() {
   for (pid_t i = 0; i < MAX_PROCESSES; i++) {
     if (process_table[i] == NULL) {
       return i; // Retorna el primer PID disponible
@@ -98,3 +97,24 @@ void proc_kill(struct proc *proc);
 
 /** Cuando un proceso termina se debe llamar a esta funcion que se encarga... */
 int proc_reap(struct proc *proc);
+
+int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
+  int count = 0;
+  for (int i = 0; i < MAX_PROCESSES && count < max_count; ++i) {
+    if (process_table[i] != NULL) {
+      buffer[count].pid = process_table[i]->pid;
+      buffer[count].ppid =
+          process_table[i]->parent ? process_table[i]->parent->pid : -1;
+      str_ncpy(buffer[count].name, process_table[i]->name,
+               sizeof(buffer[count].name) - 1);
+      buffer[count].name[sizeof(buffer[count].name) - 1] = '\0';
+      buffer[count].state = process_table[i]->status;
+      buffer[count].priority = process_table[i]->priority;
+      count++;
+    }
+  }
+  if (out_count) {
+    *out_count = count;
+  }
+  return 0;
+}

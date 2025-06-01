@@ -57,3 +57,18 @@ int show_kmsg_cmd() {
 
   return 0;
 }
+
+int show_processes_cmd() {
+  int pid;
+  char *argv[] = {"ps", NULL};
+  int argc = 1;
+
+  pid = spawn_process("ps", argc, argv);
+
+  if (pid < 0) {
+    printf("Error spawning process 'ps'\n");
+    return -1;
+  }
+
+  return 0;
+}
