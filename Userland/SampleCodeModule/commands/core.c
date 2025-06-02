@@ -1,6 +1,6 @@
 #include <core.h>
 
-int exit_cmd() {
+int exit_cmd(void) {
   printf("\n");
   printf("Saving session...\n");
   printf("Session saved\n");

@@ -6,11 +6,11 @@
 
 typedef int (*main_func_t)(int argc, char *argv[]);
 
-typedef int (*terminal_command)();
+typedef int (*shell_command)(int params_count, char *params[]);
 
 typedef struct command_entry {
   const char *name;
-  terminal_command func;
+  shell_command func;
 } command_entry_t;
 
 typedef struct {

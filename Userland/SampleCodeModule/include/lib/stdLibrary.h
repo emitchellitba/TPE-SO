@@ -15,12 +15,12 @@ typedef struct {
 static char hexa_digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-extern void get_input(char *buffer);
+extern void get_input();
 // TODO: Esta funcion viene de shell.c, una libreria no deberia
 // depender de un modulo. Aparte de que hay dependencia circular.
 
 void printf(const char *str, ...);
-void scanf(const char *formatt, ...);
+// void scanf(const char *formatt, ...);
 char get_char();
 char get_entry();
 void put_char(const char c);
@@ -35,6 +35,7 @@ int str_cmp(const char *str1, const char *str2);
 int str_ncmp(const char *str1, const char *str2, int n);
 int str_len(const char *str);
 char *str_tok(char *str1, const char *str2);
+char *strchr(const char *str, int c);
 void to_lower(char *str);
 unsigned int _abs(int a);
 

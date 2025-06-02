@@ -10,21 +10,17 @@
 #define BUFF_SIZE 500
 #define SPECIAL_KEY_MAX_VALUE 5
 
-typedef enum {
-  HELP = 0,
-  DATE,
-  ZOOM_IN,
-  ZOOM_OUT,
-  COLOR_FONT,
-  COLOR_BG,
-  CLEAR,
-  EXIT,
-  REGISTERS
-} command_id;
-// TODO: completar este enum o borrarlo si no es necesario
+#define MAX_PARAMS 10
+#define MAX_PARAM_LEN 32
+
+typedef struct {
+  char *cmd;
+  int param_count;
+  char params[MAX_PARAMS][MAX_PARAM_LEN];
+} parsed_input_t;
 
 int shell_main(int argc, char *argv[]);
 int get_total_commands();
-void get_input(char *buffer);
+void get_input();
 
 #endif
