@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <videodriver.h>
+#include <semaphores/semaphore.h>
 
 extern int init_main(int argc, char **argv);
 extern void call_timer_tick();

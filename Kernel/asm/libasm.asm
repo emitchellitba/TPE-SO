@@ -1,5 +1,7 @@
 %include "macros.inc"
 
+GLOBAL aquire
+GLOBAL release
 GLOBAL cpu_vendor
 GLOBAL get_sec
 GLOBAL get_min
@@ -194,6 +196,17 @@ load_registers_array:
     popState
     ret
 
+aquire:
+    mov al, 0
+.retry
+    xchg [rdi], al
+    test al, al
+    jz .retry
+    ret
+
+release:
+    mov byte [rdi], 1
+    ret
 
 section .bss
     register_array resq 17

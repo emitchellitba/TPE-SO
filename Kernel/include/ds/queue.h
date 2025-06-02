@@ -115,7 +115,7 @@ static inline void *dequeue(struct queue *queue) {
     queue->tail = NULL;
 
   void *value = head->value;
-  // kfree(head);
+  kfree(head);
 
   return value;
 }
@@ -135,12 +135,12 @@ static inline void queue_remove(struct queue *queue, void *value) {
         --queue->count;
         queue->tail = queue->tail->prev;
         queue->tail->next = NULL;
-        // kfree(node);
+        kfree(node);
       } else {
         --queue->count;
         node->prev->next = node->next;
         node->next->prev = node->prev;
-        // kfree(node);
+        kfree(node);
       }
 
       break;
@@ -165,8 +165,23 @@ static inline void queue_node_remove(struct queue *queue, struct qnode *node) {
     queue->tail = node->prev;
 
   --queue->count;
-  // kfree(node);
+  kfree(node);
   return;
+}
+
+/**
+ * \brief free a queue and all its elements
+ */
+static inline void queue_free(struct queue *queue) {
+  if (!queue)
+    return;
+  // remove and free all elements
+  while(queue->head) {
+    dequeue(queue);
+  }
+
+  // free the queue itself
+  kfree(queue);
 }
 
 #endif /* ! _DS_QUEUE_H */
