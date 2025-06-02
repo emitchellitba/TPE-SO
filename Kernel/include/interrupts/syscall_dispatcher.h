@@ -8,6 +8,7 @@
 #include <lib.h>
 #include <logger.h>
 #include <process.h>
+#include <scheduler.h>
 #include <soundDriver.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -20,6 +21,10 @@
 #define ENOENT 2
 #define EFAULT 9
 #define ENOMEM 12
+
+extern scheduler_t scheduler;
+
+extern void call_timer_tick();
 
 int64_t syscall_dispatcher(uint64_t rax, ...);
 
@@ -43,7 +48,7 @@ int64_t sys_rm_program(va_list args);
 int64_t sys_get_programs(va_list args);
 int64_t sys_spawn_process(va_list args);
 int64_t sys_kill_proc(va_list args);
-int64_t sys_ps(va_list args);
 int64_t sys_change_priority(va_list args);
+int64_t sys_exit(va_list args);
 
 #endif

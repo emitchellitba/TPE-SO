@@ -3,6 +3,7 @@
 
 #include <libu.h>
 #include <ls.h>
+#include <my_script.h>
 #include <ps.h>
 #include <shell.h>
 #include <stdLibrary.h>

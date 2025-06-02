@@ -22,3 +22,4 @@ DEFINE_WRAPPER(get_programs, (char **buffer, int max_count),
                (buffer, max_count))
 DEFINE_WRAPPER(spawn_process, (char *name, int argc, char **argv),
                (name, argc, argv))
+DEFINE_WRAPPER(proc_exit, (int code), (code))

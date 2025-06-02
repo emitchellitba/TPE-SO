@@ -80,9 +80,6 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   proc->parent = parent;
   proc->entry = entry;
 
-  struct queue wait_queue = {0};
-  proc->wait_queue = wait_queue;
-
   proc->priority = QUANTUM_DEFAULT;
 
   proc->status = READY;
@@ -91,12 +88,77 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   return 0;
 }
 
-// Recordar que al terminar el proceso se debe poner en NULL la posición del
-// array process_table
-void proc_kill(struct proc *proc);
+/**
+ * Mata un proceso. Cambia su estado a ZOMBIE y libera
+ */
+void proc_kill(struct proc *proc) {
+  if (!proc) {
+    proc_log(LOG_ERR, "Cannot kill a NULL process\n");
+    return;
+  }
 
-/** Cuando un proceso termina se debe llamar a esta funcion que se encarga... */
-int proc_reap(struct proc *proc);
+  if (proc->pid == 1) {
+    proc_log(LOG_ERR, "Cannot kill the init process (PID: %d)\n", proc->pid);
+    return;
+  }
+
+  proc_log(LOG_INFO, "Killing process %s (PID: %d)\n", proc->name, proc->pid);
+
+  /* Eliminarlo del flujo del scheduler */
+  if (proc->status == RUNNING) {
+    sched_current_died();
+  } else if (proc->status == BLOCKED) {
+    /* TODO: Terminar esto */
+  } else if (proc->status == READY) {
+    sched_ready_queue_remove(proc);
+  }
+
+  /* Cambiar estado del proceso */
+  proc->status = ZOMBIE;
+
+  /* Cerrar pipes o semaforos */
+  /* TODO: Terminar esto */
+
+  /* Liberar recursos del kernel utilizados por el proceso (stack) */
+  kmm_free(proc->stack_start, kernel_mem);
+
+  /* Marcar todos los hijos como huerfanos */
+  for (int i = 0; i < MAX_PROCESSES; i++) {
+    if (process_table[i] && process_table[i]->parent == proc) {
+      /* TODO: Reparentar a los hijos para que los limpie init */
+      process_table[i]->parent = NULL;
+      process_table[i]->status = READY;
+    }
+  }
+
+  /* Liberar el nombre */
+  kmm_free((void *)proc->name, kernel_mem);
+  proc->name = NULL;
+
+  /* Despertar al padre si lo hay y esta esperando al hijo */
+  if (proc->parent && 0 /* Si esta bloqueado por wait */) {
+    // proc->parent->status = READY;
+    // proc->parent->exit = proc->exit;
+  } else {
+    /* El proceso es huerfano, directamente se llama a reap */
+    proc_reap(proc);
+  }
+}
+
+/**
+ * Recoge un proceso. Es decir, lo elimina de la tabla de
+ * procesos y libera sus recursos.
+ * Idealmente esta funcion debe ser llamada por aquel que
+ * recolecta el resultado del proceso.
+ */
+int proc_reap(struct proc *proc) {
+  process_table[proc->pid] = NULL;
+  process_count--;
+
+  kmm_free(proc, kernel_mem);
+
+  return 0;
+}
 
 int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
   int count = 0;

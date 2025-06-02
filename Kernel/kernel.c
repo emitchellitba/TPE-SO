@@ -46,6 +46,7 @@ void *initializeKernelBinary() {
 int main() {
   load_idt();
 
+  // sem_init();
   kernel_mem = kmm_init(heapModuleAddress);
 
 #if defined(USE_BUDDY_MM)

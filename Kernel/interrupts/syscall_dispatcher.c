@@ -43,6 +43,7 @@ static syscall_func_t syscall_table[] = {
     sys_spawn_process,   // 18
     sys_kill_proc,       // 19
     sys_change_priority, // 20
+    sys_exit,            // 21
                          // sys_wait,           // 18
                          // sys_set_priority,   // 19
                          // sys_block,         // 20
@@ -323,4 +324,24 @@ int64_t sys_change_priority(va_list args) {
   syscall_log(LOG_INFO, "change_priority(pid=%ld, new_priority=%d)\n", pid,
               new_priority);
   return change_priority(pid, new_priority);
+}
+
+int64_t sys_exit(va_list args) {
+  int code = va_arg(args, int);
+  syscall_log(LOG_DEBUG, "exit(code=%d)\n", code);
+
+  if (!scheduler || !scheduler->current_process) {
+    syscall_log(LOG_CRIT, "exit called with no current process\n");
+    return -EFAULT;
+  }
+
+  scheduler->current_process->exit = code;
+
+  proc_kill(scheduler->current_process);
+
+  call_timer_tick();
+
+  // No se deberia alcanzar este punto
+  while (1)
+    ;
 }

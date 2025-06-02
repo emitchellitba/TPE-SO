@@ -4,13 +4,6 @@
 extern void _hlt();
 extern unsigned long ticks;
 
-typedef struct scheduler_cdt {
-  int init;
-  struct queue *ready_processes;
-  char idle_flag;
-  struct proc *current_process;
-} scheduler_cdt;
-
 scheduler_t scheduler = NULL;
 struct queue ready_queue = {0};
 
@@ -72,6 +65,12 @@ uint64_t schedule(uint64_t last_rsp) {
   if (!scheduler || !scheduler->init || !scheduler->ready_processes)
     return last_rsp;
 
+  if (scheduler->current_died) {
+    scheduler->current_died = 0;
+    enqueue_next_process();
+    return (uint64_t)scheduler->current_process->stack_pointer;
+  }
+
   scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
   struct queue *ready_queue = scheduler->ready_processes;
 
@@ -125,4 +124,13 @@ void yield() {
   scheduler->current_process->has_quantum = 0; // Forzar cambio de proceso
   call_timer_tick(); // Llamar al tick del timer para que se ejecute el
                      // scheduler
+}
+
+void sched_current_died() { scheduler->current_died = 1; }
+
+void sched_ready_queue_remove(struct proc *proc) {
+  if (!scheduler || !scheduler->ready_processes || !proc)
+    return;
+
+  queue_remove(scheduler->ready_processes, proc);
 }

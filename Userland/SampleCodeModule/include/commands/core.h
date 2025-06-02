@@ -7,6 +7,6 @@
 #define MAX_PARAM_LEN 32
 
 int exit_cmd();
-int rm_cmd(int params_count, char params[MAX_PARAMS][MAX_PARAM_LEN]);
+int my_script_cmd(void);
 
 #endif // _CORE_H_

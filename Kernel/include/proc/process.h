@@ -68,13 +68,7 @@ typedef struct proc {
   uint64_t *stack_start;   // Comienzo del stack: direccion mas alta
   uint64_t *stack_pointer; // Posicion actual del stack
 
-  // char **argv;
-  // uint64_t argc;
-
   proc_main_function entry; // Direccion de inicio del proceso
-
-  struct queue
-      wait_queue; // Cola de procesos hijos que hay que esperar con wait
 
   /** Valor de retorno del proceso. -1 indica que no terminó */
   int exit;
@@ -94,9 +88,14 @@ typedef struct proc {
   // struct sigaction sigaction[SIG_MAX + 1]; // Array de handlers
 } proc_t;
 
+extern void sched_current_died();
+extern void sched_ready_queue_remove(struct proc *proc);
+
 int proc_new(proc_t **ref);
 int proc_init(proc_t *proc, const char *name, proc_t *parent,
               proc_main_function entry);
 int proc_list(proc_info_t *buffer, int max_count, int *out_count);
+void proc_kill(struct proc *proc);
+int proc_reap(struct proc *proc);
 
 #endif // PROC_H

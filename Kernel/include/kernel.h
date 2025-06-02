@@ -14,6 +14,7 @@
 #include <naiveConsole.h>
 #include <proc/process.h>
 #include <scheduler.h>
+#include <semaphores/semaphore.h>
 #include <soundDriver.h>
 #include <stdint.h>
 #include <string.h>
