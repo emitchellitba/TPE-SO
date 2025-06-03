@@ -46,15 +46,42 @@ semaphore_t *my_sem_open(uint64_t id) {
   return &semaphore_table[id];
 }
 
+// ... (inclusiones necesarias: scheduler.h, process.h) ...
+
 uint64_t my_sem_post(semaphore_t *sem) {
   if (!sem_is_open(sem)) {
-    return -1; // Error: semáforo no está abierto
+    // printk_err("my_sem_post: Semáforo ID %lu no está abierto o es
+    // inválido.\n", sem ? sem->id : -1);
+    return -1; // Error: semáforo no válido o no está en uso
   }
-  aquire(&(sem->lock));
-  sem->value++;
-  release(&(sem->lock));
-  return unblock_sem_process(
-      (struct proc *)dequeue(sem->waiting_process_queue));
+
+  aquire(&(sem->lock)); // Adquirir lock para proteger el semáforo
+
+  proc_t *process_to_wake = (proc_t *)dequeue(sem->waiting_process_queue);
+
+  if (process_to_wake) {
+    // Hay un proceso esperando en la cola del semáforo.
+    // Lo despertamos. El valor del semáforo no se incrementa;
+    // el 'post' es consumido por el proceso que se despierta.
+    // printk_info("my_sem_post: Sem ID %lu, despertando proceso PID %d.\n",
+    // sem->id, process_to_wake->pid);
+
+    // Liberar el lock ANTES de llamar a proc_ready, ya que proc_ready
+    // podría llevar a un cambio de contexto si el proceso despertado tiene alta
+    // prioridad.
+    release(&(sem->lock));
+
+    proc_ready(
+        process_to_wake); // Usar la función del scheduler para ponerlo en READY
+  } else {
+    // Nadie esperando, simplemente incrementamos el valor del semáforo.
+    sem->value++;
+    // printk_info("my_sem_post: Sem ID %lu, nadie esperando. Valor incrementado
+    // a %lu.\n", sem->id, sem->value);
+    release(&(sem->lock));
+  }
+
+  return 0; // Éxito
 }
 
 uint64_t my_sem_wait(semaphore_t *sem) {
@@ -69,10 +96,10 @@ uint64_t my_sem_wait(semaphore_t *sem) {
       return 0; // Éxito
     } else {
       // Agregar el proceso actual a la cola de espera
-      struct proc *current_proc = get_running_process();
+      struct proc *current_proc = get_running();
       enqueue(sem->waiting_process_queue, current_proc);
       release(&(sem->lock));
-      block_curent_process(); // Bloquear el proceso actual
+      block_current(BLK_SEMAPHORE, sem); // Bloquear el proceso actual
     }
   }
 }

@@ -4,6 +4,7 @@
 #include <exec.h>
 #include <fs.h>
 #include <interrupts.h>
+#include <kernel_asm.h>
 #include <keyboardDriver.h>
 #include <lib.h>
 #include <lib/error.h>
@@ -21,8 +22,6 @@
 #define DECLARE_SYSCALL(name) int64_t name(va_list args);
 
 extern scheduler_t scheduler;
-
-extern void call_timer_tick();
 
 int64_t syscall_dispatcher(uint64_t rax, ...);
 
@@ -49,5 +48,7 @@ DECLARE_SYSCALL(sys_spawn_process)
 DECLARE_SYSCALL(sys_kill_proc)
 DECLARE_SYSCALL(sys_change_priority)
 DECLARE_SYSCALL(sys_exit)
+DECLARE_SYSCALL(sys_block)
+DECLARE_SYSCALL(sys_unblock)
 
 #endif

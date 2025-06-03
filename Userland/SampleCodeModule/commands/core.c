@@ -1,5 +1,8 @@
 #include <core.h>
 
+#include <libu.h>
+#include <stdLibrary.h>
+
 int exit_cmd(void) {
   printf("\n");
   printf("Saving session...\n");

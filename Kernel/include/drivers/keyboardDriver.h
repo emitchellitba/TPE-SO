@@ -1,7 +1,8 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
-#include <lib.h>
+#include <stddef.h>
+#include <stdint.h>
 
 typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 

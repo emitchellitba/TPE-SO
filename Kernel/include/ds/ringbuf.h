@@ -149,25 +149,18 @@ static inline size_t ringbuf_available(struct ringbuf *ring) {
   return ring->tail + ring->size - ring->head;
 }
 
-static inline int ringbuf_contains_line(struct ringbuf *ring) {
-  size_t head = ring->head;
-  while (head != ring->tail) {
-    if (ring->buf[head] == '\n')
-      return 1;
-    head = (head + 1) % ring->size;
-  }
-  return 0;
-}
-
-static inline size_t ringbuf_read_line(struct ringbuf *ring, char *buf,
-                                       size_t count) {
+/**
+ * \brief read from a ring buffer until character c is found or count is reached
+ */
+static inline size_t ringbuf_read_until(struct ringbuf *ring, char *buf,
+                                        size_t count, char c) {
   size_t read = 0;
   while (read < count && ring->head != ring->tail) {
     if (ring->head == ring->size)
       ring->head = 0;
-    char c = ring->buf[ring->head++];
-    buf[read++] = c;
-    if (c == '\n')
+    char ch = ring->buf[ring->head++];
+    buf[read++] = ch;
+    if (ch == c)
       break;
   }
   return read;

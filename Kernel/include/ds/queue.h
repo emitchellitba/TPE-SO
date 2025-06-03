@@ -1,9 +1,8 @@
 #ifndef _DS_QUEUE_H
 #define _DS_QUEUE_H
 
-#include "../lib/logger.h"
-#include "../lib/memory_manager.h"
-#include <kernel.h>
+#include <logger.h>
+#include <memory_manager.h>
 #include <stddef.h>
 #include <string.h>
 

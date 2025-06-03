@@ -45,6 +45,8 @@ static syscall_func_t syscall_table[] = {
     sys_kill_proc,       // 20
     sys_change_priority, // 21
     sys_exit,            // 22
+    sys_block,           // 23
+    sys_unblock,         // 24
                          // sys_wait,           // 23
                          // sys_set_priority,   // 24
                          // sys_block,          // 25
@@ -80,14 +82,16 @@ int64_t sys_read(va_list args) {
     return -EINVAL;
   }
 
-  if (!scheduler || !scheduler->current_process) {
+  proc_t *current_process = get_running();
+
+  if (!current_process) {
     syscall_log(LOG_ERR, "No current process in scheduler\n");
     return -EFAULT;
   }
 
   // TODO: Hacer una funcion get_fd_entry(current_process, fd);
   // que devuelva un puntero a fd_entry_t
-  fd_entry_t *fd_entry = &scheduler->current_process->fds[fd];
+  fd_entry_t *fd_entry = &current_process->fds[fd];
 
   if (!fd_entry || !fd_entry->ops || !fd_entry->ops->read) {
     return -EBADF;
@@ -109,12 +113,14 @@ int64_t sys_write(va_list args) {
     return -EINVAL;
   }
 
-  if (!scheduler || !scheduler->current_process) {
+  proc_t *current_process = get_running();
+
+  if (!current_process) {
     syscall_log(LOG_ERR, "No current process in scheduler\n");
     return -EFAULT;
   }
 
-  fd_entry_t *fd_entry = &scheduler->current_process->fds[fd];
+  fd_entry_t *fd_entry = &current_process->fds[fd];
 
   if (!fd_entry || !fd_entry->ops || !fd_entry->ops->write) {
     return -EBADF;
@@ -364,18 +370,32 @@ int64_t sys_exit(va_list args) {
   int code = va_arg(args, int);
   syscall_log(LOG_DEBUG, "exit(code=%d)\n", code);
 
-  if (!scheduler || !scheduler->current_process) {
+  proc_t *current_process = get_running();
+
+  if (!current_process) {
     syscall_log(LOG_CRIT, "exit called with no current process\n");
     return -EFAULT;
   }
 
-  scheduler->current_process->exit = code;
+  current_process->exit = code;
 
-  proc_kill(scheduler->current_process);
+  proc_kill(current_process);
 
   call_timer_tick();
 
   // No se deberia alcanzar este punto
   while (1)
     ;
+}
+
+int64_t sys_block(va_list args) {
+  int64_t pid = va_arg(args, pid_t);
+  syscall_log(LOG_INFO, "sys_block(pid=%ld)\n", pid);
+  return block_process_by_pid((pid_t)pid);
+}
+
+int64_t sys_unblock(va_list args) {
+  int64_t pid = va_arg(args, pid_t);
+  syscall_log(LOG_INFO, "sys_unblock(pid=%ld)\n", pid);
+  return unblock_process_by_pid((pid_t)pid);
 }

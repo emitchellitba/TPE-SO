@@ -1,5 +1,7 @@
 #include <ps.h>
 
+#include <stdLibrary.h>
+
 int ps_main(int argc, char *argv[]) {
   proc_info_t procs[32];
   int n = get_procs(procs, 32);

@@ -1,3 +1,4 @@
+#include <libu.h>
 #include <stdLibrary.h>
 #include <stdarg.h>
 
@@ -5,8 +6,6 @@
 #define HEXA_MAX 16
 #define BUFF_SIZE 500
 
-extern void read(int fd, char *buffer, size_t count);
-extern void write(int fd, const char *buffer, size_t count);
 extern void get_date_time(const date_time *dt);
 
 char hexa_digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
@@ -181,7 +180,11 @@ char get_entry() {
   return buffer[0];
 }
 
-char get_char() { return get_entry(); }
+char get_char() {
+  char c;
+  int n = read(STDIN, &c, 1);
+  return n <= 0 ? 0 : c;
+}
 
 void put_char(const char c) {
   write(1, &c, 1);
@@ -199,6 +202,7 @@ int str_cmp(const char *str1, const char *str2) {
   }
   if (*str1 == '\0' || *str2 == '\0')
     return *str1 - *str2;
+  return 0;
 }
 
 int str_ncmp(const char *str1, const char *str2, int n) {
@@ -211,6 +215,7 @@ int str_ncmp(const char *str1, const char *str2, int n) {
   }
   if (*str1 == '\0' || *str2 == '\0')
     return *str1 - *str2;
+  return 0;
 }
 
 int str_len(const char *str) {

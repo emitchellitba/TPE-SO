@@ -2,7 +2,6 @@
 #define LIBU_H
 
 #include <lib/wrappers.h>
-#include <stdLibrary.h>
 
 #define STDIN 0
 #define STDOUT 1

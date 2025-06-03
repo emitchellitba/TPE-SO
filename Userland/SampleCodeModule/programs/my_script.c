@@ -1,4 +1,7 @@
-#include <my_script.h>
+#include <libu.h>
+#include <stdLibrary.h>
+
+int my_script_main(int argc, char *argv[]);
 
 int my_script_main(int argc, char *argv[]) {
   printf("Hello, World!\n");

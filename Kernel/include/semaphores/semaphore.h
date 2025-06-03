@@ -18,4 +18,6 @@ typedef struct {
   struct queue *waiting_process_queue;
 } semaphore_t;
 
+void my_sem_init();
+
 #endif

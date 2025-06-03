@@ -75,9 +75,10 @@ int shell_main(int argc, char *argv[]) {
 
     parse_input();
 
-    int command_idx = process_input(parsed.cmd);
+    int command_idx = process_input(/* parsed.cmd */);
     if (command_idx != -1) {
-      command_table[command_idx].func(parsed.param_count, parsed.params);
+      command_table[command_idx].func(parsed.param_count,
+                                      (char **)parsed.params);
     } else {
       show_command_not_found();
     }
@@ -88,27 +89,34 @@ int shell_main(int argc, char *argv[]) {
 int get_total_commands() { return TOTAL_CMDS; }
 
 void get_input() {
-  char *buffer = input_buffer;
+  char *c = input_buffer;
+  int count = 0;
 
-  char *c = buffer;
-  int limit_count = 0;
+  char ch;
+  while (1) {
+    ch = get_char();
+    if (!ch)
+      continue;
 
-  do {
-    *c = get_char();
-    if (*c <= SPECIAL_KEY_MAX_VALUE) {
-      c--;
-    } else if (*c == '\b') {
-      if (c > buffer) {
-        put_char(*c);
+    if ((unsigned char)ch <= SPECIAL_KEY_MAX_VALUE)
+      continue;
+
+    if (ch == '\b') {
+      if (count > 0) {
+        put_char('\b');
         c--;
+        count--;
       }
-      c--;
-    } else {
-      put_char(*c);
-      limit_count++;
-      if (limit_count > BUFF_SIZE)
-        break;
+      continue;
     }
-  } while ((*c++) != '\n');
-  *(c - 1) = '\0';
+
+    put_char(ch);
+    *c++ = ch;
+    count++;
+
+    if (ch == '\n' || count >= BUFF_SIZE - 1)
+      break;
+  }
+
+  *(c - (c > input_buffer && *(c - 1) == '\n' ? 1 : 0)) = '\0';
 }

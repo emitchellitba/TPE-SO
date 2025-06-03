@@ -15,7 +15,7 @@ static int run_shell(int argc, char *argv[], int *pid) {
   return 0;
 }
 
-static int load_programs() {
+static void load_programs() {
   load_program(SHELL_PROGRAM_NAME, (uint64_t)&shell_main);
   load_program("ps", (uint64_t)&ps_main);
   load_program("ls", (uint64_t)&ls_main);

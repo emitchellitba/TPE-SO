@@ -1,7 +1,8 @@
+#include <process.h>
+
 #include "../include/lib/memory_manager.h"
 #include <ds/queue.h>
 #include <lib/logger.h>
-#include <process.h>
 
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
@@ -71,7 +72,7 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   proc->stack_start = (uint64_t *)kmalloc(kernel_mem, STACK_SIZE);
   if (!proc->stack_start) {
     proc_log(LOG_ERR, "Error allocating stack memory for process\n");
-    err = -NOMEMERR;
+    err = -1;
     return err;
   }
   proc->stack_pointer = (uint64_t *)((char *)proc->stack_start + STACK_SIZE);
@@ -92,10 +93,16 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   proc->parent = parent;
   proc->entry = entry;
 
+  // struct queue wait_queue = {0};
+  // proc->wait_queue = wait_queue;
+
   proc->priority = QUANTUM_DEFAULT;
 
   proc->status = READY;
   proc->exit = -1;
+
+  proc->block_reason = BLK_NONE;
+  proc->waiting_on = NULL;
 
   return 0;
 }
@@ -191,4 +198,8 @@ int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
     *out_count = count;
   }
   return 0;
+}
+
+proc_t *get_proc_by_pid(pid_t pid) {
+  return process_table[pid] ? process_table[pid] : NULL;
 }

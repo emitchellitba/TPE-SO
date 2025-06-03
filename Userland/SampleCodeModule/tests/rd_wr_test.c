@@ -10,7 +10,9 @@ int rd_wr_test_main(int argc, char *argv[]) {
 
   int n = read(STDIN, buffer, 10);
 
-  printf("Read from stdin: %s\n", buffer);
+  printf("Read %d from stdin: %s\n", n, buffer);
 
   write(STDOUT, "Hello from rd_wr_test!\n", 24);
+
+  return 0;
 }
