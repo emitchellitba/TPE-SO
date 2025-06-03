@@ -65,7 +65,7 @@ int main() {
   char *argv[] = {name, NULL};
   int argc = 1;
 
-  syscall_dispatcher(0x12, (uint64_t)name, argc, argv);
+  syscall_dispatcher(SPAWN_PROCESS_SYSCALL_ENTRY, (uint64_t)name, argc, argv);
 
   call_timer_tick();
 

@@ -13,4 +13,6 @@ int my_script_main(int argc, char *argv[]) {
   }
 
   proc_exit(0);
+
+  return 0;
 }

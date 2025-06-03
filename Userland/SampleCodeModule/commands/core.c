@@ -14,14 +14,14 @@ int exit_cmd(void) {
   return 0;
 }
 
-int my_script_cmd(void) {
+int test_cmd(void) {
   int pid;
-  char *argv[] = {"my_script", NULL};
+  char *argv[] = {"test", NULL};
   int argc = 1;
 
-  pid = spawn_process("my_script", argc, argv);
+  pid = spawn_process("test", argc, argv);
   if (pid < 0) {
-    printf("Error spawning process 'my_script'\n");
+    printf("Error spawning process 'test'\n");
     return -1;
   }
 

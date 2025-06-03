@@ -16,7 +16,7 @@ command_entry_t command_table[] = {
     {"kmsg", show_kmsg_cmd},
     {"ps", show_processes_cmd},
     {"programs", show_programs_cmd},
-    {"myscr", my_script_cmd},
+    {"run test", test_cmd},
 };
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))

@@ -32,18 +32,18 @@ int proc_new(proc_t **ref) {
 
   if (process_count >= MAX_PROCESSES) {
     proc_log(LOG_ERR, "Maximum number of processes reached\n");
-    return NOMEMERR; // No hay espacio para más procesos
+    return NOMEMERR;
   }
 
-  // Alocamos memoria para el proceso
   int err = 0;
   proc_t *proc = (proc_t *)kmalloc(kernel_mem, sizeof(proc_t));
-
   if (!proc) {
     proc_log(LOG_ERR, "Error allocating process\n");
     err = NOMEMERR;
     return err;
   }
+
+  memset(proc, 0, sizeof(proc_t));
 
   if (ref) {
     *ref = proc;
@@ -53,7 +53,7 @@ int proc_new(proc_t **ref) {
 }
 
 /**
- * Inicializa el stack y la informacion del proceso
+ * Inicializa el stack, fds y la informacion del proceso
  */
 int proc_init(proc_t *proc, const char *name, proc_t *parent,
               proc_main_function entry) {
@@ -76,6 +76,18 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   }
   proc->stack_pointer = (uint64_t *)((char *)proc->stack_start + STACK_SIZE);
 
+  proc->fds[0] = (fd_entry_t){
+      .resource = NULL,
+      .ops = &keyboard_ops,
+      .type = FD_TERMINAL,
+  };
+
+  proc->fds[1] =
+      (fd_entry_t){.resource = NULL, .ops = &video_ops, .type = FD_TERMINAL};
+
+  proc->fds[2] = (fd_entry_t){
+      .resource = NULL, .ops = &video_err_ops, .type = FD_TERMINAL};
+
   proc->name = name;
   proc->parent = parent;
   proc->entry = entry;
@@ -89,7 +101,7 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
 }
 
 /**
- * Mata un proceso. Cambia su estado a ZOMBIE y libera
+ * Mata un proceso. Cambia su estado a ZOMBIE y libera sus recursos del kernel.
  */
 void proc_kill(struct proc *proc) {
   if (!proc) {

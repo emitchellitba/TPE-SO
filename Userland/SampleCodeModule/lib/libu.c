@@ -1,7 +1,5 @@
 #include <libu.h>
 
-// DEFINE_WRAPPER(read, (char *buffer, size_t count), (buffer, count))
-// DEFINE_WRAPPER(write_stdin, (const char *str, size_t count), (str, count))
 // DEFINE_WRAPPER(get_date_time, (const void *dt), (dt))
 // DEFINE_WRAPPER(screen_clear, (void), ())
 // DEFINE_WRAPPER(change_color, (uint8_t background), (background))
@@ -14,7 +12,13 @@
 // DEFINE_WRAPPER(get_regist, (uint64_t *regs), (regs))
 // DEFINE_WRAPPER(make_sound, (int64_t time, int64_t nFrequence), (time,
 // nFrequence))
+DEFINE_WRAPPER(read, (int fd, char *buffer, size_t count), (fd, buffer, count))
+DEFINE_WRAPPER(write, (int fd, const char *buffer, size_t count),
+               (fd, buffer, count))
 DEFINE_WRAPPER(read_kmsg, (char *log, size_t size), (log, size))
+DEFINE_WRAPPER(pipe_create, (char *id), (id))
+DEFINE_WRAPPER(pipe_open, (char *id, int mode), (id, mode))
+DEFINE_WRAPPER(pipe_close, (char *id), (id))
 DEFINE_WRAPPER(get_procs, (proc_info_t * procs, size_t size), (procs, size))
 DEFINE_WRAPPER(load_program, (char *name, int entry), (name, entry))
 DEFINE_WRAPPER(rm_program, (char *name), (name))
@@ -22,4 +26,7 @@ DEFINE_WRAPPER(get_programs, (char **buffer, int max_count),
                (buffer, max_count))
 DEFINE_WRAPPER(spawn_process, (char *name, int argc, char **argv),
                (name, argc, argv))
+DEFINE_WRAPPER(kill_proc, (int pid), (pid))
+DEFINE_WRAPPER(change_priority, (int pid, int new_priority),
+               (pid, new_priority))
 DEFINE_WRAPPER(proc_exit, (int code), (code))

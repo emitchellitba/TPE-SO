@@ -5,9 +5,12 @@
 #define HEXA_MAX 16
 #define BUFF_SIZE 500
 
-extern void read(char *buffer, size_t count);
-extern void write_stdin(const char *str, size_t count);
+extern void read(int fd, char *buffer, size_t count);
+extern void write(int fd, const char *buffer, size_t count);
 extern void get_date_time(const date_time *dt);
+
+char hexa_digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 void printf(const char *str, ...) {
   va_list args;
@@ -174,14 +177,14 @@ void put_int(int n) {
 char get_entry() {
   char buffer[1];
   buffer[0] = '\0';
-  read(buffer, 1);
+  read(0, buffer, 1);
   return buffer[0];
 }
 
 char get_char() { return get_entry(); }
 
 void put_char(const char c) {
-  write_stdin(&c, 1);
+  write(1, &c, 1);
   return;
 }
 

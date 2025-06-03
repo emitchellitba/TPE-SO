@@ -12,9 +12,6 @@ typedef struct {
   uint8_t year;
 } date_time;
 
-static char hexa_digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                               '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
 extern void get_input();
 // TODO: Esta funcion viene de shell.c, una libreria no deberia
 // depender de un modulo. Aparte de que hay dependencia circular.

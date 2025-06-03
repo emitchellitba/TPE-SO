@@ -1,8 +1,11 @@
 #ifndef PROC_H
 #define PROC_H
 
-#include "../ds/queue.h"
+#include <ds/queue.h>
+#include <ds/ringbuf.h>
+#include <filedesc.h>
 #include <lib.h>
+#include <pipe.h>
 #include <stdint.h>
 
 /** TODO: Crear una seccion para codigos de errores */
@@ -11,6 +14,8 @@
 
 #define STACK_SIZE (8192U) /* 8 KiB */
 #define QUANTUM_DEFAULT 2
+
+#define FD_MAX 16
 
 typedef int (*proc_main_function)(int argc, char **argv);
 
@@ -23,34 +28,6 @@ typedef struct {
 } proc_info_t;
 // TODO: MOVER ESTE proc_info_t a una librera compartida entre kernel y userland
 
-/*
-  IDEA FUNCIONAMIENTO PROCESOS:
-
-  - Cada proceso tiene un PCB (Process Control Block) que contiene toda la
-  informacion necesaria para su manejo.
-
-  Cuando un proceso termina:
-    1. Se guarda el valor de retorno en el PCB
-    2. Se cambia el estado del proceso a ZOMBIE (termino pero no fue
-  recolectado)
-    3. Se libera la memoria utilizada por el proceso
-
-  Cuando un proceso padre llama a waitpid(pid):
-    1. Se busca el PCB del proceso hijo en la cola de procesos
-    2. Si el proceso hijo no ha terminado, El proceso padre se bloquea y se
-  agrega a la cola de espera del hijo (obs: los hijos tienen un unico padre, por
-  lo que, no es necesario hacer una cola, simplemente basta con que cuando el
-  hijo termine, el kernel despierte al padre si esta dormido). Cuando un proceso
-  hijo termina, el kernel debe despertar al padre y retornar el valor de retorno
-  del hijo en la syscall.
-    3. Si el proceso hijo ha terminado, el padre encuentra que el estado del
-  hijo es ZOMBIE, el kernel agarra el estado retorno del hijo y se lo pasa al
-  padre (valor de retorno de la syscall), luego se liberan los recursos del hijo
-  y se cambia su estado a DEAD (que en realidad significa que el PCB se remueve
-  de manera completa).
-*/
-
-typedef uint8_t pid_t;
 typedef uint8_t priority_t;
 
 /** Estados de un proceso */
@@ -77,7 +54,7 @@ typedef struct proc {
   priority_t has_quantum;
   priority_t priority;
 
-  // TODO: Agregar fds (ver como agregarlos)
+  fd_entry_t fds[FD_MAX]; // Tabla de descriptores de archivos
 
   // PARA DEBUGGING
   uint64_t start_time;
@@ -87,6 +64,10 @@ typedef struct proc {
   // struct queue *sig_queue; // Cola de señales
   // struct sigaction sigaction[SIG_MAX + 1]; // Array de handlers
 } proc_t;
+
+extern file_ops_t video_ops;
+extern file_ops_t video_err_ops;
+extern file_ops_t keyboard_ops;
 
 extern void sched_current_died();
 extern void sched_ready_queue_remove(struct proc *proc);

@@ -9,7 +9,6 @@
 
 extern int get_total_commands();
 extern uint64_t get_regist(uint64_t *regs);
-extern uint64_t read_kmsg(char *log, size_t size);
 
 int get_registers_cmd();
 int help_cmd();

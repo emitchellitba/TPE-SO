@@ -1,7 +1,11 @@
 #ifndef _DS_RINGBUF_H
 #define _DS_RINGBUF_H
 
+#include <kernel.h>
+#include <lib/memory_manager.h>
 #include <stddef.h>
+
+KMEMORY_DECLARE
 
 typedef long int off_t;
 
@@ -26,42 +30,38 @@ struct ringbuf {
 /**
  * \brief create a new dynamically allocated ring buffer
  *
- * NOT YET IMPLEMENTED
  */
-// static inline struct ringbuf *ringbuf_new(size_t size)
-// {
-//     struct ringbuf *ring = kmalloc(sizeof(struct ringbuf), &M_BUFFER, 0);
+static inline struct ringbuf *ringbuf_new(size_t size) {
+  struct ringbuf *ring = kmalloc(kernel_mem, sizeof(struct ringbuf));
 
-//     if (!ring)
-//         return NULL;
+  if (!ring)
+    return NULL;
 
-//     ring->buf  = kmalloc(size, &M_BUFFER, 0);
+  ring->buf = kmalloc(kernel_mem, size * sizeof(char));
 
-//     if (!ring->buf) {
-//         kfree(ring);
-//         return NULL;
-//     }
+  if (!ring->buf) {
+    kmm_free(ring, kernel_mem);
+    return NULL;
+  }
 
-//     ring->size = size;
-//     ring->head = 0;
-//     ring->tail = 0;
+  ring->size = size;
+  ring->head = 0;
+  ring->tail = 0;
 
-//     return ring;
-// }
+  return ring;
+}
 
 /**
  * \brief free a dynamically allocated ring buffer
  *
- * NOT YET IMPLEMENTED
  */
-// static inline void ringbuf_free(struct ringbuf *r)
-// {
-//     if (!r)
-//         return;
+static inline void ringbuf_free(struct ringbuf *r) {
+  if (!r)
+    return;
 
-//     kfree(r->buf);
-//     kfree(r);
-// }
+  kmm_free(r->buf, kernel_mem);
+  kmm_free(r, kernel_mem);
+}
 
 /**
  * \brief read from a ring buffer
@@ -147,6 +147,30 @@ static inline size_t ringbuf_available(struct ringbuf *ring) {
     return ring->tail - ring->head;
 
   return ring->tail + ring->size - ring->head;
+}
+
+static inline int ringbuf_contains_line(struct ringbuf *ring) {
+  size_t head = ring->head;
+  while (head != ring->tail) {
+    if (ring->buf[head] == '\n')
+      return 1;
+    head = (head + 1) % ring->size;
+  }
+  return 0;
+}
+
+static inline size_t ringbuf_read_line(struct ringbuf *ring, char *buf,
+                                       size_t count) {
+  size_t read = 0;
+  while (read < count && ring->head != ring->tail) {
+    if (ring->head == ring->size)
+      ring->head = 0;
+    char c = ring->buf[ring->head++];
+    buf[read++] = c;
+    if (c == '\n')
+      break;
+  }
+  return read;
 }
 
 #endif /* ! _DS_RINGBUF_H */

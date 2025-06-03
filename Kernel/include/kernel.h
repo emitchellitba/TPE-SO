@@ -20,6 +20,8 @@
 #include <string.h>
 #include <videodriver.h>
 
+#define SPAWN_PROCESS_SYSCALL_ENTRY 19
+
 extern int init_main(int argc, char **argv);
 extern void call_timer_tick();
 extern void _cli();

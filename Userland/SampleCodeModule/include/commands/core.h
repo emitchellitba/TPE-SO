@@ -8,5 +8,6 @@
 
 int exit_cmd();
 int my_script_cmd(void);
+int test_cmd(void);
 
 #endif // _CORE_H_

@@ -34,23 +34,24 @@ static syscall_func_t syscall_table[] = {
     sys_fill_out_buffer, // 9
     sys_beep,            // 10
     sys_read_kmsg,       // 11
-    sys_pipe_open,       // 12
-    sys_pipe_close,      // 13
-    sys_get_procs,       // 14
-    sys_load_program,    // 15
-    sys_rm_program,      // 16
-    sys_get_programs,    // 17
-    sys_spawn_process,   // 18
-    sys_kill_proc,       // 19
-    sys_change_priority, // 20
-    sys_exit,            // 21
-                         // sys_wait,           // 18
-                         // sys_set_priority,   // 19
-                         // sys_block,         // 20
-                         // sys_unblock,       // 21
-                         // sys_renounce,      // 22
-                         // sys_getpid,        // 23
-                         // sys_getppid,       // 24
+    sys_pipe_create,     // 12
+    sys_pipe_open,       // 13
+    sys_pipe_close,      // 14
+    sys_get_procs,       // 15
+    sys_load_program,    // 16
+    sys_rm_program,      // 17
+    sys_get_programs,    // 18
+    sys_spawn_process,   // 19
+    sys_kill_proc,       // 20
+    sys_change_priority, // 21
+    sys_exit,            // 22
+                         // sys_wait,           // 23
+                         // sys_set_priority,   // 24
+                         // sys_block,          // 25
+                         // sys_unblock,        // 26
+                         // sys_renounce,       // 27
+                         // sys_getpid,         // 28
+                         // sys_getppid,        // 29
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -67,37 +68,59 @@ int64_t syscall_dispatcher(uint64_t rax, ...) {
 }
 
 int64_t sys_read(va_list args) {
-  FDS fd = va_arg(args, int); // enums are promoted to int
-  uint8_t *buffer = va_arg(args, uint8_t *);
+  int fd = va_arg(args, int);
+  char *buffer = va_arg(args, char *);
   uint64_t count = va_arg(args, uint64_t);
-  switch (fd) {
-  case STDIN:
-    load_buffer((char *)buffer, count);
-    break;
-  default:
-    break;
+
+  syscall_log(LOG_INFO, "read(fd=%d, buffer=%p, count=%lu)\n", fd, buffer,
+              count);
+
+  if (fd < 0 || fd >= FD_MAX) {
+    syscall_log(LOG_ERR, "Invalid file descriptor: %d\n", fd);
+    return -EINVAL;
   }
-  return 1;
+
+  if (!scheduler || !scheduler->current_process) {
+    syscall_log(LOG_ERR, "No current process in scheduler\n");
+    return -EFAULT;
+  }
+
+  // TODO: Hacer una funcion get_fd_entry(current_process, fd);
+  // que devuelva un puntero a fd_entry_t
+  fd_entry_t *fd_entry = &scheduler->current_process->fds[fd];
+
+  if (!fd_entry || !fd_entry->ops || !fd_entry->ops->read) {
+    return -EBADF;
+  }
+
+  return fd_entry->ops->read(fd_entry->resource, buffer, count);
 }
 
 int64_t sys_write(va_list args) {
-  /* 1 y 2 son fds para STDOUT Y STDERR */
-
-  FDS fd = va_arg(args, int);
-  const uint8_t *buffer = va_arg(args, const uint8_t *);
+  int fd = va_arg(args, int);
+  const char *buffer = va_arg(args, const char *);
   uint64_t count = va_arg(args, uint64_t);
-  switch (fd) {
-  case STDOUT:
-    printStd((const char *)buffer, count);
-    break;
-  case STDERR:
-    // TODO: Borrar casteo
-    printErr((const char *)buffer, count);
-    break;
-  default:
-    break;
+
+  syscall_log(LOG_INFO, "write(fd=%d, buffer=%p, count=%lu)\n", fd, buffer,
+              count);
+
+  if (fd < 0 || fd >= FD_MAX) {
+    syscall_log(LOG_ERR, "Invalid file descriptor: %d\n", fd);
+    return -EINVAL;
   }
-  return 1;
+
+  if (!scheduler || !scheduler->current_process) {
+    syscall_log(LOG_ERR, "No current process in scheduler\n");
+    return -EFAULT;
+  }
+
+  fd_entry_t *fd_entry = &scheduler->current_process->fds[fd];
+
+  if (!fd_entry || !fd_entry->ops || !fd_entry->ops->write) {
+    return -EBADF;
+  }
+
+  return fd_entry->ops->write(fd_entry->resource, buffer, count);
 }
 
 int64_t sys_clear_screen(va_list args) {
@@ -205,16 +228,27 @@ int64_t sys_read_kmsg(va_list args) {
   return (int64_t)to_read;
 }
 
+int64_t sys_pipe_create(va_list args) {
+  char *id = va_arg(args, char *);
+  syscall_log(LOG_INFO, "pipe_create(id=%s)\n", id);
+
+  return 0;
+}
+
 int64_t sys_pipe_open(va_list args) {
   int64_t pipe_id = va_arg(args, int64_t);
   syscall_log(LOG_INFO, "pipe_open(pipe_id=%ld)\n", pipe_id);
   // return pipe_open(pipe_id);
+
+  return 0;
 }
 
 int64_t sys_pipe_close(va_list args) {
   int64_t pipe_id = va_arg(args, int64_t);
   syscall_log(LOG_INFO, "pipe_close(pipe_id=%ld)\n", pipe_id);
   // return pipe_close(pipe_id);
+
+  return 0;
 }
 
 int64_t sys_get_procs(va_list args) {

@@ -1,5 +1,7 @@
 #include <init.h>
 
+extern int rd_wr_test_main(int argc, char *argv[]);
+
 #define SHELL_PROGRAM_NAME "shell"
 
 static int run_shell(int argc, char *argv[], int *pid) {
@@ -17,7 +19,7 @@ static int load_programs() {
   load_program(SHELL_PROGRAM_NAME, (uint64_t)&shell_main);
   load_program("ps", (uint64_t)&ps_main);
   load_program("ls", (uint64_t)&ls_main);
-  load_program("my_script", (uint64_t)&my_script_main);
+  load_program("test", (uint64_t)&rd_wr_test_main);
 }
 
 int init_main(int argc, char **argv) {

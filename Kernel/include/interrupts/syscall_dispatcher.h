@@ -6,6 +6,7 @@
 #include <interrupts.h>
 #include <keyboardDriver.h>
 #include <lib.h>
+#include <lib/error.h>
 #include <logger.h>
 #include <process.h>
 #include <scheduler.h>
@@ -17,10 +18,7 @@
 
 #define INVALID_SYS_ID -1
 
-// TODO: Ver si los errores deberian estar aca
-#define ENOENT 2
-#define EFAULT 9
-#define ENOMEM 12
+#define DECLARE_SYSCALL(name) int64_t name(va_list args);
 
 extern scheduler_t scheduler;
 
@@ -28,27 +26,28 @@ extern void call_timer_tick();
 
 int64_t syscall_dispatcher(uint64_t rax, ...);
 
-int64_t sys_read(va_list args);
-int64_t sys_write(va_list args);
-int64_t sys_clear_screen(va_list args);
-int64_t sys_change_color(va_list args);
-int64_t sys_draw_sqr(va_list args);
-int64_t sys_free_draw(va_list args);
-int64_t sys_get_time(va_list args);
-int64_t sys_sleep(va_list args);
-int64_t sys_zoom(va_list args);
-int64_t sys_fill_out_buffer(va_list args);
-int64_t sys_beep(va_list args);
-int64_t sys_read_kmsg(va_list args);
-int64_t sys_pipe_open(va_list args);
-int64_t sys_pipe_close(va_list args);
-int64_t sys_get_procs(va_list args);
-int64_t sys_load_program(va_list args);
-int64_t sys_rm_program(va_list args);
-int64_t sys_get_programs(va_list args);
-int64_t sys_spawn_process(va_list args);
-int64_t sys_kill_proc(va_list args);
-int64_t sys_change_priority(va_list args);
-int64_t sys_exit(va_list args);
+DECLARE_SYSCALL(sys_read)
+DECLARE_SYSCALL(sys_write)
+DECLARE_SYSCALL(sys_clear_screen)
+DECLARE_SYSCALL(sys_change_color)
+DECLARE_SYSCALL(sys_draw_sqr)
+DECLARE_SYSCALL(sys_free_draw)
+DECLARE_SYSCALL(sys_get_time)
+DECLARE_SYSCALL(sys_sleep)
+DECLARE_SYSCALL(sys_zoom)
+DECLARE_SYSCALL(sys_fill_out_buffer)
+DECLARE_SYSCALL(sys_beep)
+DECLARE_SYSCALL(sys_read_kmsg)
+DECLARE_SYSCALL(sys_pipe_create)
+DECLARE_SYSCALL(sys_pipe_open)
+DECLARE_SYSCALL(sys_pipe_close)
+DECLARE_SYSCALL(sys_get_procs)
+DECLARE_SYSCALL(sys_load_program)
+DECLARE_SYSCALL(sys_rm_program)
+DECLARE_SYSCALL(sys_get_programs)
+DECLARE_SYSCALL(sys_spawn_process)
+DECLARE_SYSCALL(sys_kill_proc)
+DECLARE_SYSCALL(sys_change_priority)
+DECLARE_SYSCALL(sys_exit)
 
 #endif
