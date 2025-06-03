@@ -2,6 +2,9 @@
 #define _KEYBOARD_H_
 
 #include <lib.h>
+#include <ringbuf.h>
+#include <scheduler.h>
+#include <stdint.h>
 
 typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 

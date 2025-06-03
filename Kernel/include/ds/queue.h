@@ -42,8 +42,7 @@ struct queue {
 /**
  * \brief create a new statically allocated queue
  */
-#define QUEUE_NEW()                                                            \
-  &(struct queue) { 0 }
+#define QUEUE_NEW() &(struct queue){0}
 
 /**
  * \brief create a new dynamically allocated queue
@@ -177,7 +176,7 @@ static inline void queue_free(struct queue *queue) {
   if (!queue)
     return;
   // remove and free all elements
-  while(queue->head) {
+  while (queue->head) {
     dequeue(queue);
   }
 

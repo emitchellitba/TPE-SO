@@ -5,7 +5,7 @@
 #include <lib.h>
 #include <stdint.h>
 
-/** TODO: Crear una seccion para codigos de errores */
+/* TODO: Crear una seccion para codigos de errores */
 #define NOMEMERR 1;
 #define INVALARGSERR 2;
 
@@ -53,12 +53,25 @@ typedef struct {
 typedef uint8_t pid_t;
 typedef uint8_t priority_t;
 
-/** Estados de un proceso */
-#define DEAD 0 // Este estado puede ser innecesario
-#define READY 1
-#define RUNNING 2
-#define ZOMBIE 3
-#define BLOCKED 4
+// En tu process.h o similar
+typedef enum proc_state_t {
+  DEAD,
+  READY,
+  RUNNING,
+  ZOMBIE,
+  BLOCKED
+
+} proc_state_t;
+
+typedef enum block_reason_t {
+  BLK_NONE,      // No está bloqueado o razón no específica
+  BLK_KEYBOARD,  // Esperando entrada del teclado
+  BLK_ARBITRARY, // Bloqueado por syscall sys_block
+  BLK_SEMAPHORE, // Esperando en un semáforo
+  BLK_CHILD      // Esperando a que un proceso hijo termine (waitpid)
+                 // BLK_PIPE_READ,  // (Futuro) Esperando para leer de un pipe
+  // BLK_PIPE_WRITE, // (Futuro) Esperando para escribir en un pipe
+} block_reason_t;
 
 typedef struct proc {
   pid_t pid;
@@ -73,13 +86,15 @@ typedef struct proc {
 
   proc_main_function entry; // Direccion de inicio del proceso
 
-  struct queue
-      wait_queue; // Cola de procesos hijos que hay que esperar con wait
+  block_reason_t block_reason;
+  void *waiting_on;
 
+  // queue_t my_queue; // Cola de espera para bloqueos
   /** Valor de retorno del proceso. -1 indica que no terminó */
   int exit;
 
-  int status; // Estado del proceso (0 = running, 1 = ready, 2 = zombie)
+  proc_state_t
+      status; // Estado del proceso (0 = running, 1 = ready, 2 = zombie)
   priority_t has_quantum;
   priority_t priority;
 
@@ -98,5 +113,6 @@ int proc_new(proc_t **ref);
 int proc_init(proc_t *proc, const char *name, proc_t *parent,
               proc_main_function entry);
 int proc_list(proc_info_t *buffer, int max_count, int *out_count);
+proc_t *get_proc_by_pid(pid_t pid);
 
 #endif // PROC_H

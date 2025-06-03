@@ -43,13 +43,13 @@ static syscall_func_t syscall_table[] = {
     sys_spawn_process,   // 18
     sys_kill_proc,       // 19
     sys_change_priority, // 20
-                         // sys_wait,           // 18
-                         // sys_set_priority,   // 19
-                         // sys_block,         // 20
-                         // sys_unblock,       // 21
-                         // sys_renounce,      // 22
-                         // sys_getpid,        // 23
-                         // sys_getppid,       // 24
+    sys_block,           // 21
+    sys_unblock,         // 22
+                         // sys_wait,           // 23
+                         // sys_set_priority,   // 24
+                         // sys_renounce,      // 25
+                         // sys_getpid,        // 26
+                         // sys_getppid,       // 27
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -137,7 +137,7 @@ int64_t sys_free_draw(va_list args) {
               "free_draw(x=%ld, y=%ld, drawing=%p, colors=%p, size=%ld)\n", x,
               y, drawing, colors, size);
   // TODO: Borrar todos estos casteos y hacer tipos consistentes
-  free_draw((int)x, (int)y, (int(*)[28])drawing, colors, (int)size);
+  free_draw((int)x, (int)y, (int (*)[28])drawing, colors, (int)size);
   return 0;
 }
 
@@ -307,4 +307,16 @@ int64_t sys_change_priority(va_list args) {
   syscall_log(LOG_INFO, "change_priority(pid=%ld, new_priority=%d)\n", pid,
               new_priority);
   return change_priority(pid, new_priority);
+}
+
+int64_t sys_block(va_list args) {
+  int64_t pid = va_arg(args, pid_t);
+  syscall_log(LOG_INFO, "sys_block(pid=%ld)\n", pid);
+  return block_process_by_pid((pid_t)pid);
+}
+
+int64_t sys_unblock(va_list args) {
+  int64_t pid = va_arg(args, pid_t);
+  syscall_log(LOG_INFO, "sys_unblock(pid=%ld)\n", pid);
+  return unblock_process_by_pid((pid_t)pid);
 }

@@ -1,6 +1,4 @@
 #include <keyboardDriver.h>
-#include <ringbuf.h>
-#include <stdint.h>
 
 extern void _hlt(void); // Add this line
 
@@ -22,6 +20,7 @@ unsigned int shift = 0;
 unsigned int capsLock = 0;
 unsigned int arrow = 0;
 extern unsigned int get_scan_code();
+static proc_t *blocked_reader = NULL;
 
 static unsigned char printableAscii[58][2] = {
     {0, 0},     {27, 27},    {'1', '!'},   {'2', '@'}, {'3', '#'},   {'4', '$'},
@@ -98,16 +97,31 @@ void press_key() {
         }
       }
       ringbuf_write(kbuff, 1, &printableAscii[scanCode][col]);
+
+      if (blocked_reader != NULL) {
+        proc_ready(blocked_reader); // Poner el proceso en la cola de listos
+        blocked_reader = NULL;      // Ya no hay nadie bloqueado
+      }
     }
   }
 }
-
 int load_buffer(char *buffer, size_t count) {
   int bytes_read = 0;
 
-  while ((bytes_read = ringbuf_read(kbuff, count, buffer)) == 0) {
-    _hlt(); // Halt CPU until next interrupt (e.g., keyboard)
+  if (blocked_reader != NULL) {
+    return -1;
   }
 
+  bytes_read = ringbuf_read(kbuff, count, buffer);
+
+  if (bytes_read == 0) {
+    blocked_reader = get_running();
+    block_current(BLK_KEYBOARD, NULL);
+    bytes_read = ringbuf_read(kbuff, count, buffer);
+  }
   return bytes_read;
 }
+
+void set_keyboard_blocked_null() { blocked_reader = NULL; }
+
+proc_t *get_keyboard_blocked() { return blocked_reader; }

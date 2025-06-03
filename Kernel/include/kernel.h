@@ -14,11 +14,11 @@
 #include <naiveConsole.h>
 #include <proc/process.h>
 #include <scheduler.h>
+#include <semaphores/semaphore.h>
 #include <soundDriver.h>
 #include <stdint.h>
 #include <string.h>
 #include <videodriver.h>
-#include <semaphores/semaphore.h>
 
 extern int init_main(int argc, char **argv);
 extern void call_timer_tick();
