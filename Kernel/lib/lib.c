@@ -1,12 +1,12 @@
 #include <lib.h>
 #include <stdint.h>
 
-extern uint16_t getSec();
-extern uint16_t getMin();
-extern uint16_t getHour();
-extern uint16_t getDay();
-extern uint16_t getMonth();
-extern uint16_t getYear();
+extern uint16_t get_sec();
+extern uint16_t get_min();
+extern uint16_t get_hour();
+extern uint16_t get_day();
+extern uint16_t get_month();
+extern uint16_t get_year();
 
 void *memset(void *destination, int32_t c, uint64_t length) {
   uint8_t chr = (uint8_t)c;
@@ -61,11 +61,39 @@ int str_len(const char *str) {
   return len;
 }
 
+char *str_cpy(char *dest, const char *src) {
+  char *start = dest;
+  while (*src != '\0') {
+    *dest++ = *src++;
+  }
+  *dest = '\0';
+  return start;
+}
+
+int str_cmp(const char *s1, const char *s2) {
+  while (*s1 && (*s1 == *s2)) {
+    s1++;
+    s2++;
+  }
+  return (unsigned char)*s1 - (unsigned char)*s2;
+}
+
+char *str_ncpy(char *dest, const char *src, size_t n) {
+  size_t i;
+  for (i = 0; i < n && src[i] != '\0'; i++) {
+    dest[i] = src[i];
+  }
+  for (; i < n; i++) {
+    dest[i] = '\0';
+  }
+  return dest;
+}
+
 int abs(int x) { return x < 0 ? -x : x; }
 
-uint16_t getSecs() { return getSec(); }
-uint16_t getMins() { return getMin(); }
-uint16_t getHours() { return getHour(); }
-uint16_t getDays() { return getDay(); }
-uint16_t getMonths() { return getMonth(); }
-uint16_t getYears() { return getYear(); }
+uint16_t get_secs() { return get_sec(); }
+uint16_t get_mins() { return get_min(); }
+uint16_t get_hours() { return get_hour(); }
+uint16_t get_days() { return get_day(); }
+uint16_t get_months() { return get_month(); }
+uint16_t get_years() { return get_year(); }

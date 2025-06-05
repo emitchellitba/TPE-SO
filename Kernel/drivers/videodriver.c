@@ -1,10 +1,4 @@
-#include "videodriver.h"
-#include "colors.h"
-#include "fonts.h"
-#include <lib.h>
-#include <stdint.h>
-#include <sysCallDispatcher.h>
-
+#include <videodriver.h>
 #define CHAR_WIDTH (8 * size)
 #define CHAR_HEIGHT (16 * size)
 #define CANT_COLORS 6
@@ -83,7 +77,7 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
   uint8_t *framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
   uint64_t offset =
       (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
-  framebuffer[offset] = (hexColor) & 0xFF;
+  framebuffer[offset] = (hexColor)&0xFF;
   framebuffer[offset + 1] = (hexColor >> 8) & 0xFF;
   framebuffer[offset + 2] = (hexColor >> 16) & 0xFF;
 }

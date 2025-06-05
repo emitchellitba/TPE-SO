@@ -1,5 +1,10 @@
 #include <keyboardDriver.h>
-#include <stdint.h>
+
+#include <lib.h>
+#include <ringbuf.h>
+#include <scheduler.h>
+
+extern void _hlt(void); // Add this line
 
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
@@ -12,14 +17,14 @@
 #define RIGHT_ARROW 0x4D
 #define DOWN_ARROW 0x50
 #define ESC 5
+#define KBUFF_SIZE 8192
 
-static char buffer[5000];
+struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
-unsigned int lastIndexBuffer = 0;
-unsigned int readIndexBuffer = 0;
 unsigned int arrow = 0;
-extern unsigned int getScanCode();
+extern unsigned int get_scan_code();
+static proc_t *blocked_reader = NULL;
 
 static unsigned char printableAscii[58][2] = {
     {0, 0},     {27, 27},    {'1', '!'},   {'2', '@'}, {'3', '#'},   {'4', '$'},
@@ -35,7 +40,7 @@ static unsigned char printableAscii[58][2] = {
 };
 
 void press_key() {
-  unsigned int scanCode = getScanCode();
+  unsigned int scanCode = get_scan_code();
   unsigned int col = 0;
 
   switch (scanCode) {
@@ -74,11 +79,12 @@ void press_key() {
   }
 
   if (scanCode <= 0x80) {
-    if (arrow != 0) {
-      buffer[lastIndexBuffer++] = arrow;
+    if (arrow) {
+      ringbuf_write(kbuff, 1, &arrow);
       arrow = 0;
     } else if (esc) {
-      buffer[lastIndexBuffer++] = ESC;
+      char aux = ESC;
+      ringbuf_write(kbuff, 1, &aux);
     } else if (!(scanCode == LEFT_SHIFT_PRESSED ||
                  scanCode == RIGHT_SHIFT_PRESSED ||
                  scanCode == LEFT_SHIFT_RELEASED ||
@@ -94,28 +100,33 @@ void press_key() {
           col = 1;
         }
       }
-      buffer[lastIndexBuffer++] = printableAscii[scanCode][col];
+      ringbuf_write(kbuff, 1, &printableAscii[scanCode][col]);
+
+      if (blocked_reader != NULL) {
+        proc_ready(blocked_reader); // Poner el proceso en la cola de listos
+        blocked_reader = NULL;      // Ya no hay nadie bloqueado
+      }
     }
-    lastIndexBuffer %= 5000;
   }
 }
 
-unsigned char getLastKey() {
-  // si no hay caracteres por leer, devuelvo -1
-  if (readIndexBuffer == lastIndexBuffer)
+int load_buffer(char *buffer, size_t count) {
+  int bytes_read = 0;
+
+  if (blocked_reader != NULL) {
     return -1;
-  if (buffer[readIndexBuffer] > 0x80) {
-    readIndexBuffer++;
-    return 0;
   }
-  return buffer[readIndexBuffer++];
+
+  bytes_read = ringbuf_read(kbuff, count, buffer);
+
+  if (bytes_read == 0) {
+    blocked_reader = get_running();
+    block_current(BLK_KEYBOARD, NULL);
+    bytes_read = ringbuf_read(kbuff, count, buffer);
+  }
+  return bytes_read;
 }
 
-void load_buffer(char *buffer, size_t count) {
-  char current;
-  int myCount = 0;
-  while ((current = getLastKey()) != -1 && myCount < count) {
-    if (current != 0)
-      buffer[myCount++] = current;
-  }
-}
+void set_keyboard_blocked_null() { blocked_reader = NULL; }
+
+proc_t *get_keyboard_blocked() { return blocked_reader; }

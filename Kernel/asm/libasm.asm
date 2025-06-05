@@ -1,17 +1,23 @@
-GLOBAL cpuVendor
-GLOBAL getSec
-GLOBAL getMin
-GLOBAL getHour
-GLOBAL getDay
-GLOBAL getMonth
-GLOBAL getYear
-GLOBAL getScanCode
-GLOBAL outb
+%include "macros.inc"
+
+GLOBAL aquire
+GLOBAL release
+GLOBAL cpu_vendor
+GLOBAL get_sec
+GLOBAL get_min
+GLOBAL get_hour
+GLOBAL get_day
+GLOBAL get_month
+GLOBAL get_year
+GLOBAL get_scan_code
 GLOBAL inb
+GLOBAL outb
+GLOBAL register_array
+GLOBAL load_registers_array
 
 section .text
 	
-cpuVendor:
+cpu_vendor:
 	push rbp
 	mov rbp, rsp
 
@@ -36,7 +42,7 @@ cpuVendor:
 	ret
 
 
-getSec:
+get_sec:
 	push rbp
 	mov rbp, rsp
 
@@ -48,7 +54,7 @@ getSec:
 	pop rbp
 	ret
 
-getMin: 
+get_min: 
 	push rbp
 	mov rbp, rsp
 
@@ -60,7 +66,7 @@ getMin:
 	pop rbp
 	ret
 
-getHour:
+get_hour:
 	push rbp
 	mov rbp, rsp
 
@@ -72,7 +78,7 @@ getHour:
 	pop rbp
 	ret
 
-getDay:
+get_day:
 	push rbp
 	mov rbp, rsp
 
@@ -84,7 +90,7 @@ getDay:
 	pop rbp
 	ret
 
-getMonth: 
+get_month: 
 	push rbp
 	mov rbp, rsp
 
@@ -96,7 +102,7 @@ getMonth:
 	pop rbp
 	ret
 
-getYear:
+get_year:
 	push rbp
 	mov rbp, rsp
 
@@ -108,7 +114,7 @@ getYear:
 	pop rbp
 	ret
 
-getScanCode: 
+get_scan_code: 
 	push rbp
 	mov rbp, rsp
 	mov rax, 0
@@ -137,4 +143,70 @@ outb:
 	out dx, al
 	ret
 
+load_registers_array:
+    pushState
 
+    mov rax, [rsp + 16*8]       ; Captura RIP de la pila antes de modificar rsp
+    mov [register_array + 128], rax  ; Guarda RIP en la posición correcta en el array
+
+    mov rax, register_array
+
+    push rbx
+    mov rbx, [rbp - 8]
+    mov QWORD[rax], rbx
+    pop rbx
+    
+    add rax, 8
+    mov QWORD[rax], rbx
+    add rax, 8
+    mov QWORD[rax], rcx
+    add rax, 8
+    mov QWORD[rax], rdx
+    add rax, 8
+    mov QWORD[rax], rsi
+    add rax, 8
+    mov QWORD[rax], rdi
+    add rax, 8
+
+    push rbx
+    mov rbx, [rbp]              ;levanto el rbp del stack
+    mov QWORD[rax], rbx             
+    pop rbx       
+    
+    add rax, 8
+    mov QWORD[rax], rbp             ;en rbp tengo el rsp original
+    add rax, 8
+    mov QWORD[rax], r8
+    add rax, 8
+    mov QWORD[rax], r9
+    add rax, 8
+    mov QWORD[rax], r10
+    add rax, 8
+    mov QWORD[rax], r11
+    add rax, 8
+    mov QWORD[rax], r12
+    add rax, 8
+    mov QWORD[rax], r13
+    add rax, 8
+    mov QWORD[rax], r14
+    add rax, 8
+    mov QWORD[rax], r15
+    add rax, 8
+    
+    popState
+    ret
+
+aquire:
+    mov al, 0
+.retry
+    xchg [rdi], al
+    test al, al
+    jz .retry
+    ret
+
+release:
+    mov byte [rdi], 1
+    ret
+
+section .bss
+    register_array resq 17

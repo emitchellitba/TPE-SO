@@ -1,11 +1,13 @@
 
+# CFLAGS = -DUSE_SIMPLE_MM or -DUSE_BUDDY_MM
+
 all:  bootloader kernel userland image
 
 bootloader:
 	cd Bootloader; make all
 
 kernel:
-	cd Kernel; make all
+	cd Kernel; make all CFLAGS="$(CFLAGS)"
 
 userland:
 	cd Userland; make all

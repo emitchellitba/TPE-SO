@@ -1,31 +1,10 @@
-x64BareBones is a basic setup to develop operating systems for the Intel 64 bits architecture.
+1. El memory manager utilizado por el kernel se puede modificar en tiempo de compilacion. Para ello el script compile.sh acepta
+   un parametro. En caso de no especificarse, se defaultea al memory manager dummy.
 
-The final goal of the project is to provide an entry point for a kernel and the possibility to load extra binary modules separated from the main kernel.
+   Para ejecutar el kernel con el DUMMY memory manager:
 
-Environment setup:
-1- Install the following packages before building the Toolchain and Kernel:
+   ./compile.sh USE_SIMPLE_MM
 
-nasm qemu gcc make
+  Para ejecutar el kernel con el BUDDY memory manager:
 
-2- Build the Toolchain
-
-Execute the following commands on the x64BareBones project directory:
-
-  user@linux:$ cd Toolchain
-  user@linux:$ make all
-
-3- Build the Kernel
-
-From the x64BareBones project directory run:
-
-  user@linux:$ make all
-
-4- Run the kernel
-
-From the x64BareBones project directory run:
-
-  user@linux:$ ./run.sh
-
-
-Author: Rodrigo Rearden (RowDaBoat)
-Collaborator: Augusto Nizzo McIntosh
+  ./compile.sh USE_BUDDY_MM

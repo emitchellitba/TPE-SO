@@ -1712,4 +1712,4 @@ const unsigned char font[] = {
     0x00,
 };
 
-unsigned char *get_font() { return font; };
+const unsigned char *get_font() { return font; };

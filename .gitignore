@@ -1,5 +1,6 @@
 # Ignore object files
 *.o
+*.out
 
 # Ignore image files
 *.img
@@ -10,6 +11,9 @@
 *.bin
 .bash_history
 settings.json
+.gdbinit
+.gdb_history
 
 Kernel/*.elf
 .vscode
+hooks/*

@@ -11,12 +11,12 @@ typedef struct {
   uint8_t year;
 } date_time;
 
-// extern int getSec();
-// extern int getMin();
-// extern int getHour();
-// extern int getDay();
-// extern int getMonth();
-// extern int getYear();
+// extern int get_sec();
+// extern int get_min();
+// extern int get_hour();
+// extern int get_day();
+// extern int get_month();
+// extern int get_year();
 void get_time(date_time *dt);
 void timer_handler();
 int ticks_elapsed();
