@@ -1,5 +1,8 @@
 #include <pipe.h>
 
+#include <lib.h>
+#include <queue.h>
+
 typedef struct pipe_t {
   struct ringbuf *buffer;
   int readers;
@@ -19,7 +22,7 @@ pipes_table_t pipes_table = {0};
 pipe_t *find_pipe_by_id(const char *id) {
   for (int i = 0; i < MAX_PIPES; i++) {
     if (pipes_table.pipes[i] && pipes_table.pipes[i]->in_use &&
-        strcmp(pipes_table.pipes[i]->id, id) == 0) {
+        str_cmp(pipes_table.pipes[i]->id, id) == 0) {
       return pipes_table.pipes[i];
     }
   }
@@ -40,7 +43,7 @@ pipe_t *create_pipe(const char *id) {
         return NULL;
       }
 
-      strncpy(pipe->id, id, sizeof(pipe->id));
+      str_ncpy(pipe->id, id, sizeof(pipe->id));
       pipe->in_use = true;
       pipes_table.pipes[i] = pipe;
 

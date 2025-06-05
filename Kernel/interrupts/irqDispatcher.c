@@ -1,9 +1,6 @@
 #include <keyboardDriver.h>
-#include <naiveConsole.h>
 #include <stdint.h>
-#include <time.h>
 #include <time_rtc.h>
-#include <videodriver.h>
 
 static void int_20();
 static void int_21();
@@ -13,4 +10,4 @@ void irqDispatcher(uint64_t irq) { interrupt_arr[irq](); }
 
 void int_20() { timer_handler(); }
 
-void int_21() { press_key(); }
+void int_21() { handle_key_press(); }

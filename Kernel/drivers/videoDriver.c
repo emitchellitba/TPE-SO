@@ -1,4 +1,7 @@
-#include <videodriver.h>
+#include <videoDriver.h>
+
+#include <fonts.h>
+
 #define CHAR_WIDTH (8 * size)
 #define CHAR_HEIGHT (16 * size)
 #define CANT_COLORS 6
@@ -6,16 +9,14 @@
 #define SPECIAL_CHARACTER 6
 #define SCREEN_LOG_WIDTH SCREEN_WIDTH_PIXELS / 8
 #define SCREEN_LOG_HEIGHT SCREEN_HEIGHT_PIXELS / 16
-#define MAX_WIDTH_LOG SCREEN_WIDTH_PIXELS / CHAR_WIDTH    // varía con size
-#define MAX_HEIGHT_LOG SCREEN_HEIGHT_PIXELS / CHAR_HEIGHT // varía con size
+#define MAX_WIDTH_LOG SCREEN_WIDTH_PIXELS / CHAR_WIDTH
+#define MAX_HEIGHT_LOG SCREEN_HEIGHT_PIXELS / CHAR_HEIGHT
 #define MAX_SQUARE 32
 
 color font_color = WHITE, background_color = BLACK;
 unsigned int bcolor_iterator = 1;
 unsigned int fcolor_iterator = 0;
 static color colors[6] = {WHITE, BLACK, RED, GREEN, BLUE, YELLOW};
-// static char hexa_digits[16] =
-// {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 unsigned int posX = 0, posY = 0, size = 1;
 char screen_text_log[SCREEN_LOG_HEIGHT][SCREEN_LOG_WIDTH];
 int top_left_screen = 0, currentX = 0, currentY = 0, mooving_matrix = 0;
@@ -69,10 +70,6 @@ typedef struct vbe_mode_info_structure *VBEInfoPtr;
 
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 
-uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base);
-void clear_screen_text_log();
-void deleteChar();
-
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
   uint8_t *framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
   uint64_t offset =
@@ -89,6 +86,19 @@ void putPixelRGB(char R, char G, char B, uint64_t x, uint64_t y) {
   framebuffer[offset] = R;
   framebuffer[offset + 1] = G;
   framebuffer[offset + 2] = B;
+}
+
+void set_color(char r, char g, char b) {
+  font_color = (r << 16) | (g << 8) | b;
+}
+
+int print_str(char *string, int length, int isErr) {
+  if (isErr) {
+    printErr(string, length);
+  } else {
+    printStd(string, length);
+  }
+  return length;
 }
 
 void printStd(const char *buffer, size_t count) { print(buffer, count, 1); }
@@ -139,37 +149,6 @@ void zoom_out() {
     break;
   }
   clear_screen();
-}
-
-uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base) {
-  char *p = buffer;
-  char *p1, *p2;
-  uint32_t digits = 0;
-
-  do {
-    uint32_t remainder = value % base;
-    *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
-    digits++;
-  } while (value /= base);
-
-  *p = 0;
-
-  p1 = buffer;
-  p2 = p - 1;
-  while (p1 < p2) {
-    char tmp = *p1;
-    *p1 = *p2;
-    *p2 = tmp;
-    p1++;
-    p2--;
-  }
-
-  return digits;
-}
-
-uint8_t getHexDigit(uint64_t number, int position) {
-  number >>= (position * 4);
-  return number & 0xF;
 }
 
 void scroll_down() {
@@ -223,9 +202,9 @@ void clear_screen_text_log() {
 }
 
 int can_move_top_left_pointer() { // esta funcion corrige posibles errores/bugs
-                                  // que tenga el borrado de caracteres con
-                                  // respecto a las posiciones de
-                                  // top_left_screen y currentY
+  // que tenga el borrado de caracteres con
+  // respecto a las posiciones de
+  // top_left_screen y currentY
   return currentY == MAX_HEIGHT_LOG ||
          (mooving_matrix &&
           (abs(currentY - top_left_screen) <= 1 ||

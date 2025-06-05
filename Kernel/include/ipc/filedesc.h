@@ -4,9 +4,11 @@
 #include <keyboardDriver.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <videodriver.h>
+#include <videoDriver.h>
 
 typedef enum { FD_NONE, FD_PIPE, FD_TERMINAL } FDType;
+
+#define READ_LINE_BLOCKED -2
 
 // Abstraccion de operaciones de archivo para acceder a
 // distintos tipos de recursos.

@@ -203,3 +203,12 @@ int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
 proc_t *get_proc_by_pid(pid_t pid) {
   return process_table[pid] ? process_table[pid] : NULL;
 }
+
+void return_from_syscall(proc_t *proc, int retval) {
+  if (!proc) {
+    proc_log(LOG_ERR, "Cannot return from syscall for a NULL process\n");
+    return;
+  }
+
+  proc->syscall_retval = retval;
+}

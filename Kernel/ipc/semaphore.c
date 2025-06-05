@@ -1,11 +1,13 @@
-#include <semaphores/semaphore.h>
+#include <ipc/semaphore.h>
+
+#include <process.h>
+#include <scheduler.h>
 
 // TODO: manejo de errores (enum, tipo de dato, etc.)
 // TODO: agregar fuciones de bloqueo/desbloqueo de procesos en scheduler.c
 
 static semaphore_t semaphore_table[MAX_SEMAPHORES];
 
-// Se inicializan todos los semáforos en la tabla con su id y estado inactivo
 void my_sem_init() {
   for (int i = 0; i < MAX_SEMAPHORES; i++) {
     semaphore_table[i].id = i;
@@ -13,7 +15,6 @@ void my_sem_init() {
   }
 }
 
-// Retorna el semáforo con el id especificado, o NULL si no existe o está en uso
 semaphore_t *my_sem_create(uint64_t id, uint64_t value) {
   if (id < MAX_SEMAPHORES && !semaphore_table[id].in_use) {
     if (!semaphore_table[id].waiting_process_queue) {
@@ -29,7 +30,6 @@ semaphore_t *my_sem_create(uint64_t id, uint64_t value) {
   }
 }
 
-// Libera el semáforo pasado cómo parámetro
 void my_sem_destroy(semaphore_t *sem) {
   if (sem_is_open(sem)) {
     sem->in_use = 0;
@@ -37,7 +37,6 @@ void my_sem_destroy(semaphore_t *sem) {
   }
 }
 
-// Retorna la referencia a un semáforo si existe y está en uso, o NULL si no
 semaphore_t *my_sem_open(uint64_t id) {
   if (id >= MAX_SEMAPHORES || !semaphore_table[id].in_use) {
     return NULL; // Semáforo no válido o no está en uso
@@ -45,8 +44,6 @@ semaphore_t *my_sem_open(uint64_t id) {
 
   return &semaphore_table[id];
 }
-
-// ... (inclusiones necesarias: scheduler.h, process.h) ...
 
 uint64_t my_sem_post(semaphore_t *sem) {
   if (!sem_is_open(sem)) {

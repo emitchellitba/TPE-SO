@@ -15,7 +15,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <time_rtc.h>
-#include <videodriver.h>
+#include <videoDriver.h>
 
 #define INVALID_SYS_ID -1
 

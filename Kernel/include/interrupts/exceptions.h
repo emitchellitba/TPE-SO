@@ -4,7 +4,7 @@
 #include <lib.h>
 #include <stdint.h>
 #include <syscall_dispatcher.h>
-#include <videodriver.h>
+#include <videoDriver.h>
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPERATION_CODE_ID 6

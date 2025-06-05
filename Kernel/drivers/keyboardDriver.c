@@ -3,8 +3,9 @@
 #include <lib.h>
 #include <ringbuf.h>
 #include <scheduler.h>
+#include <videoDriver.h>
 
-extern void _hlt(void); // Add this line
+typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
@@ -19,12 +20,22 @@ extern void _hlt(void); // Add this line
 #define ESC 5
 #define KBUFF_SIZE 8192
 
+extern unsigned int get_scan_code();
+
+typedef struct ReadRequest {
+  proc_t *proc;      // Proceso esperando
+  char *user_buffer; // Dónde copiar la entrada
+  int to_read;       // Cuántos caracteres quiere leer
+} read_request_t;
+
 struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
 unsigned int arrow = 0;
-extern unsigned int get_scan_code();
-static proc_t *blocked_reader = NULL;
+
+static struct queue *kbd_read_queue = QUEUE_NEW(); /* Kbd read wait queue */
+
+int isReading = 0;
 
 static unsigned char printableAscii[58][2] = {
     {0, 0},     {27, 27},    {'1', '!'},   {'2', '@'}, {'3', '#'},   {'4', '$'},
@@ -36,32 +47,56 @@ static unsigned char printableAscii[58][2] = {
     {'j', 'J'}, {'k', 'K'},  {'l', 'L'},   {';', ':'}, {39, 34},     {'`', '~'},
     {0, 0},     {'\\', '|'}, {'z', 'Z'},   {'x', 'X'}, {'c', 'C'},   {'v', 'V'},
     {'b', 'B'}, {'n', 'N'},  {'m', 'M'},   {',', '<'}, {'.', '>'},   {'/', '?'},
-    {0, 0},     {0, 0},      {0, 0},       {' ', ' '},
-};
+    {0, 0},     {0, 0},      {0, 0},       {' ', ' '}};
 
-void press_key() {
+/** No deberia ejecutarse si no hay una linea disponible */
+static int get_line(char *buffer, size_t count) {
+  return ringbuf_read_until(kbuff, buffer, count, '\n');
+}
+
+static int next_line_length() { return ringbuf_find(kbuff, '\n'); }
+
+int read_line(char *buffer, size_t count) {
+  if (next_line_length() == 0) {
+    read_request_t *request = kmalloc(kernel_mem, sizeof(read_request_t));
+    if (!request) {
+      printk("Error: No se pudo asignar memoria para ReadRequest.\n");
+      return -1;
+    }
+
+    request->proc = get_running();
+    request->user_buffer = buffer;
+    request->to_read = count;
+
+    enqueue(kbd_read_queue, request);
+    block_current(0, NULL);
+
+    return READ_LINE_BLOCKED;
+  } else {
+    int read = get_line(buffer, count);
+  }
+}
+
+void handle_key_press() {
   unsigned int scanCode = get_scan_code();
-  unsigned int col = 0;
 
   switch (scanCode) {
-  case LEFT_SHIFT_PRESSED:  // left shift pressed
-  case RIGHT_SHIFT_PRESSED: // right shift pressed
+  case LEFT_SHIFT_PRESSED:
+  case RIGHT_SHIFT_PRESSED:
     shift = 1;
-    break;
-  case LEFT_SHIFT_RELEASED:  // left shift released
-  case RIGHT_SHIFT_RELEASED: // right shift released
+    return;
+  case LEFT_SHIFT_RELEASED:
+  case RIGHT_SHIFT_RELEASED:
     shift = 0;
-    break;
-  case CAPSLOCK_PRESSED: // capsLock pressed
-    if (capsLock == 1) {
-      capsLock = 0;
-    } else {
-      capsLock = 1;
-    }
-    break;
-  case ESC_PRESSED:
-    esc = 1;
-    break;
+    return;
+  case CAPSLOCK_PRESSED:
+    capsLock = !capsLock;
+    return;
+  case ESC_PRESSED: {
+    char aux = ESC;
+    ringbuf_write(kbuff, 1, &aux);
+    return;
+  }
   case LEFT_ARROW:
     arrow = LEFT;
     break;
@@ -78,55 +113,36 @@ void press_key() {
     break;
   }
 
-  if (scanCode <= 0x80) {
-    if (arrow) {
-      ringbuf_write(kbuff, 1, &arrow);
-      arrow = 0;
-    } else if (esc) {
-      char aux = ESC;
-      ringbuf_write(kbuff, 1, &aux);
-    } else if (!(scanCode == LEFT_SHIFT_PRESSED ||
-                 scanCode == RIGHT_SHIFT_PRESSED ||
-                 scanCode == LEFT_SHIFT_RELEASED ||
-                 scanCode == RIGHT_SHIFT_RELEASED ||
-                 scanCode == CAPSLOCK_PRESSED)) {
-      if (printableAscii[scanCode][0] >= 'a' &&
-          printableAscii[scanCode][0] <= 'z') {
-        if ((shift == 1 && capsLock == 0) || (capsLock == 1 && shift == 0)) {
-          col = 1;
-        }
-      } else {
-        if (shift == 1) {
-          col = 1;
-        }
-      }
-      ringbuf_write(kbuff, 1, &printableAscii[scanCode][col]);
+  if (scanCode > 0x80)
+    return;
 
-      if (blocked_reader != NULL) {
-        proc_ready(blocked_reader); // Poner el proceso en la cola de listos
-        blocked_reader = NULL;      // Ya no hay nadie bloqueado
-      }
+  if (arrow) {
+    ringbuf_write(kbuff, 1, (char *)&arrow);
+    arrow = 0;
+    return;
+  }
+
+  if (scanCode == LEFT_SHIFT_PRESSED || scanCode == RIGHT_SHIFT_PRESSED ||
+      scanCode == LEFT_SHIFT_RELEASED || scanCode == RIGHT_SHIFT_RELEASED ||
+      scanCode == CAPSLOCK_PRESSED)
+    return;
+
+  unsigned int col = shift ^ capsLock ? 1 : 0;
+  unsigned char c = printableAscii[scanCode][col];
+  ringbuf_write(kbuff, 1, (char *)&c);
+
+  if ((c >= 32 && c <= 126) || c == '\n' || c == '\b' || c == 9)
+    print_str((char *)&c, 1, 0);
+
+  if (c == '\n') {
+    while (!queue_is_empty(kbd_read_queue) && next_line_length() > 0) {
+      read_request_t *req = (read_request_t *)dequeue(kbd_read_queue);
+
+      int n = get_line(req->user_buffer, req->to_read);
+
+      proc_ready(req->proc);
+
+      return_from_syscall(req->proc, n);
     }
   }
 }
-
-int load_buffer(char *buffer, size_t count) {
-  int bytes_read = 0;
-
-  if (blocked_reader != NULL) {
-    return -1;
-  }
-
-  bytes_read = ringbuf_read(kbuff, count, buffer);
-
-  if (bytes_read == 0) {
-    blocked_reader = get_running();
-    block_current(BLK_KEYBOARD, NULL);
-    bytes_read = ringbuf_read(kbuff, count, buffer);
-  }
-  return bytes_read;
-}
-
-void set_keyboard_blocked_null() { blocked_reader = NULL; }
-
-proc_t *get_keyboard_blocked() { return blocked_reader; }

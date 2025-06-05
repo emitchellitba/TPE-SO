@@ -184,4 +184,11 @@ static inline void queue_free(struct queue *queue) {
   kmm_free(queue, kernel_mem);
 }
 
+/**
+ * \brief check if the queue is empty
+ */
+static inline int queue_is_empty(struct queue *queue) {
+  return !queue || queue->count == 0;
+}
+
 #endif /* ! _DS_QUEUE_H */

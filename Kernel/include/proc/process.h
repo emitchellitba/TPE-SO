@@ -5,7 +5,6 @@
 #include <ds/ringbuf.h>
 #include <filedesc.h>
 #include <lib.h>
-#include <pipe.h>
 #include <stdint.h>
 
 /* TODO: Crear una seccion para codigos de errores */
@@ -68,6 +67,9 @@ typedef struct proc {
   /** Valor de retorno del proceso. -1 indica que no terminó */
   int exit;
 
+  /** Valor de retorno de la ultima syscall */
+  int syscall_retval;
+
   proc_state_t
       status; // Estado del proceso (0 = running, 1 = ready, 2 = zombie)
   priority_t has_quantum;
@@ -99,5 +101,6 @@ void proc_kill(struct proc *proc);
 int proc_reap(struct proc *proc);
 
 proc_t *get_proc_by_pid(pid_t pid);
+void return_from_syscall(proc_t *proc, int retval);
 
 #endif // PROC_H

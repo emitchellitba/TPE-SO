@@ -21,6 +21,5 @@ typedef struct {
 
 int shell_main(int argc, char *argv[]);
 int get_total_commands();
-void get_input();
 
 #endif

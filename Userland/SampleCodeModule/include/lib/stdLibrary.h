@@ -13,7 +13,6 @@ typedef struct {
   uint8_t year;
 } date_time;
 
-extern void get_input();
 // TODO: Esta funcion viene de shell.c, una libreria no deberia
 // depender de un modulo. Aparte de que hay dependencia circular.
 
@@ -32,9 +31,10 @@ void put_int(int n);
 int str_cmp(const char *str1, const char *str2);
 int str_ncmp(const char *str1, const char *str2, int n);
 int str_len(const char *str);
-char *str_tok(char *str1, const char *str2);
 char *strchr(const char *str, int c);
 void to_lower(char *str);
 unsigned int _abs(int a);
+
+char *trim(char *str);
 
 #endif // _STDLIBRARY_H_

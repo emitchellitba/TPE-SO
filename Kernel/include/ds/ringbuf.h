@@ -166,4 +166,22 @@ static inline size_t ringbuf_read_until(struct ringbuf *ring, char *buf,
   return read;
 }
 
+/**
+ * \brief returns the number of elements from the head up to and including the
+ * character c. If c is not found, returns 0.
+ */
+static inline size_t ringbuf_find(struct ringbuf *ring, char c) {
+  size_t head = ring->head;
+  size_t count = 0;
+  while (head != ring->tail) {
+    if (head == ring->size)
+      head = 0;
+    count++;
+    if (ring->buf[head] == c)
+      return count;
+    head++;
+  }
+  return 0;
+}
+
 #endif /* ! _DS_RINGBUF_H */

@@ -110,13 +110,18 @@ uint64_t schedule(uint64_t last_rsp) {
         scheduler->current_process->has_quantum--;
 
       if (scheduler->current_process->has_quantum == 0) {
-        scheduler->current_process->status = READY;
-        proc_ready(scheduler->current_process);
+        if (scheduler->current_process->status != BLOCKED &&
+            scheduler->current_process->status != ZOMBIE &&
+            scheduler->current_process->status != DEAD) {
+          scheduler->current_process->status = READY;
+          proc_ready(scheduler->current_process);
+        }
 
         enqueue_next_process();
       }
     }
   }
+
   return (uint64_t)scheduler->current_process->stack_pointer;
 }
 
@@ -145,9 +150,8 @@ uint64_t change_priority(pid_t pid, priority_t new_priority) {
 }
 
 void yield() {
-  scheduler->current_process->has_quantum = 0; // Forzar cambio de proceso
-  call_timer_tick(); // Llamar al tick del timer para que se ejecute el
-                     // scheduler
+  scheduler->current_process->has_quantum = 0;
+  call_timer_tick();
 }
 
 void sched_current_died() { scheduler->current_died = 1; }

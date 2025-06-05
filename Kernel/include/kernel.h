@@ -6,6 +6,7 @@
 #include <exec.h>
 #include <fs.h>
 #include <idtLoader.h>
+#include <ipc/semaphore.h>
 #include <keyboardDriver.h>
 #include <lib.h>
 #include <logger.h>
@@ -14,11 +15,10 @@
 #include <naiveConsole.h>
 #include <proc/process.h>
 #include <scheduler.h>
-#include <semaphores/semaphore.h>
 #include <soundDriver.h>
 #include <stdint.h>
 #include <string.h>
-#include <videodriver.h>
+#include <videoDriver.h>
 
 #define SPAWN_PROCESS_SYSCALL_ENTRY 19
 

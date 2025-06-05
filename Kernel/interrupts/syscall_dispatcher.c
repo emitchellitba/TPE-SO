@@ -1,5 +1,6 @@
-#include <proc/process.h>
 #include <syscall_dispatcher.h>
+
+#include <process.h>
 
 static void fill_out_buffer(uint64_t *buffer);
 
@@ -97,7 +98,13 @@ int64_t sys_read(va_list args) {
     return -EBADF;
   }
 
-  return fd_entry->ops->read(fd_entry->resource, buffer, count);
+  int n = fd_entry->ops->read(fd_entry->resource, buffer, count);
+
+  if (n == READ_LINE_BLOCKED) {
+    return current_process->syscall_retval;
+  }
+
+  return n;
 }
 
 int64_t sys_write(va_list args) {

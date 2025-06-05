@@ -23,14 +23,14 @@ command_entry_t command_table[] = {
 
 static int process_input() {
   for (int i = 0; i < TOTAL_CMDS; i++) {
-    if (str_cmp(input_buffer, command_table[i].name) == 0)
+    if (str_cmp(parsed.cmd, command_table[i].name) == 0)
       return i;
   }
   return -1;
 }
 
 static void parse_input() {
-  char *input = input_buffer;
+  char *input = trim(input_buffer);
 
   parsed.cmd = input;
   parsed.param_count = 0;
@@ -67,11 +67,26 @@ static void show_command_not_found() {
   printf("Type 'help' for a list of available commands\n");
 }
 
+static int get_input() {
+  int n = read(STDIN, input_buffer, BUFF_SIZE);
+
+  if (n < 0)
+    return 0;
+
+  input_buffer[n] = '\0';
+
+  if (input_buffer[n - 1] == '\n') {
+    input_buffer[n - 1] = '\0';
+  }
+  return 1;
+}
+
 int shell_main(int argc, char *argv[]) {
   while (1) {
     show_prompt();
-    get_input();
-    to_lower(input_buffer);
+
+    if (!get_input())
+      continue;
 
     parse_input();
 
@@ -87,36 +102,3 @@ int shell_main(int argc, char *argv[]) {
 }
 
 int get_total_commands() { return TOTAL_CMDS; }
-
-void get_input() {
-  char *c = input_buffer;
-  int count = 0;
-
-  char ch;
-  while (1) {
-    ch = get_char();
-    if (!ch)
-      continue;
-
-    if ((unsigned char)ch <= SPECIAL_KEY_MAX_VALUE)
-      continue;
-
-    if (ch == '\b') {
-      if (count > 0) {
-        put_char('\b');
-        c--;
-        count--;
-      }
-      continue;
-    }
-
-    put_char(ch);
-    *c++ = ch;
-    count++;
-
-    if (ch == '\n' || count >= BUFF_SIZE - 1)
-      break;
-  }
-
-  *(c - (c > input_buffer && *(c - 1) == '\n' ? 1 : 0)) = '\0';
-}
