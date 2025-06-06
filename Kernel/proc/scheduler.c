@@ -141,14 +141,6 @@ int process_wrapper(uint64_t user_argc, char **user_argv) {
   }
 }
 
-uint64_t change_priority(pid_t pid, priority_t new_priority) {
-  if (!scheduler || !scheduler->current_process)
-    return 1;
-
-  scheduler->current_process->priority = new_priority;
-  return 0;
-}
-
 void yield() {
   scheduler->current_process->has_quantum = 0;
   call_timer_tick();
