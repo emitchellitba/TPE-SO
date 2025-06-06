@@ -14,6 +14,12 @@ typedef struct {
   int y;
 } Segment;
 
+typedef struct {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+} Pixel;
+
 /**
  * @brief Imprime un string en pantalla.
  *

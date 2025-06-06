@@ -95,7 +95,7 @@ extern void sched_ready_queue_remove(struct proc *proc);
 
 int proc_new(proc_t **ref);
 int proc_init(proc_t *proc, const char *name, proc_t *parent,
-              proc_main_function entry);
+              proc_main_function entry, int redirect, int red_fds[2]);
 int proc_list(proc_info_t *buffer, int max_count, int *out_count);
 void proc_kill(struct proc *proc);
 int proc_reap(struct proc *proc);
@@ -103,5 +103,6 @@ int proc_reap(struct proc *proc);
 proc_t *get_proc_by_pid(pid_t pid);
 void return_from_syscall(proc_t *proc, int retval);
 int find_free_fd(proc_t *proc);
+int copy_fd(proc_t *target, proc_t *source, int target_fd, int src_fd);
 
 #endif // PROC_H

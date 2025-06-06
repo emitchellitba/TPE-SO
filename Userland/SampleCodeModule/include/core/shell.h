@@ -22,4 +22,4 @@ typedef struct {
 int shell_main(int argc, char *argv[]);
 int get_total_commands();
 
-#endif
+#endif // _SHELL_H_

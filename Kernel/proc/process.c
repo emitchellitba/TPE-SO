@@ -3,6 +3,7 @@
 #include "../include/lib/memory_manager.h"
 #include <ds/queue.h>
 #include <lib/logger.h>
+#include <stdbool.h>
 
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
@@ -10,6 +11,8 @@ LOGGER_DEFINE(proc, proc_log, proc_log_level)
 #define MAX_PROCESSES 64
 static struct proc *process_table[MAX_PROCESSES] = {NULL};
 static int process_count = 0;
+
+/* ---- FUNCIONES AUXILIARES ESTATICAS ----- */
 
 static pid_t proc_pid_alloc() {
   for (pid_t i = 0; i < MAX_PROCESSES; i++) {
@@ -20,6 +23,17 @@ static pid_t proc_pid_alloc() {
   proc_log(LOG_ERR, "No available PIDs\n");
   return -1; // No hay PIDs disponibles
 }
+
+static void inherit_fds(proc_t *child, proc_t *parent, int red_fds[2]) {
+  for (int i = 0; i < 2; i++) {
+    fd_entry_t *src = &parent->fds[red_fds[i]];
+    child->fds[i] = *src;
+    if (src->ops && src->ops->add_ref)
+      src->ops->add_ref(src->resource);
+  }
+}
+
+/* ---- FUNCIONES DEL MODULO ----- */
 
 /**
  * Se encarga de alocar la estructura basica del proceso
@@ -57,7 +71,7 @@ int proc_new(proc_t **ref) {
  * Inicializa el stack, fds y la informacion del proceso
  */
 int proc_init(proc_t *proc, const char *name, proc_t *parent,
-              proc_main_function entry) {
+              proc_main_function entry, int redirect, int red_fds[2]) {
   int err = 0;
 
   if (!proc) {
@@ -77,17 +91,33 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   }
   proc->stack_pointer = (uint64_t *)((char *)proc->stack_start + STACK_SIZE);
 
-  proc->fds[0] = (fd_entry_t){
-      .resource = NULL,
-      .ops = &keyboard_ops,
-      .type = FD_TERMINAL,
-  };
+  if (redirect) {
+    proc_t *running_proc = get_running();
 
-  proc->fds[1] =
-      (fd_entry_t){.resource = NULL, .ops = &video_ops, .type = FD_TERMINAL};
+    if (running_proc->fds[red_fds[0]].type == FD_NONE ||
+        running_proc->fds[red_fds[1]].type == FD_NONE) {
+      kmm_free(proc->stack_start, kernel_mem);
+      return -1;
+    }
 
-  proc->fds[2] = (fd_entry_t){
-      .resource = NULL, .ops = &video_err_ops, .type = FD_TERMINAL};
+    inherit_fds(proc, running_proc, red_fds);
+  } else {
+    proc->fds[0] = (fd_entry_t){
+        .resource = NULL,
+        .ops = &keyboard_ops,
+        .type = FD_TERMINAL,
+    };
+    proc->fds[1] = (fd_entry_t){
+        .resource = NULL,
+        .ops = &video_ops,
+        .type = FD_TERMINAL,
+    };
+    proc->fds[2] = (fd_entry_t){
+        .resource = NULL,
+        .ops = &video_err_ops,
+        .type = FD_TERMINAL,
+    };
+  }
 
   proc->name = name;
   proc->parent = parent;
@@ -222,4 +252,15 @@ int find_free_fd(proc_t *proc) {
       return i;
   }
   return -1;
+}
+
+int copy_fd(proc_t *target, proc_t *source, int targetfd, int srcfd) {
+  if (source->fds[srcfd].type == FD_NONE) {
+    proc_log(LOG_ERR, "Source file descriptor is not valid\n");
+    return -1;
+  }
+
+  target->fds[targetfd] = source->fds[srcfd];
+
+  return 0;
 }

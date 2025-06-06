@@ -31,7 +31,9 @@ void put_int(int n);
 int str_cmp(const char *str1, const char *str2);
 int str_ncmp(const char *str1, const char *str2, int n);
 int str_len(const char *str);
-char *strchr(const char *str, int c);
+char *str_tok(char *str, const char *delim);
+char *str_chr(const char *str, int c);
+void str_ncpy(char *dest, const char *src, int n);
 void to_lower(char *str);
 unsigned int _abs(int a);
 

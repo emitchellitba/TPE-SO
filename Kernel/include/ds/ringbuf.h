@@ -108,8 +108,8 @@ static inline size_t ringbuf_write(struct ringbuf *ring, size_t n, char *buf) {
   size_t size = n;
 
   while (n) {
-    if (RING_INDEX(ring, ring->head) ==
-        RING_INDEX(ring, ring->tail) + 1) /* Ring is full */
+    if (RING_INDEX(ring, ring->tail + 1) ==
+        RING_INDEX(ring, ring->head)) // Buffer lleno
       break;
 
     if (ring->tail == ring->size)
@@ -182,6 +182,15 @@ static inline size_t ringbuf_find(struct ringbuf *ring, char c) {
     head++;
   }
   return 0;
+}
+
+static inline void ringbuf_unwrite(struct ringbuf *ring) {
+  if (ring->tail == ring->head)
+    return;
+  if (ring->tail == 0)
+    ring->tail = ring->size - 1;
+  else
+    ring->tail--;
 }
 
 #endif /* ! _DS_RINGBUF_H */

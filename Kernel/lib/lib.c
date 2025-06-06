@@ -52,6 +52,24 @@ void *memcpy(void *destination, const void *source, uint64_t length) {
   return destination;
 }
 
+void *memmove(void *dest, const void *src, uint64_t n) {
+  uint8_t *d = (uint8_t *)dest;
+  const uint8_t *s = (const uint8_t *)src;
+
+  if (d == s || n == 0)
+    return dest;
+
+  if (d < s || d >= s + n) {
+    for (uint64_t i = 0; i < n; i++)
+      d[i] = s[i];
+  } else {
+    for (uint64_t i = n; i > 0; i--)
+      d[i - 1] = s[i - 1];
+  }
+
+  return dest;
+}
+
 int str_len(const char *str) {
   int len = 0;
   while (*str != '\0') {

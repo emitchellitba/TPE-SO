@@ -184,7 +184,7 @@ int str_len(const char *str) {
   return len;
 }
 
-char *strchr(const char *str, int c) {
+char *str_chr(const char *str, int c) {
   while (*str) {
     if (*str == (char)c)
       return (char *)str;
@@ -193,6 +193,36 @@ char *strchr(const char *str, int c) {
   if (c == '\0')
     return (char *)str;
   return 0;
+}
+
+char *str_tok(char *str, const char *delim) {
+  static char *last = 0;
+  if (str)
+    last = str;
+  if (!last)
+    return 0;
+
+  char *start = last;
+  while (*start && str_chr(delim, *start))
+    start++;
+
+  if (!*start) {
+    last = 0;
+    return 0;
+  }
+
+  char *end = start;
+  while (*end && !str_chr(delim, *end))
+    end++;
+
+  if (*end) {
+    *end = '\0';
+    last = end + 1;
+  } else {
+    last = 0;
+  }
+
+  return start;
 }
 
 void to_lower(char *str) {
@@ -204,19 +234,22 @@ void to_lower(char *str) {
 }
 
 char *trim(char *str) {
-  // Move pointer forward past leading whitespace
   while (*str == ' ' || *str == '\t' || *str == '\n')
     str++;
 
-  // Find the end of the string
   char *end = str + str_len(str) - 1;
 
-  // Move end pointer backward past trailing whitespace
   while (end > str && (*end == ' ' || *end == '\t' || *end == '\n'))
     end--;
 
-  // Write new null terminator after the last non-whitespace character
   *(end + 1) = '\0';
 
   return str;
+}
+
+void str_ncpy(char *dest, const char *src, int n) {
+  for (int i = 0; i < n && src[i] != '\0'; i++) {
+    dest[i] = src[i];
+  }
+  dest[n] = '\0';
 }

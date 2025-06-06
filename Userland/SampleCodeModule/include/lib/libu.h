@@ -6,6 +6,12 @@
 #define STDIN 0
 #define STDOUT 1
 
+#define READ_PIPE 0
+#define WRITE_PIPE 1
+
+#define SPAWN_USE_DEFAULT_IO 0x1
+#define SPAWN_INHERIT_FDS 0x2
+
 typedef int (*main_func_t)(int argc, char *argv[]);
 
 typedef int (*shell_command)(int params_count, char *params[]);
@@ -33,11 +39,14 @@ DECLARE_WRAPPER(get_procs, (proc_info_t * procs, size_t size))
 DECLARE_WRAPPER(load_program, (char *name, int entry))
 DECLARE_WRAPPER(rm_program, (char *name))
 DECLARE_WRAPPER(get_programs, (char **buffer, int max_count))
-DECLARE_WRAPPER(spawn_process, (char *name, int argc, char **argv))
+DECLARE_WRAPPER(spawn_process, (const char *name, int argc, char **argv))
+DECLARE_WRAPPER(spawn_process_redirect,
+                (const char *name, int argc, char **argv, int redirect,
+                 int red_fds[2]))
 DECLARE_WRAPPER(kill_proc, (int pid))
 DECLARE_WRAPPER(change_priority, (int pid, int new_priority))
 DECLARE_WRAPPER(proc_exit, (int code))
-DECLARE_WRAPPER(dup2_fd, (int oldfd, int newfd))
+DECLARE_WRAPPER(copy_fd, (int pid, int target_fd, int src_fd))
 DECLARE_WRAPPER(close_fd, (int fd))
 
 #endif // LIBU_H

@@ -51,7 +51,7 @@ DECLARE_SYSCALL(sys_change_priority)
 DECLARE_SYSCALL(sys_exit)
 DECLARE_SYSCALL(sys_block)
 DECLARE_SYSCALL(sys_unblock)
-DECLARE_SYSCALL(sys_dup2_fd)
+DECLARE_SYSCALL(sys_copy_fd)
 DECLARE_SYSCALL(sys_close_fd)
 
 #endif

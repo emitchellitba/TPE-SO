@@ -24,11 +24,22 @@ DEFINE_WRAPPER(load_program, (char *name, int entry), (name, entry))
 DEFINE_WRAPPER(rm_program, (char *name), (name))
 DEFINE_WRAPPER(get_programs, (char **buffer, int max_count),
                (buffer, max_count))
-DEFINE_WRAPPER(spawn_process, (char *name, int argc, char **argv),
-               (name, argc, argv))
 DEFINE_WRAPPER(kill_proc, (int pid), (pid))
 DEFINE_WRAPPER(change_priority, (int pid, int new_priority),
                (pid, new_priority))
 DEFINE_WRAPPER(proc_exit, (int code), (code))
-DEFINE_WRAPPER(dup2_fd, (int oldfd, int newfd), (oldfd, newfd))
+DEFINE_WRAPPER(copy_fd, (int pid, int target_fd, int src_fd),
+               (pid, target_fd, src_fd))
 DEFINE_WRAPPER(close_fd, (int fd), (fd))
+
+extern int64_t _spawn_process(char *name, int argc, char **argv, int redirect,
+                              int fds[2]);
+
+int64_t spawn_process_redirect(const char *name, int argc, char **argv,
+                               int redirect, int red_fds[2]) {
+  return _spawn_process(name, argc, argv, redirect, red_fds);
+}
+
+int64_t spawn_process(const char *name, int argc, char **argv) {
+  return _spawn_process(name, argc, argv, 0, NULL);
+}

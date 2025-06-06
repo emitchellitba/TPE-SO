@@ -22,16 +22,12 @@ typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 
 extern unsigned int get_scan_code();
 
-typedef struct ReadRequest {
-  proc_t *proc;      // Proceso esperando
-  char *user_buffer; // Dónde copiar la entrada
-  int to_read;       // Cuántos caracteres quiere leer
-} read_request_t;
-
 struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
 unsigned int arrow = 0;
+
+static int current_line_len = 0;
 
 static struct queue *kbd_read_queue = QUEUE_NEW(); /* Kbd read wait queue */
 
@@ -51,30 +47,23 @@ static unsigned char printableAscii[58][2] = {
 
 /** No deberia ejecutarse si no hay una linea disponible */
 static int get_line(char *buffer, size_t count) {
-  return ringbuf_read_until(kbuff, buffer, count, '\n');
+  int n = ringbuf_read_until(kbuff, buffer, count, '\n');
+  if (n == count && buffer[count - 1] != '\n') {
+    char rest_buffer[128];
+    ringbuf_read_until(kbuff, rest_buffer, KBUFF_SIZE, '\n');
+  }
+  return n;
 }
 
 static int next_line_length() { return ringbuf_find(kbuff, '\n'); }
 
 int read_line(char *buffer, size_t count) {
-  if (next_line_length() == 0) {
-    read_request_t *request = kmalloc(kernel_mem, sizeof(read_request_t));
-    if (!request) {
-      printk("Error: No se pudo asignar memoria para ReadRequest.\n");
-      return -1;
-    }
-
-    request->proc = get_running();
-    request->user_buffer = buffer;
-    request->to_read = count;
-
-    enqueue(kbd_read_queue, request);
+  while (next_line_length() == 0) {
+    enqueue(kbd_read_queue, get_running());
     block_current(0, NULL);
-
-    return READ_LINE_BLOCKED;
-  } else {
-    int read = get_line(buffer, count);
   }
+
+  return get_line(buffer, count);
 }
 
 void handle_key_press() {
@@ -129,20 +118,37 @@ void handle_key_press() {
 
   unsigned int col = shift ^ capsLock ? 1 : 0;
   unsigned char c = printableAscii[scanCode][col];
-  ringbuf_write(kbuff, 1, (char *)&c);
 
-  if ((c >= 32 && c <= 126) || c == '\n' || c == '\b' || c == 9)
+  if (c == '\b') {
+    if (current_line_len > 0) {
+      ringbuf_unwrite(kbuff);
+      print_str((char *)&c, 1, 0);
+      current_line_len--;
+    }
+
+    return;
+  }
+
+  if (c == '\t') {
+    for (int i = 0; i < 4; i++) {
+      ringbuf_write(kbuff, 1, " ");
+      print_str(" ", 1, 0);
+      current_line_len++;
+    }
+    return;
+  }
+
+  if ((c >= 32 && c <= 126)) {
+    ringbuf_write(kbuff, 1, (char *)&c);
     print_str((char *)&c, 1, 0);
+    current_line_len++;
+  }
 
   if (c == '\n') {
-    while (!queue_is_empty(kbd_read_queue) && next_line_length() > 0) {
-      read_request_t *req = (read_request_t *)dequeue(kbd_read_queue);
+    ringbuf_write(kbuff, 1, (char *)&c);
+    print_str((char *)&c, 1, 0);
+    proc_ready(dequeue(kbd_read_queue));
 
-      int n = get_line(req->user_buffer, req->to_read);
-
-      proc_ready(req->proc);
-
-      return_from_syscall(req->proc, n);
-    }
+    current_line_len = 0;
   }
 }

@@ -233,6 +233,8 @@ EXPORT_FUNC get_programs
 ;   1 - name
 ;   2 - argc
 ;   3 - argv
+;   4 - redirect
+;   5 - redirect_fds
 ;-------------------------------------------------------------------------------
 EXPORT_FUNC spawn_process
     do_syscall_direct 0x13
@@ -266,13 +268,14 @@ EXPORT_FUNC proc_exit
     do_syscall_direct 0x16
 
 ;-------------------------------------------------------------------------------
-; 0x19 - dup2_fd
+; 0x19 - copy_fd
 ;-------------------------------------------------------------------------------
 ; Argumentos:
-;   1 - oldfd
-;   2 - newfd
+;   1 - pid
+;   2 - target_fd
+;   3 - source_fd
 ;-------------------------------------------------------------------------------
-EXPORT_FUNC dup2_fd
+EXPORT_FUNC copy_fd
     do_syscall_direct 0x19
 
 ;-------------------------------------------------------------------------------

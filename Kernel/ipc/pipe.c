@@ -14,6 +14,8 @@ typedef struct pipe_t {
   uint64_t write_sem;
   char id[32];
   bool in_use;
+  struct queue *read_queue;
+  struct queue *write_queue;
 } pipe_t;
 
 typedef struct {
@@ -72,6 +74,22 @@ pipe_t *create_pipe(const char *id) {
 
       str_ncpy(pipe->id, id, sizeof(pipe->id));
       pipe->in_use = true;
+
+      pipe->read_queue = queue_new();
+      if (!pipe->read_queue) {
+        ringbuf_free(pipe->buffer);
+        kmm_free(pipe, kernel_mem);
+        return NULL;
+      }
+
+      pipe->write_queue = queue_new();
+      if (!pipe->write_queue) {
+        queue_free(pipe->read_queue);
+        ringbuf_free(pipe->buffer);
+        kmm_free(pipe, kernel_mem);
+        return NULL;
+      }
+
       pipes_table.pipes[i] = pipe;
 
       return pipe;
@@ -91,19 +109,36 @@ void pipe_free(struct pipe_t *pipe) {
 }
 
 static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
-  // wait
+  while (!ringbuf_available(pipe->buffer)) {
+    enqueue(pipe->read_queue, get_running());
+    block_current(0, NULL);
+  }
+
+  proc_ready(dequeue(pipe->write_queue));
 
   return ringbuf_read(pipe->buffer, size, (char *)buf);
-
-  // post
 }
 
 static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
-  // wait(pipe->write_sem);
+  size_t total_written = 0;
+  const char *cbuf = (const char *)buf;
 
-  return ringbuf_write(pipe->buffer, size, (const char *)buf);
+  while (total_written < size) {
+    int n =
+        ringbuf_write(pipe->buffer, size - total_written, cbuf + total_written);
+    total_written += n;
 
-  // signal(pipe->read_sem);
+    if (n > 0) {
+      proc_ready(dequeue(pipe->read_queue));
+    }
+
+    if (total_written < size) {
+      enqueue(pipe->write_queue, get_running());
+      block_current(0, NULL);
+    }
+  }
+
+  return total_written;
 }
 
 static int pipe_close_read(pipe_t *pipe) {
