@@ -92,9 +92,12 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
   proc->name = name;
   proc->parent = parent;
   proc->entry = entry;
-
-  // struct queue wait_queue = {0};
-  // proc->wait_queue = wait_queue;
+  if (parent && parent->child_count < MAX_PROCESSES) {
+    parent->children[parent->child_count++] = proc->pid;
+  } else if (parent) {
+    proc_log(LOG_ERR, "Parent process has reached maximum children limit\n");
+    return -1; // No se puede agregar más hijos
+  }
 
   proc->priority = QUANTUM_DEFAULT;
 
@@ -154,13 +157,19 @@ void proc_kill(struct proc *proc) {
   kmm_free((void *)proc->name, kernel_mem);
   proc->name = NULL;
 
-  /* Despertar al padre si lo hay y esta esperando al hijo */
-  if (proc->parent && 0 /* Si esta bloqueado por wait */) {
-    // proc->parent->status = READY;
-    // proc->parent->exit = proc->exit;
-  } else {
-    /* El proceso es huerfano, directamente se llama a reap */
-    proc_reap(proc);
+  /* Despertar al padre si lo hay y está esperando al hijo */
+  if (proc->parent && proc->parent->status == BLOCKED &&
+      proc->parent->block_reason == BLK_CHILD) {
+
+    pid_t waiting = (intptr_t)(proc->parent->waiting_on);
+
+    if (waiting == -1 || waiting == proc->pid) {
+      proc_log(LOG_INFO, "Waking up parent PID %d waiting on PID %d\n",
+               proc->parent->pid, proc->pid);
+
+      proc_ready(proc->parent);
+      return; // El padre se encargará de hacer el reap
+    }
   }
 }
 
@@ -202,4 +211,67 @@ int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
 
 proc_t *get_proc_by_pid(pid_t pid) {
   return process_table[pid] ? process_table[pid] : NULL;
+}
+
+pid_t wait_pid(pid_t pid, int *exit_status) {
+  proc_t *parent = get_running();
+  proc_t *child = NULL;
+
+  if (parent->child_count == 0) {
+    proc_log(LOG_INFO, "No child processes to wait for\n");
+    return -1;
+  }
+
+  while (true) {
+    if (pid == -1) {
+      for (int i = 0; i < parent->child_count; i++) {
+        child = get_proc_by_pid(parent->children[i]);
+        if (child && child->status == ZOMBIE) {
+          if (exit_status)
+            *exit_status = child->exit;
+          proc_reap(child);
+
+          for (int j = i; j < parent->child_count - 1; j++)
+            parent->children[j] = parent->children[j + 1];
+          parent->child_count--;
+          return child->pid;
+        }
+      }
+
+      parent->block_reason = BLK_CHILD;
+      parent->waiting_on = (void *)(intptr_t)-1;
+      parent->status = BLOCKED;
+      yield();
+    } else {
+      int found = 0;
+      for (int i = 0; i < parent->child_count; i++) {
+        if (parent->children[i] == pid) {
+          found = 1;
+          child = get_proc_by_pid(pid);
+          if (!child)
+            return -1;
+
+          if (child->status == ZOMBIE) {
+            if (exit_status)
+              *exit_status = child->exit;
+            proc_reap(child);
+            for (int j = i; j < parent->child_count - 1; j++)
+              parent->children[j] = parent->children[j + 1];
+            parent->child_count--;
+            return pid;
+          }
+
+          parent->block_reason = BLK_CHILD;
+          parent->waiting_on = (void *)(intptr_t)pid;
+          parent->status = BLOCKED;
+          yield();
+          break;
+        }
+      }
+
+      if (!found) {
+        return -1;
+      }
+    }
+  }
 }

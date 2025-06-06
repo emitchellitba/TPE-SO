@@ -54,6 +54,8 @@ typedef struct proc {
   pid_t pid;
   const char *name;
   struct proc *parent; // Puntero al proceso padre
+  pid_t children[64];  // Arreglo de PIDs de hijos
+  int child_count;     // Cantidad de hijos
 
   uint64_t *stack_start;   // Comienzo del stack: direccion mas alta
   uint64_t *stack_pointer; // Posicion actual del stack
@@ -62,8 +64,6 @@ typedef struct proc {
 
   block_reason_t block_reason;
   void *waiting_on;
-
-  // queue_t my_queue; // Cola de espera para bloqueos
 
   /** Valor de retorno del proceso. -1 indica que no terminó */
   int exit;
@@ -97,7 +97,7 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
 int proc_list(proc_info_t *buffer, int max_count, int *out_count);
 void proc_kill(struct proc *proc);
 int proc_reap(struct proc *proc);
-
+pid_t wait_pid(pid_t pid, int *exit_status);
 proc_t *get_proc_by_pid(pid_t pid);
 
 #endif // PROC_H

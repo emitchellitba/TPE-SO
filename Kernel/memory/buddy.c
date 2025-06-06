@@ -11,8 +11,8 @@
 
 #define GET_LEFT_CHILD(i) (2 * (i) + 1)
 #define GET_RIGHT_CHILD(i) (2 * (i) + 2)
-#define GET_PARENT(i) (((i)-1) / 2)
-#define GET_SIBLING(i) (((i) % 2) ? ((i) + 1) : ((i)-1)) // Funciona si i > 0
+#define GET_PARENT(i) (((i) - 1) / 2)
+#define GET_SIBLING(i) (((i) % 2) ? ((i) + 1) : ((i) - 1)) // Funciona si i > 0
 
 typedef struct {
   char tree[TREE_SIZE]; // 0: libre, 1: ocupado/dividido

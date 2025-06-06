@@ -47,13 +47,14 @@ static syscall_func_t syscall_table[] = {
     sys_exit,            // 22
     sys_block,           // 23
     sys_unblock,         // 24
-                         // sys_wait,           // 23
-                         // sys_set_priority,   // 24
-                         // sys_block,          // 25
-                         // sys_unblock,        // 26
-                         // sys_renounce,       // 27
-                         // sys_getpid,         // 28
-                         // sys_getppid,        // 29
+    sys_wait_pid,        // 23
+    sys_wait,            // 24
+                         // sys_set_priority,   // 25
+                         // sys_block,          // 26
+                         // sys_unblock,        // 27
+                         // sys_renounce,       // 28
+                         // sys_getpid,         // 29
+                         // sys_getppid,        // 30
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -167,7 +168,7 @@ int64_t sys_free_draw(va_list args) {
               "free_draw(x=%ld, y=%ld, drawing=%p, colors=%p, size=%ld)\n", x,
               y, drawing, colors, size);
   // TODO: Borrar todos estos casteos y hacer tipos consistentes
-  free_draw((int)x, (int)y, (int(*)[28])drawing, colors, (int)size);
+  free_draw((int)x, (int)y, (int (*)[28])drawing, colors, (int)size);
   return 0;
 }
 
@@ -302,7 +303,7 @@ int64_t sys_rm_program(va_list args) {
 
 int64_t sys_get_programs(va_list args) {
   /* recibe un buffer de strings y una cantidad maxima */
-  char(*buffer)[MAX_FILE_NAME_LEN] = va_arg(args, char(*)[MAX_FILE_NAME_LEN]);
+  char (*buffer)[MAX_FILE_NAME_LEN] = va_arg(args, char (*)[MAX_FILE_NAME_LEN]);
   int max_count = va_arg(args, int);
   syscall_log(LOG_INFO, "ls_programs()\n");
 
@@ -398,4 +399,16 @@ int64_t sys_unblock(va_list args) {
   int64_t pid = va_arg(args, pid_t);
   syscall_log(LOG_INFO, "sys_unblock(pid=%ld)\n", pid);
   return unblock_process_by_pid((pid_t)pid);
+}
+
+int64_t sys_wait_pid(va_list args) {
+  int64_t pid = va_arg(args, pid_t);
+  syscall_log(LOG_INFO, "sys_wait_pid(pid=%ld)\n", pid);
+  int *exit_status = va_arg(args, int *);
+  return wait_pid(pid, exit_status);
+}
+
+int64_t sys_wait(va_list args) {
+  int *exit_status = va_arg(args, int *);
+  return wait_pid(WAIT_PID, exit_status);
 }

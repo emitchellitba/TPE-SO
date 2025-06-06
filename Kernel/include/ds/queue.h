@@ -41,8 +41,7 @@ struct queue {
 /**
  * \brief create a new statically allocated queue
  */
-#define QUEUE_NEW()                                                            \
-  &(struct queue) { 0 }
+#define QUEUE_NEW() &(struct queue){0}
 
 /**
  * \brief create a new dynamically allocated queue
