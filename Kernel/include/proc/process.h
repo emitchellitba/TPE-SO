@@ -100,5 +100,6 @@ void proc_kill(struct proc *proc);
 int proc_reap(struct proc *proc);
 pid_t wait_pid(pid_t pid, int *exit_status);
 proc_t *get_proc_by_pid(pid_t pid);
+int64_t change_priority(pid_t pid, priority_t new_priority);
 
 #endif // PROC_H
