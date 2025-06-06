@@ -28,8 +28,11 @@ static ssize_t kb_read(void *resource, void *buf, size_t count) {
   return n;
 }
 
-file_ops_t keyboard_ops = {.read = kb_read, .write = NULL};
+file_ops_t keyboard_ops = {
+    .read = kb_read, .write = NULL, .close = NULL, .add_ref = NULL};
 
-file_ops_t video_ops = {.read = NULL, .write = video_write_stdout};
+file_ops_t video_ops = {
+    .read = NULL, .write = video_write_stdout, .close = NULL, .add_ref = NULL};
 
-file_ops_t video_err_ops = {.read = NULL, .write = video_write_stderr};
+file_ops_t video_err_ops = {
+    .read = NULL, .write = video_write_stderr, .close = NULL, .add_ref = NULL};

@@ -48,13 +48,8 @@ static syscall_func_t syscall_table[] = {
     sys_exit,            // 22
     sys_block,           // 23
     sys_unblock,         // 24
-                         // sys_wait,           // 23
-                         // sys_set_priority,   // 24
-                         // sys_block,          // 25
-                         // sys_unblock,        // 26
-                         // sys_renounce,       // 27
-                         // sys_getpid,         // 28
-                         // sys_getppid,        // 29
+    sys_dup2_fd,         // 25
+    sys_close_fd,        // 26
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -429,4 +424,63 @@ int64_t sys_unblock(va_list args) {
   int64_t pid = va_arg(args, pid_t);
   syscall_log(LOG_INFO, "sys_unblock(pid=%ld)\n", pid);
   return unblock_process_by_pid((pid_t)pid);
+}
+
+int64_t sys_dup2_fd(va_list args) {
+  int old_fd = va_arg(args, int);
+  int new_fd = va_arg(args, int);
+  syscall_log(LOG_INFO, "sys_dup2_fd(old_fd=%d, new_fd=%d)\n", old_fd, new_fd);
+
+  proc_t *current_process = get_running();
+  if (!current_process)
+    return -EFAULT;
+
+  if (old_fd < 0 || old_fd >= FD_MAX || new_fd < 0 || new_fd >= FD_MAX ||
+      old_fd == new_fd)
+    return -EINVAL;
+
+  fd_entry_t *old_entry = &current_process->fds[old_fd];
+
+  if (!old_entry->ops)
+    return -EBADF;
+
+  fd_entry_t *new_entry = &current_process->fds[new_fd];
+
+  if (new_entry->ops && new_entry->ops->close) {
+    new_entry->ops->close(new_entry->resource);
+  }
+
+  new_entry->ops = old_entry->ops;
+  new_entry->resource = old_entry->resource;
+  new_entry->type = old_entry->type;
+
+  if (new_entry->ops && new_entry->ops->add_ref) {
+    new_entry->ops->add_ref(new_entry->resource);
+  }
+
+  return new_fd;
+}
+
+int64_t sys_close_fd(va_list args) {
+  int fd = va_arg(args, int);
+  syscall_log(LOG_INFO, "sys_close_fd(fd=%d)\n", fd);
+
+  proc_t *current_process = get_running();
+  if (!current_process)
+    return -EFAULT;
+
+  if (fd < 0 || fd >= FD_MAX)
+    return -EINVAL;
+
+  fd_entry_t *entry = &current_process->fds[fd];
+
+  if (entry->ops && entry->ops->close) {
+    entry->ops->close(entry->resource);
+  }
+
+  entry->ops = NULL;
+  entry->resource = NULL;
+  entry->type = FD_NONE;
+
+  return 0;
 }

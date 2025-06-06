@@ -15,7 +15,7 @@ int pipes_test_main(int argc, char *argv[]) {
     return 1;
   }
 
-  int write_fd = pipe_open(pipe_id, 1);
+  int write_fd = pipe_open(pipe_id, 1); // 4
   if (write_fd < 0) {
     printf("Error opening pipe for writing: %d\n", write_fd);
     return 1;
@@ -24,9 +24,22 @@ int pipes_test_main(int argc, char *argv[]) {
   const char *msg = "Hola desde el proceso main\n";
   write(write_fd, msg, str_len(msg));
 
-  load_program("process_b", (uint64_t)process_b);
+  // load_program("process_b", (uint64_t)process_b);
 
-  spawn_process("process_b", 0, NULL);
+  // spawn_process("process_b", 0, NULL);
+
+  int write_fd2 = pipe_open(pipe_id, 1); // 5
+
+  int read_fd = pipe_open(pipe_id, 0); // 6
+
+  if (read_fd < 0 || write_fd2 < 0) {
+    return 1;
+  }
+
+  dup2_fd(read_fd, write_fd2); // Queremos copiar el fd de lectura al fd de
+                               // escritura (el 6 al 5)
+
+  close_fd(read_fd); // Cerramos el fd original (6)
 
   return 0;
 }

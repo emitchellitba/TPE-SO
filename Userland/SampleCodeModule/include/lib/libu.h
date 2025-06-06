@@ -37,5 +37,7 @@ DECLARE_WRAPPER(spawn_process, (char *name, int argc, char **argv))
 DECLARE_WRAPPER(kill_proc, (int pid))
 DECLARE_WRAPPER(change_priority, (int pid, int new_priority))
 DECLARE_WRAPPER(proc_exit, (int code))
+DECLARE_WRAPPER(dup2_fd, (int oldfd, int newfd))
+DECLARE_WRAPPER(close_fd, (int fd))
 
 #endif // LIBU_H

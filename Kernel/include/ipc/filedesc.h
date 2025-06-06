@@ -15,6 +15,8 @@ typedef enum { FD_NONE, FD_PIPE, FD_TERMINAL } FDType;
 typedef struct file_ops {
   ssize_t (*read)(void *resource, void *buf, size_t count);
   ssize_t (*write)(void *resource, const void *buf, size_t count);
+  int (*close)(void *resource);
+  int (*add_ref)(void *resource);
 } file_ops_t;
 
 typedef struct fd_entry {

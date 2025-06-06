@@ -106,6 +106,46 @@ static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
   // signal(pipe->read_sem);
 }
 
-static file_ops_t pipe_read_ops = {.read = pipe_read, .write = NULL};
+static int pipe_close_read(pipe_t *pipe) {
+  if (!pipe)
+    return -1;
+  if (pipe->readers > 0)
+    pipe->readers--;
+  if (pipe->readers == 0 && pipe->writers == 0)
+    pipe_free(pipe);
+  return 0;
+}
 
-static file_ops_t pipe_write_ops = {.read = NULL, .write = pipe_write};
+static int pipe_close_write(pipe_t *pipe) {
+  if (!pipe)
+    return -1;
+  if (pipe->writers > 0)
+    pipe->writers--;
+  if (pipe->readers == 0 && pipe->writers == 0)
+    pipe_free(pipe);
+  return 0;
+}
+
+static int pipe_add_ref_write(pipe_t *pipe) {
+  if (!pipe)
+    return -1;
+  pipe->writers++;
+  return 0;
+}
+
+static int pipe_add_ref_read(pipe_t *pipe) {
+  if (!pipe)
+    return -1;
+  pipe->readers++;
+  return 0;
+}
+
+static file_ops_t pipe_read_ops = {.read = pipe_read,
+                                   .write = NULL,
+                                   .close = pipe_close_read,
+                                   .add_ref = pipe_add_ref_read};
+
+static file_ops_t pipe_write_ops = {.read = NULL,
+                                    .write = pipe_write,
+                                    .close = pipe_close_write,
+                                    .add_ref = pipe_add_ref_write};

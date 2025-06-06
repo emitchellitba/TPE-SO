@@ -30,3 +30,5 @@ DEFINE_WRAPPER(kill_proc, (int pid), (pid))
 DEFINE_WRAPPER(change_priority, (int pid, int new_priority),
                (pid, new_priority))
 DEFINE_WRAPPER(proc_exit, (int code), (code))
+DEFINE_WRAPPER(dup2_fd, (int oldfd, int newfd), (oldfd, newfd))
+DEFINE_WRAPPER(close_fd, (int fd), (fd))
