@@ -1,6 +1,7 @@
 #include <libu.h>
 #include <stdLibrary.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #define MAX_BUFF 1000
 #define HEXA_MAX 16
@@ -11,37 +12,154 @@ extern void get_date_time(const date_time *dt);
 char hexa_digits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
                         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
+int itoa(int value, char *buffer) {
+  char tmp[20];
+  int i = 0, neg = 0;
+
+  if (value == 0) {
+    buffer[0] = '0';
+    buffer[1] = '\0';
+    return 1;
+  }
+
+  if (value < 0) {
+    neg = 1;
+    value = -value;
+  }
+
+  while (value > 0) {
+    tmp[i++] = (value % 10) + '0';
+    value /= 10;
+  }
+
+  int len = 0;
+  if (neg)
+    buffer[len++] = '-';
+
+  while (i > 0)
+    buffer[len++] = tmp[--i];
+  buffer[len] = '\0';
+  return len;
+}
+
+int utoa(size_t value, char *buffer) {
+  char tmp[20];
+  int i = 0;
+
+  if (value == 0) {
+    buffer[0] = '0';
+    buffer[1] = '\0';
+    return 1;
+  }
+
+  while (value > 0) {
+    tmp[i++] = (value % 10) + '0';
+    value /= 10;
+  }
+
+  int len = 0;
+  while (i > 0)
+    buffer[len++] = tmp[--i];
+  buffer[len] = '\0';
+  return len;
+}
+
+int xtoa(uint64_t value, char *buffer) {
+  char tmp[20];
+  int i = 0;
+  const char *digits = "0123456789abcdef";
+
+  if (value == 0) {
+    buffer[0] = '0';
+    buffer[1] = '\0';
+    return 1;
+  }
+
+  while (value > 0) {
+    tmp[i++] = digits[value % 16];
+    value /= 16;
+  }
+
+  int len = 0;
+  while (i > 0)
+    buffer[len++] = tmp[--i];
+  buffer[len] = '\0';
+  return len;
+}
+
 void printf(const char *str, ...) {
   va_list args;
   va_start(args, str);
   for (int i = 0; str[i] != 0; i++) {
     if (str[i] == '%') {
       i++;
+      bool left_align = false;
+      int width = 0;
+
+      // flags
+      if (str[i] == '-') {
+        left_align = true;
+        i++;
+      }
+
+      // width
+      while (str[i] >= '0' && str[i] <= '9') {
+        width = width * 10 + (str[i] - '0');
+        i++;
+      }
+
+      char buffer[64];
+      int len = 0;
+
       switch (str[i]) {
-      case 'd':
+      case 'd': {
         int num = va_arg(args, int);
-        put_int(num);
-        break;
-      case 'u':
-        size_t u_num = va_arg(args, size_t);
-        put_uint(u_num);
-        break;
-      case 's':
-        char *s = va_arg(args, char *);
-        put_str(s);
-        break;
-      case 'c':
-        char c = va_arg(args, char);
-        put_char(c);
-        break;
-      case 'x':
-        uint64_t hex = va_arg(args, uint64_t);
-        put_hex(hex);
-        break;
-      default:
-        put_char('%');
+        len = itoa(num, buffer);
         break;
       }
+      case 'u': {
+        size_t num = va_arg(args, size_t);
+        len = utoa(num, buffer);
+        break;
+      }
+      case 'x': {
+        uint64_t hex = va_arg(args, uint64_t);
+        len = xtoa(hex, buffer);
+        break;
+      }
+      case 's': {
+        char *s = va_arg(args, char *);
+        int s_len = 0;
+        while (s[s_len])
+          s_len++;
+
+        if (width > s_len && !left_align)
+          for (int j = 0; j < width - s_len; j++)
+            put_char(' ');
+        put_str(s);
+        if (width > s_len && left_align)
+          for (int j = 0; j < width - s_len; j++)
+            put_char(' ');
+        continue;
+      }
+      case 'c': {
+        char c = (char)va_arg(args, int);
+        put_char(c);
+        continue;
+      }
+      default:
+        put_char('%');
+        put_char(str[i]);
+        continue;
+      }
+
+      if (width > len && !left_align)
+        for (int j = 0; j < width - len; j++)
+          put_char(' ');
+      put_str(buffer);
+      if (width > len && left_align)
+        for (int j = 0; j < width - len; j++)
+          put_char(' ');
     } else if (str[i] == '\\') {
       i++;
       switch (str[i]) {
@@ -53,6 +171,7 @@ void printf(const char *str, ...) {
         break;
       default:
         put_char('\\');
+        put_char(str[i]);
         break;
       }
     } else {

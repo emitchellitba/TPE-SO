@@ -70,8 +70,8 @@ int proc_new(proc_t **ref) {
 /**
  * Inicializa el stack, fds y la informacion del proceso
  */
-int proc_init(proc_t *proc, const char *name, proc_t *parent,
-              proc_main_function entry, int redirect, int red_fds[2]) {
+int proc_init(proc_t *proc, const char *name, proc_main_function entry,
+              int redirect, int red_fds[2]) {
   int err = 0;
 
   if (!proc) {
@@ -119,6 +119,7 @@ int proc_init(proc_t *proc, const char *name, proc_t *parent,
     };
   }
 
+  proc_t *parent = get_running();
   proc->name = name;
   proc->parent = parent;
   proc->entry = entry;

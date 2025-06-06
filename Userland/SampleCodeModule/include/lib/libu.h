@@ -12,6 +12,14 @@
 #define SPAWN_USE_DEFAULT_IO 0x1
 #define SPAWN_INHERIT_FDS 0x2
 
+typedef enum proc_state_t {
+  DEAD,
+  READY,
+  RUNNING,
+  ZOMBIE,
+  BLOCKED
+} proc_state_t;
+
 typedef int (*main_func_t)(int argc, char *argv[]);
 
 typedef int (*shell_command)(int params_count, char *params[]);
@@ -48,5 +56,7 @@ DECLARE_WRAPPER(change_priority, (int pid, int new_priority))
 DECLARE_WRAPPER(proc_exit, (int code))
 DECLARE_WRAPPER(copy_fd, (int pid, int target_fd, int src_fd))
 DECLARE_WRAPPER(close_fd, (int fd))
+DECLARE_WRAPPER(wait_pid, (int pid, int *status))
+DECLARE_WRAPPER(wait, (int *status))
 
 #endif // LIBU_H

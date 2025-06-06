@@ -31,6 +31,8 @@ DEFINE_WRAPPER(proc_exit, (int code), (code))
 DEFINE_WRAPPER(copy_fd, (int pid, int target_fd, int src_fd),
                (pid, target_fd, src_fd))
 DEFINE_WRAPPER(close_fd, (int fd), (fd))
+DEFINE_WRAPPER(wait_pid, (int pid, int *status), (pid, status))
+DEFINE_WRAPPER(wait, (int *status), (status))
 
 extern int64_t _spawn_process(char *name, int argc, char **argv, int redirect,
                               int fds[2]);

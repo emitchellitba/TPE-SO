@@ -367,7 +367,7 @@ int64_t sys_spawn_process(va_list args) {
     return -ENOMEM;
   }
 
-  proc_init(new_proc, name, NULL, entry, redirect, fds);
+  proc_init(new_proc, name, entry, redirect, fds);
 
   execv(new_proc, argc, argv);
 
@@ -460,12 +460,15 @@ int64_t sys_close_fd(va_list args) {
 
 int64_t sys_wait_pid(va_list args) {
   int64_t pid = va_arg(args, pid_t);
-  syscall_log(LOG_INFO, "sys_wait_pid(pid=%ld)\n", pid);
   int *exit_status = va_arg(args, int *);
+
+  syscall_log(LOG_INFO, "sys_wait_pid(pid=%ld)\n", pid);
+
   return wait_pid(pid, exit_status);
 }
 
 int64_t sys_wait(va_list args) {
   int *exit_status = va_arg(args, int *);
+
   return wait_pid(WAIT_PID, exit_status);
 }

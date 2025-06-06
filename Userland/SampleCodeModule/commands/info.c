@@ -70,6 +70,12 @@ int show_processes_cmd() {
     return -1;
   }
 
+  int status;
+  if (wait_pid(pid, &status) < 0) {
+    printf("Error waiting for process 'ps'\n");
+    return -1;
+  }
+
   return 0;
 }
 

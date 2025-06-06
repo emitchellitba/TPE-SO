@@ -36,7 +36,6 @@ typedef enum proc_state_t {
   RUNNING,
   ZOMBIE,
   BLOCKED
-
 } proc_state_t;
 
 typedef enum block_reason {
@@ -94,8 +93,8 @@ extern void sched_current_died();
 extern void sched_ready_queue_remove(struct proc *proc);
 
 int proc_new(proc_t **ref);
-int proc_init(proc_t *proc, const char *name, proc_t *parent,
-              proc_main_function entry, int redirect, int red_fds[2]);
+int proc_init(proc_t *proc, const char *name, proc_main_function entry,
+              int redirect, int red_fds[2]);
 int proc_list(proc_info_t *buffer, int max_count, int *out_count);
 void proc_kill(struct proc *proc);
 int proc_reap(struct proc *proc);
