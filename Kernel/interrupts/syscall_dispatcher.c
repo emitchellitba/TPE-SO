@@ -50,6 +50,8 @@ static syscall_func_t syscall_table[] = {
     sys_unblock,         // 24
     sys_copy_fd,         // 25
     sys_close_fd,        // 26
+    sys_wait_pid,        // 27
+    sys_wait,            // 28
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -454,4 +456,16 @@ int64_t sys_close_fd(va_list args) {
   entry->type = FD_NONE;
 
   return 0;
+}
+
+int64_t sys_wait_pid(va_list args) {
+  int64_t pid = va_arg(args, pid_t);
+  syscall_log(LOG_INFO, "sys_wait_pid(pid=%ld)\n", pid);
+  int *exit_status = va_arg(args, int *);
+  return wait_pid(pid, exit_status);
+}
+
+int64_t sys_wait(va_list args) {
+  int *exit_status = va_arg(args, int *);
+  return wait_pid(WAIT_PID, exit_status);
 }

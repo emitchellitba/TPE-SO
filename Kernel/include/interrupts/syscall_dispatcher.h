@@ -20,6 +20,8 @@
 
 #define INVALID_SYS_ID -1
 
+#define WAIT_PID -1 // Special value to wait for any child process
+
 #define DECLARE_SYSCALL(name) int64_t name(va_list args);
 
 extern scheduler_t scheduler;
@@ -53,5 +55,7 @@ DECLARE_SYSCALL(sys_block)
 DECLARE_SYSCALL(sys_unblock)
 DECLARE_SYSCALL(sys_copy_fd)
 DECLARE_SYSCALL(sys_close_fd)
+DECLARE_SYSCALL(sys_wait_pid)
+DECLARE_SYSCALL(sys_wait)
 
 #endif
