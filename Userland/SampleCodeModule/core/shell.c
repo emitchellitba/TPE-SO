@@ -90,7 +90,7 @@ int shell_main(int argc, char *argv[]) {
 
     parse_input();
 
-    int command_idx = process_input(/* parsed.cmd */);
+    int command_idx = process_input();
     if (command_idx != -1) {
       command_table[command_idx].func(parsed.param_count,
                                       (char **)parsed.params);

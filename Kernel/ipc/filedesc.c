@@ -1,5 +1,6 @@
 #include <ipc/filedesc.h>
 
+// TODO: Estas operaciones deberian estar en sus respectivos drivers
 static ssize_t video_write_stdout(void *resource, const void *buf,
                                   size_t count) {
   const char *cbuf = (const char *)buf;

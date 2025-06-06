@@ -245,21 +245,45 @@ int64_t sys_pipe_create(va_list args) {
   char *id = va_arg(args, char *);
   syscall_log(LOG_INFO, "pipe_create(id=%s)\n", id);
 
+  pipe_t *pipe = create_pipe(id);
+  if (!pipe)
+    return -ENOMEM;
+
   return 0;
 }
 
 int64_t sys_pipe_open(va_list args) {
-  int64_t pipe_id = va_arg(args, int64_t);
-  syscall_log(LOG_INFO, "pipe_open(pipe_id=%ld)\n", pipe_id);
-  // return pipe_open(pipe_id);
+  char *id = va_arg(args, char *);
+  int64_t mode = va_arg(args, int64_t);
+  syscall_log(LOG_INFO, "pipe_open(id=%s, mode=%ld)\n", id, mode);
 
-  return 0;
+  if ((mode != PIPE_READ && mode != PIPE_WRITE) || !id)
+    return -EINVAL;
+
+  proc_t *current_process = get_running();
+  if (!current_process)
+    return -EFAULT;
+
+  int free_fd = find_free_fd(current_process);
+  if (free_fd < 0)
+    return -ENOENT;
+
+  int res = open_pipe(&current_process->fds[free_fd], id, mode);
+  if (res < 0)
+    return res;
+
+  return free_fd;
 }
 
 int64_t sys_pipe_close(va_list args) {
-  int64_t pipe_id = va_arg(args, int64_t);
+  char *pipe_id = va_arg(args, char *);
   syscall_log(LOG_INFO, "pipe_close(pipe_id=%ld)\n", pipe_id);
-  // return pipe_close(pipe_id);
+
+  pipe_t *pipe = find_pipe_by_id(pipe_id);
+  if (!pipe)
+    return -ENOENT;
+
+  pipe_free(pipe);
 
   return 0;
 }

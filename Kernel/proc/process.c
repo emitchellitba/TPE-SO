@@ -212,3 +212,14 @@ void return_from_syscall(proc_t *proc, int retval) {
 
   proc->syscall_retval = retval;
 }
+
+int find_free_fd(proc_t *proc) {
+  if (!proc)
+    return -1;
+
+  for (int i = 0; i < FD_MAX; i++) {
+    if (proc->fds[i].type == FD_NONE)
+      return i;
+  }
+  return -1;
+}

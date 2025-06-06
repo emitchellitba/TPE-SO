@@ -9,6 +9,7 @@
 #include <lib.h>
 #include <lib/error.h>
 #include <logger.h>
+#include <pipe.h>
 #include <process.h>
 #include <scheduler.h>
 #include <soundDriver.h>

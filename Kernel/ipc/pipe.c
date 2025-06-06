@@ -3,6 +3,9 @@
 #include <lib.h>
 #include <queue.h>
 
+static file_ops_t pipe_read_ops;
+static file_ops_t pipe_write_ops;
+
 typedef struct pipe_t {
   struct ringbuf *buffer;
   int readers;
@@ -27,6 +30,30 @@ pipe_t *find_pipe_by_id(const char *id) {
     }
   }
   return NULL;
+}
+
+int open_pipe(fd_entry_t *fd, const char *id, int mode) {
+  if (!fd || !id || (mode != 0 && mode != 1))
+    return -1;
+
+  pipe_t *pipe = find_pipe_by_id(id);
+  if (!pipe) {
+    pipe = create_pipe(id);
+    if (!pipe)
+      return -1;
+  }
+
+  fd->resource = pipe;
+  fd->type = FD_PIPE;
+
+  if (mode == 0) {
+    pipe->readers++;
+    fd->ops = &pipe_read_ops;
+  } else {
+    pipe->writers++;
+    fd->ops = &pipe_write_ops;
+  }
+  return 0;
 }
 
 pipe_t *create_pipe(const char *id) {
@@ -55,34 +82,30 @@ pipe_t *create_pipe(const char *id) {
 
 void pipe_free(struct pipe_t *pipe) {
   if (pipe) {
+    pipe->in_use = false;
+
     if (pipe->buffer)
       ringbuf_free(pipe->buffer);
     kmm_free(pipe, kernel_mem);
   }
 }
 
-ssize_t pipe_read(pipe_t *pipe, size_t size, void *buf) {
-  for (int i = 0; i < size; i++) {
-    // wait(pipe->read_sem);
+static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
+  // wait
 
-    ringbuf_read(pipe->buffer, 1, (char *)buf + i);
+  return ringbuf_read(pipe->buffer, size, (char *)buf);
 
-    // signal(pipe->write_sem);
-  }
-
-  return size;
+  // post
 }
 
-ssize_t pipe_write(pipe_t *pipe, size_t size, const void *buf) {
-  size_t i = 0;
+static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
+  // wait(pipe->write_sem);
 
-  for (; i < size; i++) {
-    // wait(pipe->write_sem);
+  return ringbuf_write(pipe->buffer, size, (const char *)buf);
 
-    ringbuf_write(pipe->buffer, 1, (const char *)buf + i);
-
-    // signal(pipe->read_sem);
-  }
-
-  return i;
+  // signal(pipe->read_sem);
 }
+
+static file_ops_t pipe_read_ops = {.read = pipe_read, .write = NULL};
+
+static file_ops_t pipe_write_ops = {.read = NULL, .write = pipe_write};

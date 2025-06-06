@@ -102,5 +102,6 @@ int proc_reap(struct proc *proc);
 
 proc_t *get_proc_by_pid(pid_t pid);
 void return_from_syscall(proc_t *proc, int retval);
+int find_free_fd(proc_t *proc);
 
 #endif // PROC_H
