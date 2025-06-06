@@ -14,6 +14,7 @@
 
 #define STACK_SIZE (8192U) /* 8 KiB */
 #define QUANTUM_DEFAULT 2
+#define QUANTUM_MAX 5
 
 #define FD_MAX 16
 
