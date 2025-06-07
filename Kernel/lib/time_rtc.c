@@ -1,9 +1,9 @@
+#include <memory_manager.h>
+#include <process.h>
+#include <queue.h>
+#include <scheduler.h>
 #include <stdint.h>
 #include <time_rtc.h>
-#include <scheduler.h>
-#include <process.h>
-#include <memory_manager.h>
-#include <queue.h>
 
 #define PIT_COMMAND_PORT 0x43
 #define PIT_CHANNEL0_PORT 0x40
@@ -49,7 +49,7 @@ void timer_handler() {
 }
 
 void sleep(int ticksToWait) {
-  sleeping_proc_t* current = kmalloc(kernel_mem, sizeof(sleeping_proc_t));
+  sleeping_proc_t *current = kmalloc(kernel_mem, sizeof(sleeping_proc_t));
   current->pid = get_running()->pid;
   current->wake_up_tick = ticks + ticksToWait;
   enqueue(sleeping_proc_queue, current);

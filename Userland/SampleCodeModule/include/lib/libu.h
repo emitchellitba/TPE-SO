@@ -5,6 +5,7 @@
 
 #define STDIN 0
 #define STDOUT 1
+#define STDERR 2
 
 #define READ_PIPE 0
 #define WRITE_PIPE 1
@@ -23,11 +24,6 @@ typedef enum proc_state_t {
 typedef int (*main_func_t)(int argc, char *argv[]);
 
 typedef int (*shell_command)(int params_count, char *params[]);
-
-typedef struct command_entry {
-  const char *name;
-  shell_command func;
-} command_entry_t;
 
 typedef struct {
   int pid;

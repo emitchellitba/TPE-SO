@@ -17,20 +17,6 @@ int exit_cmd(void) {
   return 0;
 }
 
-int test_cmd(void) {
-  int pid;
-  char *argv[] = {"test", NULL};
-  int argc = 1;
-
-  pid = spawn_process("test", argc, argv);
-  if (pid < 0) {
-    printf("Error spawning process 'test'\n");
-    return -1;
-  }
-
-  return 0;
-}
-
 int sleep_cmd(int argc, char **argv) {
   if (argc < 1) {
     printf("Usage: sleep <ticks>\n");

@@ -125,22 +125,6 @@ uint64_t schedule(uint64_t last_rsp) {
   return (uint64_t)scheduler->current_process->stack_pointer;
 }
 
-int process_wrapper(uint64_t user_argc, char **user_argv) {
-  proc_t *current_p = scheduler->current_process;
-
-  if (current_p && current_p->entry) {
-    current_p->entry(user_argc, user_argv);
-  } else {
-    printk("Error: No entry point or process for wrapper!\n");
-    // sys_exit(-1);
-  }
-
-  while (1) // No se deberia llegar a este punto pues un sys_exit debe ocurrir
-            // antes
-  {
-  }
-}
-
 void yield() {
   scheduler->current_process->has_quantum = 0;
   call_timer_tick();

@@ -1,5 +1,8 @@
 #include <display.h>
 
+#include <libu.h>
+#include <stdlib.h>
+
 int clear_cmd() {
   screen_clear();
   return 0;

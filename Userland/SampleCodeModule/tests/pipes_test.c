@@ -20,18 +20,20 @@ int pipes_test_main(int argc, char *argv[]) {
   load_program("writer", writer);
   load_program("reader", reader);
 
-  char *reader_argv[] = {"reader", NULL};
-  int reader_pid = spawn_process("reader", 1, reader_argv);
-  if (reader_pid < 0) {
-    printf("Error spawning reader process: %d\n", reader_pid);
-    pipe_close(pipe_id);
-    return 1;
-  }
-
+  // Se instancia primero el writer para que se cree antes el fd de escritura y
+  // no se retorne EOF inmediatamente
   char *writer_argv[] = {"writer", NULL};
   int writer_pid = spawn_process("writer", 1, writer_argv);
   if (writer_pid < 0) {
     printf("Error spawning writer process: %d\n", writer_pid);
+    pipe_close(pipe_id);
+    return 1;
+  }
+
+  char *reader_argv[] = {"reader", NULL};
+  int reader_pid = spawn_process("reader", 1, reader_argv);
+  if (reader_pid < 0) {
+    printf("Error spawning reader process: %d\n", reader_pid);
     pipe_close(pipe_id);
     return 1;
   }
@@ -89,7 +91,7 @@ int reader(int argc, char *argv[]) {
   return 0;
 }
 
-/** Este proceso deberia quedar bloqueado por siempre */
+/** Este proceso deberia retornar debido a que no hay writers y recibe EOF */
 int lonely_reader(int argc, char *argv[]) {
   int read_fd = pipe_open("lonely_reader_pipe", READ_PIPE);
   if (read_fd < 0) {
@@ -99,7 +101,6 @@ int lonely_reader(int argc, char *argv[]) {
   char buf[64] = {0};
   ssize_t n = read(read_fd, buf, sizeof(buf));
 
-  // Codigo no alcanzable
   const char *prefix = "Hello from lonely reader: \n";
   write(1, prefix, str_len(prefix));
   write(1, buf, n);

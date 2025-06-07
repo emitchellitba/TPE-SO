@@ -13,7 +13,6 @@ void initialize_scheduler();
 void proc_ready(proc_t *p);
 uint64_t schedule(uint64_t last_rsp);
 void enqueue_next_process();
-int process_wrapper(uint64_t user_argc, char **user_argv);
 void sched_current_died();
 proc_t *get_running();
 int block_process_by_pid(pid_t pid_to_block);

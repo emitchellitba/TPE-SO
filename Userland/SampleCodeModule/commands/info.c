@@ -1,5 +1,7 @@
 #include <info.h>
 
+#include <shell.h>
+
 extern command_entry_t command_table[];
 
 char *reg_strings[] = {
@@ -54,42 +56,6 @@ int show_kmsg_cmd() {
   size_t size = KMSG_BUFF_SIZE;
   read_kmsg(log, size);
   printf("%s", log);
-
-  return 0;
-}
-
-int show_processes_cmd() {
-  int pid;
-  char *argv[] = {"ps", NULL};
-  int argc = 1;
-
-  pid = spawn_process("ps", argc, argv);
-
-  if (pid < 0) {
-    printf("Error spawning process 'ps'\n");
-    return -1;
-  }
-
-  int status;
-  if (wait_pid(pid, &status) < 0) {
-    printf("Error waiting for process 'ps'\n");
-    return -1;
-  }
-
-  return 0;
-}
-
-int show_programs_cmd() {
-  int pid;
-  char *argv[] = {"ls", NULL};
-  int argc = 1;
-
-  pid = spawn_process("ls", argc, argv);
-
-  if (pid < 0) {
-    printf("Error spawning process 'ls'\n");
-    return -1;
-  }
 
   return 0;
 }

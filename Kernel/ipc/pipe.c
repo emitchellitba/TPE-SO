@@ -110,6 +110,9 @@ void pipe_free(struct pipe_t *pipe) {
 
 static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
   while (!ringbuf_available(pipe->buffer)) {
+    if (pipe->writers == 0)
+      return 0; // EOF
+
     enqueue(pipe->read_queue, get_running());
     block_current(0, NULL);
   }
@@ -156,6 +159,12 @@ static int pipe_close_write(pipe_t *pipe) {
     return -1;
   if (pipe->writers > 0)
     pipe->writers--;
+
+  if (pipe->writers == 0) {
+    while (pipe->read_queue->count > 0)
+      proc_ready(dequeue(pipe->read_queue));
+  }
+
   if (pipe->readers == 0 && pipe->writers == 0)
     pipe_free(pipe);
   return 0;

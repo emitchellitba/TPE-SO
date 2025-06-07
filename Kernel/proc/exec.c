@@ -1,5 +1,7 @@
 #include <exec.h>
 
+#include <proc_wrapper.h>
+
 KMEMORY_DECLARE
 
 // Esta funcion prepara el stack del proceso para que contenga los argumentos
@@ -108,7 +110,7 @@ int execv(struct proc *proc, int argc, char *const argv[]) {
   char **user_argv_ptr_array_kernel_buf =
       prepare_argv_on_stack(proc, argc, argv, &proc_stack_current_addr);
   if (!user_argv_ptr_array_kernel_buf) {
-    return -1; // TODO: Usar una constante de error definida
+    return -1;
   }
 
   /*

@@ -6,21 +6,50 @@ static void execute_pipe_commands(parsed_input_t *parsed_left,
 char input_buffer[BUFF_SIZE];
 
 command_entry_t command_table[] = {
-    {"help", help_cmd},
-    {"date", print_local_date_time_cmd},
-    {"zoom", zoom_cmd},
-    {"color", color_cmd},
-    {"clear", clear_cmd},
-    {"exit", exit_cmd},
-    {"registers", get_registers_cmd},
-    {"kmsg", show_kmsg_cmd},
-    {"ps", show_processes_cmd},
-    {"programs", show_programs_cmd},
-    {"test", test_cmd},
-    {"sleep", sleep_cmd}
-};
+    // --- Comandos Built-in ---
+    {"help", CMD_BUILTIN, .data.func = help_cmd},
+    {"date", CMD_BUILTIN, .data.func = print_local_date_time_cmd},
+    {"zoom", CMD_BUILTIN, .data.func = zoom_cmd},
+    {"color", CMD_BUILTIN, .data.func = color_cmd},
+    {"clear", CMD_BUILTIN, .data.func = clear_cmd},
+    {"exit", CMD_BUILTIN, .data.func = exit_cmd},
+    {"registers", CMD_BUILTIN, .data.func = get_registers_cmd},
+    {"kmsg", CMD_BUILTIN, .data.func = show_kmsg_cmd},
+    {"sleep", CMD_BUILTIN, .data.func = sleep_cmd},
+
+    // --- Comandos Externos (Programas) ---
+    {"ps", CMD_SPAWN, .data.program_name = "ps"},
+    {"programs", CMD_SPAWN, .data.program_name = "ls"},
+    {"test", CMD_SPAWN, .data.program_name = "test"},
+    {"cat", CMD_SPAWN, .data.program_name = "cat"}};
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))
+
+static void execute_command(command_entry_t *entry, int argc, char **argv,
+                            int is_background) {
+  switch (entry->type) {
+  case CMD_BUILTIN:
+    entry->data.func(argc, argv);
+    break;
+
+  case CMD_SPAWN: {
+    int pid = spawn_process(entry->data.program_name, argc, argv);
+
+    if (pid < 0) {
+      printf("Error al iniciar el proceso '%s'\n", entry->data.program_name);
+      return;
+    }
+
+    if (is_background) {
+      printf("Process started in background with PID: %d\n", pid);
+    } else {
+      int status;
+      wait_pid(pid, &status);
+    }
+    break;
+  }
+  }
+}
 
 // --- Funciones de utilidad ---
 static void show_prompt() { printf("user@itba:> "); }
@@ -58,7 +87,6 @@ static void parse_single_command(char *input, parsed_input_t *parsed) {
   input = trim(input);
   parsed->param_count = 0;
 
-  // Find the first space to separate command from params
   char *space = str_chr(input, ' ');
   if (space) {
     *space = '\0';
@@ -66,7 +94,7 @@ static void parse_single_command(char *input, parsed_input_t *parsed) {
     parsed->cmd[MAX_PARAM_LEN - 1] = '\0';
 
     char *param = space + 1;
-    param = trim(param); // Remove leading spaces
+    param = trim(param);
 
     char *token = str_tok(param, " ");
     while (token && parsed->param_count < MAX_PARAMS) {
@@ -90,6 +118,15 @@ int shell_main(int argc, char *argv[]) {
       continue;
 
     char *line = trim(input_buffer);
+    int is_background = 0;
+
+    int len = str_len(line);
+    if (len > 0 && line[len - 1] == '&') {
+      is_background = 1;
+      line[len - 1] = '\0';
+      line = trim(line);
+    }
+
     char *pipe_pos = str_chr(line, '|');
 
     if (pipe_pos == NULL) {
@@ -102,11 +139,14 @@ int shell_main(int argc, char *argv[]) {
 
       int command_idx = find_command_index(&parsed_cmd);
       if (command_idx != -1) {
-        char *argv[MAX_PARAMS];
+        char *argv_exec[MAX_PARAMS + 1];
+        argv_exec[0] = parsed_cmd.cmd;
         for (int i = 0; i < parsed_cmd.param_count; i++) {
-          argv[i] = parsed_cmd.params[i];
+          argv_exec[i + 1] = parsed_cmd.params[i];
         }
-        command_table[command_idx].func(parsed_cmd.param_count, argv);
+
+        execute_command(&command_table[command_idx], parsed_cmd.param_count,
+                        parsed_cmd.params, is_background);
       } else {
         show_command_not_found();
       }
@@ -117,21 +157,14 @@ int shell_main(int argc, char *argv[]) {
       char *right_str = pipe_pos + 1;
 
       parsed_input_t parsed_left, parsed_right;
-
       parse_single_command(left_str, &parsed_left);
       parse_single_command(right_str, &parsed_right);
-
-      printf("\nPipe detectado!\n");
-      printf("  Comando Izquierda: '%s'\n", parsed_left.cmd);
-      printf("  Comando Derecha:   '%s'\n", parsed_right.cmd);
 
       execute_pipe_commands(&parsed_left, &parsed_right);
     }
   }
   return 0;
 }
-
-int get_total_commands() { return TOTAL_CMDS; }
 
 static void execute_pipe_commands(parsed_input_t *parsed_left,
                                   parsed_input_t *parsed_right) {
@@ -165,9 +198,10 @@ static void execute_pipe_commands(parsed_input_t *parsed_left,
   close_fd(write_fd);
   close_fd(read_fd);
 
-  // Wait both processes
-  // waitpid(pid_left);
-  // waitpid(pid_right);
+  wait_pid(pid_left, NULL);
+  wait_pid(pid_right, NULL);
 
   pipe_close("pipe_cmd");
 }
+
+int get_total_commands() { return TOTAL_CMDS; }

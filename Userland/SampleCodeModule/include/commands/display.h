@@ -10,5 +10,6 @@ extern void zoom(uint8_t zoom_in);
 int clear_cmd();
 int zoom_cmd(int argc, char **argv);
 int color_cmd(int argc, char **argv);
+int cat_cmd(void);
 
 #endif // _DISPLAY_H_

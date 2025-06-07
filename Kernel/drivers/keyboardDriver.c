@@ -82,8 +82,7 @@ void handle_key_press() {
     capsLock = !capsLock;
     return;
   case ESC_PRESSED: {
-    char aux = ESC;
-    ringbuf_write(kbuff, 1, &aux);
+    esc = 1;
     return;
   }
   case LEFT_ARROW:
