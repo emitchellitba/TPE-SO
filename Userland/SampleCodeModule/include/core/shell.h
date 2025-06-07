@@ -12,9 +12,10 @@
 
 #define MAX_PARAMS 10
 #define MAX_PARAM_LEN 32
+#define MAX_CMD_LEN 32
 
 typedef struct {
-  char *cmd;
+  char cmd[MAX_CMD_LEN];
   int param_count;
   char params[MAX_PARAMS][MAX_PARAM_LEN];
 } parsed_input_t;

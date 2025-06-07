@@ -6,5 +6,6 @@
 
 int exit_cmd();
 int test_cmd(void);
+int sleep_cmd(int argc, char **argv);
 
 #endif // _CORE_H_

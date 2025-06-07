@@ -8,9 +8,7 @@ extern void change_color(uint8_t background);
 extern void zoom(uint8_t zoom_in);
 
 int clear_cmd();
-int zoom_in_cmd();
-int zoom_out_cmd();
-int change_font_color_cmd();
-int change_bg_color_cmd();
+int zoom_cmd(int argc, char **argv);
+int color_cmd(int argc, char **argv);
 
 #endif // _DISPLAY_H_

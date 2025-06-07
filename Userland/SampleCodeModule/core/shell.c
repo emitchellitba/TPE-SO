@@ -8,17 +8,16 @@ char input_buffer[BUFF_SIZE];
 command_entry_t command_table[] = {
     {"help", help_cmd},
     {"date", print_local_date_time_cmd},
-    {"zoom in", zoom_in_cmd},
-    {"zoom out", zoom_out_cmd},
-    {"color font", change_font_color_cmd},
-    {"color background", change_bg_color_cmd},
+    {"zoom", zoom_cmd},
+    {"color", color_cmd},
     {"clear", clear_cmd},
     {"exit", exit_cmd},
     {"registers", get_registers_cmd},
     {"kmsg", show_kmsg_cmd},
     {"ps", show_processes_cmd},
     {"programs", show_programs_cmd},
-    {"run test", test_cmd},
+    {"test", test_cmd},
+    {"sleep", sleep_cmd}
 };
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))
@@ -57,22 +56,17 @@ static int find_command_index(parsed_input_t *parsed) {
 
 static void parse_single_command(char *input, parsed_input_t *parsed) {
   input = trim(input);
-
   parsed->param_count = 0;
 
-  char *dash = str_chr(input, '-');
-  if (dash) {
+  // Find the first space to separate command from params
+  char *space = str_chr(input, ' ');
+  if (space) {
+    *space = '\0';
+    str_ncpy(parsed->cmd, input, MAX_PARAM_LEN - 1);
+    parsed->cmd[MAX_PARAM_LEN - 1] = '\0';
 
-    if (dash > input && *(dash - 1) == ' ')
-      *(dash - 1) = '\0';
-    else
-      *dash = '\0';
-
-    parsed->cmd = input;
-
-    char *param = dash + 1;
-    while (*param == ' ')
-      param++;
+    char *param = space + 1;
+    param = trim(param); // Remove leading spaces
 
     char *token = str_tok(param, " ");
     while (token && parsed->param_count < MAX_PARAMS) {
@@ -82,7 +76,8 @@ static void parse_single_command(char *input, parsed_input_t *parsed) {
       token = str_tok(NULL, " ");
     }
   } else {
-    parsed->cmd = input;
+    str_ncpy(parsed->cmd, input, MAX_PARAM_LEN - 1);
+    parsed->cmd[MAX_PARAM_LEN - 1] = '\0';
   }
 }
 
@@ -107,8 +102,11 @@ int shell_main(int argc, char *argv[]) {
 
       int command_idx = find_command_index(&parsed_cmd);
       if (command_idx != -1) {
-        command_table[command_idx].func(parsed_cmd.param_count,
-                                        (char **)parsed_cmd.params);
+        char *argv[MAX_PARAMS];
+        for (int i = 0; i < parsed_cmd.param_count; i++) {
+          argv[i] = parsed_cmd.params[i];
+        }
+        command_table[command_idx].func(parsed_cmd.param_count, argv);
       } else {
         show_command_not_found();
       }

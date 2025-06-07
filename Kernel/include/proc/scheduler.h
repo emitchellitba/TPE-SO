@@ -19,5 +19,6 @@ proc_t *get_running();
 int block_process_by_pid(pid_t pid_to_block);
 void block(proc_t *process, block_reason_t reason, void *waiting_resource);
 void block_current(block_reason_t reason, void *waiting_resource);
+int unblock_process_by_pid(pid_t pid_to_unblock);
 
 #endif

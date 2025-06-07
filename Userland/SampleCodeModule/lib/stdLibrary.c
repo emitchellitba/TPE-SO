@@ -290,6 +290,7 @@ int str_ncmp(const char *str1, const char *str2, int n) {
       return *str1 - *str2;
     str1++;
     str2++;
+    i++;
   }
   if (*str1 == '\0' || *str2 == '\0')
     return *str1 - *str2;
@@ -367,8 +368,31 @@ char *trim(char *str) {
 }
 
 void str_ncpy(char *dest, const char *src, int n) {
-  for (int i = 0; i < n && src[i] != '\0'; i++) {
+  int i;
+  for (i = 0; i < n && src[i] != '\0'; i++) {
     dest[i] = src[i];
   }
-  dest[n] = '\0';
+  dest[i] = '\0';
+}
+
+int atoi(const char *str) {
+  int res = 0;
+  int sign = 1;
+
+  while (*str == ' ' || *str == '\t' || *str == '\n')
+    str++;
+
+  if (*str == '-') {
+    sign = -1;
+    str++;
+  } else if (*str == '+') {
+    str++;
+  }
+
+  while (*str >= '0' && *str <= '9') {
+    res = res * 10 + (*str - '0');
+    str++;
+  }
+
+  return sign * res;
 }

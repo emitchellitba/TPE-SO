@@ -44,7 +44,8 @@ typedef enum block_reason {
   BLK_KEYBOARD,  // Esperando entrada del teclado
   BLK_ARBITRARY, // Bloqueado por syscall sys_block
   BLK_SEMAPHORE, // Esperando en un semáforo
-  BLK_CHILD      // Esperando a que un proceso hijo termine (waitpid)
+  BLK_CHILD,
+  BLK_SLEEP      // Esperando a que un proceso hijo termine (waitpid)
                  // BLK_PIPE_READ,  // (Futuro) Esperando para leer de un pipe
   // BLK_PIPE_WRITE, // (Futuro) Esperando para escribir en un pipe
 } block_reason_t;

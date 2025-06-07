@@ -385,23 +385,3 @@ void drawcharSize(unsigned char c, color fcolor, color bcolor) {
   if ((posX %= SCREEN_WIDTH_PIXELS) == 0)
     posY += CHAR_HEIGHT;
 }
-
-void free_draw(int x, int y, int drawing[][28], color *colors, int size) {
-  int maxX = x + size;
-  int maxY = y + size;
-  for (int i = y; i < maxY; i++) {
-    for (int j = x; j < maxX; j++) {
-      putPixel(colors[drawing[i - y][j - x]], j, i);
-    }
-  }
-}
-
-void draw_sqr(int x, int y, uint64_t col, uint64_t size) {
-  int maxX = x + size;
-  int maxY = y + size;
-  for (int i = y; i < maxY; i++) {
-    for (int j = x; j < maxX; j++) {
-      putPixel(col, j, i);
-    }
-  }
-}

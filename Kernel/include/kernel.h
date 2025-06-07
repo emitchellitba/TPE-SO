@@ -20,7 +20,7 @@
 #include <string.h>
 #include <videoDriver.h>
 
-#define SPAWN_PROCESS_SYSCALL_ENTRY 19
+#define SPAWN_PROCESS_SYSCALL_ENTRY 17
 
 extern int init_main(int argc, char **argv);
 extern void call_timer_tick();

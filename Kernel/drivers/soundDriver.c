@@ -2,6 +2,8 @@
 #include <soundDriver.h>
 #include <stdint.h>
 
+//TODO: Deprecated use of sleep
+
 extern void outb(uint8_t a, uint8_t tmp);
 extern uint8_t inb(uint8_t a);
 extern void sleep(int ticks);

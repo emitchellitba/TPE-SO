@@ -38,5 +38,6 @@ void to_lower(char *str);
 unsigned int _abs(int a);
 
 char *trim(char *str);
+int atoi(const char *str);
 
 #endif // _STDLIBRARY_H_

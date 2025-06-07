@@ -27,31 +27,29 @@ static syscall_func_t syscall_table[] = {
     sys_write,           // 1
     sys_clear_screen,    // 2
     sys_change_color,    // 3
-    sys_draw_sqr,        // 4
-    sys_free_draw,       // 5
-    sys_get_time,        // 6
-    sys_sleep,           // 7
-    sys_zoom,            // 8
-    sys_fill_out_buffer, // 9
-    sys_beep,            // 10
-    sys_read_kmsg,       // 11
-    sys_pipe_create,     // 12
-    sys_pipe_open,       // 13
-    sys_pipe_close,      // 14
-    sys_get_procs,       // 15
-    sys_load_program,    // 16
-    sys_rm_program,      // 17
-    sys_get_programs,    // 18
-    sys_spawn_process,   // 19
-    sys_kill_proc,       // 20
-    sys_change_priority, // 21
-    sys_exit,            // 22
-    sys_block,           // 23
-    sys_unblock,         // 24
-    sys_copy_fd,         // 25
-    sys_close_fd,        // 26
-    sys_wait_pid,        // 27
-    sys_wait,            // 28
+    sys_get_time,        // 4
+    sys_sleep,           // 5
+    sys_zoom,            // 6
+    sys_fill_out_buffer, // 7
+    sys_beep,            // 8
+    sys_read_kmsg,       // 9
+    sys_pipe_create,     // 10
+    sys_pipe_open,       // 11
+    sys_pipe_close,      // 12
+    sys_get_procs,       // 13
+    sys_load_program,    // 14
+    sys_rm_program,      // 15
+    sys_get_programs,    // 16
+    sys_spawn_process,   // 17
+    sys_kill_proc,       // 18
+    sys_change_priority, // 19
+    sys_exit,            // 20
+    sys_block,           // 21
+    sys_unblock,         // 22
+    sys_copy_fd,         // 23
+    sys_close_fd,        // 24
+    sys_wait_pid,        // 25
+    sys_wait,            // 26
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -147,31 +145,6 @@ int64_t sys_change_color(va_list args) {
     change_bg_color();
   else
     change_font_color();
-  return 0;
-}
-
-int64_t sys_draw_sqr(va_list args) {
-  int64_t x = va_arg(args, int64_t);
-  int64_t y = va_arg(args, int64_t);
-  uint64_t col = va_arg(args, uint64_t);
-  uint64_t size = va_arg(args, uint64_t);
-  syscall_log(LOG_INFO, "draw_sqr(x=%ld, y=%ld, col=%lu, size=%lu)\n", x, y,
-              col, size);
-  draw_sqr(x, y, col, size);
-  return 0;
-}
-
-int64_t sys_free_draw(va_list args) {
-  int64_t x = va_arg(args, int64_t);
-  int64_t y = va_arg(args, int64_t);
-  int64_t **drawing = va_arg(args, int64_t **);
-  color *colors = va_arg(args, color *);
-  int64_t size = va_arg(args, int64_t);
-  syscall_log(LOG_INFO,
-              "free_draw(x=%ld, y=%ld, drawing=%p, colors=%p, size=%ld)\n", x,
-              y, drawing, colors, size);
-  // TODO: Borrar todos estos casteos y hacer tipos consistentes
-  free_draw((int)x, (int)y, (int(*)[28])drawing, colors, (int)size);
   return 0;
 }
 

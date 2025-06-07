@@ -61,12 +61,8 @@ void change_font_color();
 
 void change_bg_color();
 
-void draw_sqr(int x, int y, uint64_t col, uint64_t size);
-
 void zoom_in();
 
 void zoom_out();
-
-void free_draw(int x, int y, int drawing[][28], color *colors, int size);
 
 #endif
