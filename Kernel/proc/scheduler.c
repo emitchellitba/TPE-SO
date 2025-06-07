@@ -9,7 +9,6 @@ typedef struct scheduler_cdt {
   int init;
   struct queue *ready_processes;
   struct queue *blocked_processes;
-  char idle_flag;
   char current_died;
   proc_t *current_process;
 } scheduler_cdt;
@@ -42,7 +41,6 @@ void initialize_scheduler() {
   }
 
   scheduler->init = 1;
-  scheduler->idle_flag = 1;
   scheduler->current_process = NULL;
 }
 
@@ -58,15 +56,6 @@ void proc_ready(proc_t *p) {
   queue_remove(scheduler->blocked_processes, p);
 }
 
-static void kernel_idle() {
-  scheduler->idle_flag = 1;
-
-  // Chequeo si hay procesos listos
-  while (scheduler->ready_processes->count == 0) {
-    _hlt();
-  }
-}
-
 // Encolar el siguiente proceso listo de manera segura
 void enqueue_next_process() {
   scheduler->current_process = (proc_t *)dequeue(scheduler->ready_processes);
@@ -74,10 +63,10 @@ void enqueue_next_process() {
     scheduler->current_process->status = RUNNING;
     scheduler->current_process->has_quantum =
         scheduler->current_process->priority;
-    scheduler->idle_flag = 0;
-  } else { /* No deberia pasar nunca pero por seguridad llama a idle */
-    printk("CRITICAL: ready_processes-> count mismanaged\n");
-    kernel_idle();
+  } else {
+    printk("CRITICAL: No hay procesos listos para ejecutar.\n");
+    while (1)
+      ;
   }
 }
 
@@ -95,8 +84,11 @@ uint64_t schedule(uint64_t last_rsp) {
   struct queue *ready_queue = scheduler->ready_processes;
 
   if (ready_queue->count == 0) {
-    if (!scheduler->current_process) {
-      kernel_idle();
+    if (!scheduler->current_process ||
+        scheduler->current_process->status != RUNNING) {
+      printk("PANIC: No hay procesos listos ni corriendo. \n");
+      while (1)
+        ;
     } else {
       scheduler->current_process->has_quantum =
           scheduler->current_process->priority;

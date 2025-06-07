@@ -269,10 +269,7 @@ pid_t wait_pid(pid_t pid, int *exit_status) {
         }
       }
 
-      parent->block_reason = BLK_CHILD;
-      parent->waiting_on = (void *)(intptr_t)-1;
-      parent->status = BLOCKED;
-      yield();
+      block_current(BLK_CHILD, NULL);
     } else {
       int found = 0;
       for (int i = 0; i < parent->child_count; i++) {
@@ -292,10 +289,7 @@ pid_t wait_pid(pid_t pid, int *exit_status) {
             return pid;
           }
 
-          parent->block_reason = BLK_CHILD;
-          parent->waiting_on = (void *)(intptr_t)pid;
-          parent->status = BLOCKED;
-          yield();
+          block_current(BLK_CHILD, NULL);
           break;
         }
       }

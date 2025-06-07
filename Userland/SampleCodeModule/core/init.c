@@ -1,5 +1,7 @@
 #include <init.h>
 
+extern int ps_main(int argc, char *argv[]);
+extern int ls_main(int argc, char *argv[]);
 extern int rd_wr_test_main(int argc, char *argv[]);
 extern int pipes_test_main(int argc, char *argv[]);
 extern int cat_main(int argc, char *argv[]);
@@ -10,10 +12,8 @@ static int run_shell(int argc, char *argv[], int *pid) {
   *pid = spawn_process(SHELL_PROGRAM_NAME, argc, argv);
 
   if (*pid < 0) {
-    // Log the error if needed
     return -1;
   }
-  // Log success
   return 0;
 }
 
@@ -38,15 +38,10 @@ int init_main(int argc, char **argv) {
       break;
     }
 
-    while (1) {
-      // int64_t pid = waitpid(-1, NULL, 0); // Espera a cualquier proceso
-      // if (pid == shell_pid)
-      // {
-      //   break;
-      // }
-
-      /* Aca hay que limpiar el estado del proceso huerfano que
-         termino */
+    int pid, status;
+    while ((pid = wait(&status)) > 0) {
+      if (pid == shell_pid)
+        break;
     }
   }
 

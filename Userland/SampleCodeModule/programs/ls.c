@@ -1,8 +1,8 @@
-#include <ls.h>
+#include <libu.h>
+#include <stdLibrary.h>
 
 #define MAX_FILE_ENTRIES 16
-#define MAX_FILE_NAME_LEN                                                      \
-  32 // TODO: esto deberia estar en una libreria compartida
+#define MAX_FILE_NAME_LEN 32
 
 int ls_main(int argc, char *argv[]) {
   char buffer[MAX_FILE_ENTRIES][MAX_FILE_NAME_LEN];
