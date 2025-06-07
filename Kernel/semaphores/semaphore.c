@@ -1,4 +1,6 @@
 #include <semaphores/semaphore.h>
+#include <proc/scheduler.h>
+#include <proc/process.h>
 
 // TODO: manejo de errores (enum, tipo de dato, etc.)
 // TODO: agregar fuciones de bloqueo/desbloqueo de procesos en scheduler.c
@@ -16,12 +18,12 @@ void my_sem_init() {
 // Retorna el semáforo con el id especificado, o NULL si no existe o está en uso
 semaphore_t *my_sem_create(uint64_t id, uint64_t value) {
   if (id < MAX_SEMAPHORES && !semaphore_table[id].in_use) {
+    semaphore_table[id].waiting_process_queue = queue_new();
     if (!semaphore_table[id].waiting_process_queue) {
       return NULL; // Error al crear la cola de espera
     }
     semaphore_table[id].value = value;
     semaphore_table[id].in_use = 1;
-    semaphore_table[id].waiting_process_queue = queue_new();
     semaphore_table[id].lock = 1;
     return &semaphore_table[id];
   } else {
@@ -88,19 +90,17 @@ uint64_t my_sem_wait(semaphore_t *sem) {
   if (!sem_is_open(sem)) {
     return -1; // Error: semáforo no está abierto
   }
-  while (1) {
-    aquire(&(sem->lock));
-    if (sem->value > 0) {
-      sem->value--;
-      release(&(sem->lock));
-      return 0; // Éxito
-    } else {
-      // Agregar el proceso actual a la cola de espera
-      struct proc *current_proc = get_running();
-      enqueue(sem->waiting_process_queue, current_proc);
-      release(&(sem->lock));
-      block_current(BLK_SEMAPHORE, sem); // Bloquear el proceso actual
-    }
+  aquire(&(sem->lock));
+  if (sem->value > 0) {
+    sem->value--;
+    release(&(sem->lock));
+    return 0; // Éxito
+  } else {
+    // Agregar el proceso actual a la cola de espera
+    struct proc *current_proc = get_running();
+    enqueue(sem->waiting_process_queue, current_proc);
+    release(&(sem->lock));
+    block_current(BLK_SEMAPHORE, sem); // Bloquear el proceso actual
   }
 }
 

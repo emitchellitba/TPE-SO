@@ -10,7 +10,7 @@ SOURCES_INTERRUPTS=$(wildcard interrupts/*.c)
 SOURCES_LIB=$(wildcard lib/*.c)
 SOURCES_MEMORY=$(wildcard memory/*.c)
 SOURCES_PROC=$(wildcard proc/*.c)
-SOURCES_SEM=$(wildcard sem/*.c)
+SOURCES_SEM=$(wildcard semaphores/*.c)
 
 
 OBJECTS=$(SOURCES:.c=.o)
@@ -37,7 +37,7 @@ ASM_INCLUDE_FLAGS=-Iasm
 
 all: $(KERNEL)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_DRIVERS) $(OBJECTS_INTERRUPTS) $(OBJECTS_MEMORY) $(OBJECTS_LIB) $(OBJECTS_PROC)
+$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(OBJECTS_DRIVERS) $(OBJECTS_INTERRUPTS) $(OBJECTS_MEMORY) $(OBJECTS_LIB) $(OBJECTS_PROC) $(OBJECTS_SEM)
 	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_DRIVERS) $(OBJECTS_INTERRUPTS) $(OBJECTS_MEMORY) $(STATICLIBS) $(OBJECTS_LIB) $(OBJECTS_PROC) $(OBJECTS_SEM)
 	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_DRIVERS) $(OBJECTS_INTERRUPTS) $(OBJECTS_MEMORY) $(STATICLIBS) $(OBJECTS_LIB) $(OBJECTS_PROC) $(OBJECTS_SEM)
 
@@ -55,7 +55,7 @@ $(LOADEROBJECT):
 
 
 clean:
-	rm -rf asm/*.o drivers/*.o interrupts/*.o lib/*.o memory/*.o proc/*.o *.o *.bin kernel.bin
+	rm -rf asm/*.o drivers/*.o interrupts/*.o lib/*.o memory/*.o proc/*.o semaphores/*.o *.o *.bin kernel.bin
 
 .PHONY: all clean
 

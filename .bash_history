@@ -64,3 +64,14 @@ cat .gdbitni
 cat .gdbinit
 quit
 exit
+cd root
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+exit

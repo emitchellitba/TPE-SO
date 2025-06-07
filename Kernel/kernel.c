@@ -1,4 +1,7 @@
 #include <kernel.h>
+#include <semaphores/semaphore.h>
+#include <proc/process.h>
+#include <proc/scheduler.h>
 
 void queue_test();
 
@@ -46,7 +49,6 @@ void *initializeKernelBinary() {
 int main() {
   load_idt();
 
-  // my_sem_init();
   kernel_mem = kmm_init(heapModuleAddress);
 
 #if defined(USE_BUDDY_MM)
@@ -59,13 +61,15 @@ int main() {
 
   initialize_scheduler();
 
-  char *name = "init";
-  fs_load(name, (fs_entry_point_t)sampleCodeModuleAddress);
+  semaphore_block_test();
 
-  char *argv[] = {name, NULL};
-  int argc = 1;
+  // char *name = "init";
+  // fs_load(name, (fs_entry_point_t)sampleCodeModuleAddress);
 
-  syscall_dispatcher(SPAWN_PROCESS_SYSCALL_ENTRY, (uint64_t)name, argc, argv);
+  // char *argv[] = {name, NULL};
+  // int argc = 1;
+
+  // syscall_dispatcher(SPAWN_PROCESS_SYSCALL_ENTRY, (uint64_t)name, argc, argv);
 
   call_timer_tick();
 
@@ -108,4 +112,42 @@ void queue_test() {
   kernel_log(LOG_DEBUG, "Queue count at end: %d\n", queue->count); // 0
 
   // kfree(queue);
+}
+
+semaphore_t *test_sem = NULL;
+
+void sem_blocked_proc(int argc, char **argv) {
+    test_sem = my_sem_create(0, 0); // Semáforo bloqueante
+    // Este proceso debería bloquearse aquí
+    my_sem_wait(test_sem);
+    kernel_log(LOG_DEBUG, "Proceso desbloqueado por semáforo!\n");
+    // Aquí puedes setear una variable global para verificar que llegó
+    // o terminar el proceso
+}
+
+void sem_unblocker_proc(int argc, char **argv) {
+    test_sem = my_sem_open(0);
+    // Espera un poco (simulado)
+    for (volatile int i = 0; i < 100; ++i);
+    my_sem_post(test_sem);
+    yield();
+}
+
+void semaphore_block_test() {
+    my_sem_init();
+
+    // Proceso que se bloqueará
+    char *name1 = "bloqueado";
+    char *argv1[] = {name1, NULL};
+    int argc1 = 1;
+    fs_load(name1, (fs_entry_point_t)sem_blocked_proc);
+    // El entrypoint debe estar linkeado y ser visible
+    syscall_dispatcher(SPAWN_PROCESS_SYSCALL_ENTRY, (uint64_t)name1, argc1, argv1);
+
+    // Proceso que desbloquea
+    char *name2 = "desbloqueador";
+    char *argv2[] = {name2, NULL};
+    int argc2 = 1;
+    fs_load(name2, (fs_entry_point_t)sem_unblocker_proc);
+    syscall_dispatcher(SPAWN_PROCESS_SYSCALL_ENTRY, (uint64_t)name2, argc2, argv2);
 }
