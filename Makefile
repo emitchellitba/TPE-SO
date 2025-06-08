@@ -1,5 +1,5 @@
 
-# CFLAGS = -DUSE_SIMPLE_MM or -DUSE_BUDDY_MM
+CFLAGS = -DUSE_SIMPLE_MM or -DUSE_BUDDY_MM
 
 all:  bootloader kernel userland image
 
