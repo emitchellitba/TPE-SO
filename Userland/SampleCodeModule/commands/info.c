@@ -23,12 +23,16 @@ int get_registers_cmd() {
   return 0;
 }
 
-int help_cmd() {
-  printf("Command list:\n");
-  for (int i = 0; i < get_total_commands(); i++) {
-    printf("\t- %s\n", command_table[i].name);
+int help_cmd(int argc, char *argv[]) {
+  if (argc > 0 && str_cmp(argv[0], "-test") == 0) {
+    print_available_tests();
+  } else {
+    printf("Lista de comandos:\n");
+    for (int i = 0; i < get_total_commands(); i++) {
+      printf("\t- %s\n", command_table[i].name);
+    }
+    printf("\nPara ver los tests disponibles, escribe 'help -test'.\n");
   }
-
   return 0;
 }
 

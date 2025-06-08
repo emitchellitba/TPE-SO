@@ -53,6 +53,7 @@ typedef enum block_reason {
 typedef struct proc {
   pid_t pid;
   const char *name;
+
   struct proc *parent; // Puntero al proceso padre
   pid_t children[64];  // Arreglo de PIDs de hijos
   int child_count;     // Cantidad de hijos
@@ -63,7 +64,7 @@ typedef struct proc {
   proc_main_function entry; // Direccion de inicio del proceso
 
   block_reason_t block_reason;
-  void *waiting_on;
+  struct queue *waiting_on;
 
   /** Valor de retorno del proceso. -1 indica que no terminó */
   int exit;
@@ -78,10 +79,6 @@ typedef struct proc {
 
   fd_entry_t fds[FD_MAX]; // Tabla de descriptores de archivos
 
-  // PARA DEBUGGING
-  uint64_t start_time;
-  uint64_t cpu_time;
-
   /** por si queremos implementar seniales */
   // struct queue *sig_queue; // Cola de señales
   // struct sigaction sigaction[SIG_MAX + 1]; // Array de handlers
@@ -90,9 +87,6 @@ typedef struct proc {
 extern file_ops_t video_ops;
 extern file_ops_t video_err_ops;
 extern file_ops_t keyboard_ops;
-
-extern void sched_current_died();
-extern void sched_ready_queue_remove(struct proc *proc);
 
 int proc_new(proc_t **ref);
 int proc_init(proc_t *proc, const char *name, proc_main_function entry,

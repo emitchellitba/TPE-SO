@@ -1,5 +1,6 @@
 %include "macros.inc"
 
+GLOBAL do_exit
 GLOBAL aquire
 GLOBAL release
 GLOBAL cpu_vendor
@@ -203,6 +204,11 @@ aquire:
     test al, al
     jz .retry
     ret
+
+do_exit:
+	mov rax, 14h
+	int 80h
+	ret
 
 release:
     mov byte [rdi], 1

@@ -33,6 +33,8 @@ static void inherit_fds(proc_t *child, proc_t *parent, int red_fds[2]) {
   }
 }
 
+static void reparent_to_init(proc_t *child);
+
 /* ---- FUNCIONES DEL MODULO ----- */
 
 /**
@@ -123,6 +125,7 @@ int proc_init(proc_t *proc, const char *name, proc_main_function entry,
   proc->name = name;
   proc->parent = parent;
   proc->entry = entry;
+
   if (parent && parent->child_count < MAX_PROCESSES) {
     parent->children[parent->child_count++] = proc->pid;
   } else if (parent) {
@@ -158,30 +161,28 @@ void proc_kill(struct proc *proc) {
   proc_log(LOG_INFO, "Killing process %s (PID: %d)\n", proc->name, proc->pid);
 
   /* Eliminarlo del flujo del scheduler */
-  if (proc->status == RUNNING) {
-    sched_current_died();
-  } else if (proc->status == BLOCKED) {
-    /* TODO: Terminar esto */
-  } else if (proc->status == READY) {
-    sched_ready_queue_remove(proc);
-  }
+  sched_rm_current();
+  queue_remove(proc->waiting_on, proc);
 
   /* Cambiar estado del proceso */
   proc->status = ZOMBIE;
 
-  /* Cerrar pipes o semaforos */
-  /* TODO: Terminar esto */
-
   /* Liberar recursos del kernel utilizados por el proceso (stack) */
   kmm_free(proc->stack_start, kernel_mem);
 
-  /* Marcar todos los hijos como huerfanos */
-  for (int i = 0; i < MAX_PROCESSES; i++) {
-    if (process_table[i] && process_table[i]->parent == proc) {
-      /* TODO: Reparentar a los hijos para que los limpie init */
-      process_table[i]->parent = NULL;
-      process_table[i]->status = READY;
-    }
+  /* Cerrar todos los file descritptors */
+  for (int i = 0; i < FD_MAX; i++) {
+    if (proc->fds[i].ops && proc->fds[i].ops->close)
+      proc->fds[i].ops->close(proc->fds[i].resource);
+
+    proc->fds[i] = (fd_entry_t){.resource = NULL, .ops = NULL, .type = FD_NONE};
+  }
+
+  /* Reparentar a todos los hijos */
+  for (int i = 0; i < proc->child_count; i++) {
+    proc_t *child = get_proc_by_pid(proc->children[i]);
+    if (child)
+      reparent_to_init(child);
   }
 
   /* Liberar el nombre */
@@ -191,16 +192,10 @@ void proc_kill(struct proc *proc) {
   /* Despertar al padre si lo hay y está esperando al hijo */
   if (proc->parent && proc->parent->status == BLOCKED &&
       proc->parent->block_reason == BLK_CHILD) {
-
-    pid_t waiting = (intptr_t)(proc->parent->waiting_on);
-
-    if (waiting == -1 || waiting == proc->pid) {
-      proc_log(LOG_INFO, "Waking up parent PID %d waiting on PID %d\n",
-               proc->parent->pid, proc->pid);
-
-      proc_ready(proc->parent);
-      return; // El padre se encargará de hacer el reap
-    }
+    proc_ready(proc->parent);
+  } else if (!proc->parent) {
+    /* Caso raro: no tiene padre, simplemente reap */
+    proc_reap(proc);
   }
 }
 
@@ -260,12 +255,15 @@ pid_t wait_pid(pid_t pid, int *exit_status) {
         if (child && child->status == ZOMBIE) {
           if (exit_status)
             *exit_status = child->exit;
+          int child_pid = child->pid;
+
           proc_reap(child);
 
           for (int j = i; j < parent->child_count - 1; j++)
             parent->children[j] = parent->children[j + 1];
           parent->child_count--;
-          return child->pid;
+
+          return child_pid;
         }
       }
 
@@ -363,5 +361,23 @@ int64_t change_priority(pid_t pid, priority_t new_priority) {
   child->priority = new_priority;
   child->has_quantum = new_priority;
   proc_log(LOG_INFO, "Changed priority of PID %d to %d\n", pid, new_priority);
+  return 0;
+}
+
+static void reparent_to_init(proc_t *child) {
+  if (!child)
+    return -1;
+
+  proc_t *init_process = get_proc_by_pid(0);
+
+  child->parent = init_process;
+
+  if (init_process->child_count < MAX_PROCESSES) {
+    init_process->children[init_process->child_count++] = child->pid;
+  } else {
+    child->parent = NULL;
+    return -1;
+  }
+
   return 0;
 }

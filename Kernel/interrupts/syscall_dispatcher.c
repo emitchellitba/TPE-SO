@@ -50,6 +50,7 @@ static syscall_func_t syscall_table[] = {
     sys_close_fd,        // 24
     sys_wait_pid,        // 25
     sys_wait,            // 26
+    sys_get_pid,         // 27
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -156,11 +157,9 @@ int64_t sys_get_time(va_list args) {
 }
 
 int64_t sys_sleep(va_list args) {
-  _sti();
   uint32_t ticks = va_arg(args, uint32_t);
   syscall_log(LOG_INFO, "sleep(ticks=%u)\n", ticks);
   sleep(ticks);
-  _cli();
   return 0;
 }
 
@@ -351,6 +350,8 @@ int64_t sys_spawn_process(va_list args) {
 
 int64_t sys_kill_proc(va_list args) {
   int64_t pid = va_arg(args, int64_t);
+
+  // TODO: Pid no puede ser ni 0 ni 1 (idle e init)
   syscall_log(LOG_INFO, "kill_proc(pid=%ld)\n", pid);
   // return kill_proc(pid);
 }
@@ -444,4 +445,10 @@ int64_t sys_wait(va_list args) {
   int *exit_status = va_arg(args, int *);
 
   return wait_pid(WAIT_PID, exit_status);
+}
+
+int64_t sys_get_pid(va_list args) {
+  syscall_log(LOG_INFO, "sys_get_pid()\n");
+  proc_t *current_process = get_running();
+  return current_process->pid;
 }

@@ -5,6 +5,7 @@ extern int ls_main(int argc, char *argv[]);
 extern int rd_wr_test_main(int argc, char *argv[]);
 extern int pipes_test_main(int argc, char *argv[]);
 extern int cat_main(int argc, char *argv[]);
+extern int sched_test_main(int argc, char *argv[]);
 
 #define SHELL_PROGRAM_NAME "shell"
 
@@ -22,7 +23,10 @@ static void load_programs() {
   load_program("ps", (uint64_t)&ps_main);
   load_program("ls", (uint64_t)&ls_main);
   load_program("cat", (uint64_t)&cat_main);
-  load_program("test", (uint64_t)&pipes_test_main);
+
+  load_program("pipes_test", (uint64_t)&pipes_test_main);
+  load_program("rd_wr_test", (uint64_t)&rd_wr_test_main);
+  load_program("sched_test", (uint64_t)&sched_test_main);
 }
 
 int init_main(int argc, char **argv) {

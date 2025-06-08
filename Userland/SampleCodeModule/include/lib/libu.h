@@ -35,6 +35,7 @@ typedef struct {
 
 DECLARE_WRAPPER(read, (int fd, char *buffer, size_t count))
 DECLARE_WRAPPER(write, (int fd, const char *buffer, size_t count))
+DECLARE_WRAPPER(sleep_time, (int time))
 DECLARE_WRAPPER(read_kmsg, (char *log, size_t size))
 DECLARE_WRAPPER(pipe_create, (char *id))
 DECLARE_WRAPPER(pipe_open, (char *id, int mode))
@@ -54,5 +55,6 @@ DECLARE_WRAPPER(copy_fd, (int pid, int target_fd, int src_fd))
 DECLARE_WRAPPER(close_fd, (int fd))
 DECLARE_WRAPPER(wait_pid, (int pid, int *status))
 DECLARE_WRAPPER(wait, (int *status))
+DECLARE_WRAPPER(get_pid, (void))
 
 #endif // LIBU_H

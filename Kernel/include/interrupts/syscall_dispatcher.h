@@ -55,5 +55,6 @@ DECLARE_SYSCALL(sys_copy_fd)
 DECLARE_SYSCALL(sys_close_fd)
 DECLARE_SYSCALL(sys_wait_pid)
 DECLARE_SYSCALL(sys_wait)
+DECLARE_SYSCALL(sys_get_pid)
 
 #endif

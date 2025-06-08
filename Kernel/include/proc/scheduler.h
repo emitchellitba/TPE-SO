@@ -13,11 +13,12 @@ void initialize_scheduler();
 void proc_ready(proc_t *p);
 uint64_t schedule(uint64_t last_rsp);
 void enqueue_next_process();
-void sched_current_died();
 proc_t *get_running();
 int block_process_by_pid(pid_t pid_to_block);
 void block(proc_t *process, block_reason_t reason, void *waiting_resource);
 void block_current(block_reason_t reason, void *waiting_resource);
 int unblock_process_by_pid(pid_t pid_to_unblock);
+
+void sched_rm_current();
 
 #endif

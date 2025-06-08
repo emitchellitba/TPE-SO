@@ -9,7 +9,6 @@ typedef struct scheduler_cdt {
   int init;
   struct queue *ready_processes;
   struct queue *blocked_processes;
-  char current_died;
   proc_t *current_process;
 } scheduler_cdt;
 
@@ -49,8 +48,8 @@ void proc_ready(proc_t *p) {
     return;
 
   p->status = READY;
-  p->block_reason = BLK_NONE; // Limpiar la razon de bloqueo
-  p->waiting_on = NULL;       // Limpiar el objeto de espera
+  p->block_reason = BLK_NONE;
+  p->waiting_on = scheduler->ready_processes;
 
   enqueue(scheduler->ready_processes, p);
   queue_remove(scheduler->blocked_processes, p);
@@ -73,12 +72,6 @@ void enqueue_next_process() {
 uint64_t schedule(uint64_t last_rsp) {
   if (!scheduler || !scheduler->init || !scheduler->ready_processes)
     return last_rsp;
-
-  if (scheduler->current_died) {
-    scheduler->current_died = 0;
-    enqueue_next_process();
-    return (uint64_t)scheduler->current_process->stack_pointer;
-  }
 
   scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
   struct queue *ready_queue = scheduler->ready_processes;
@@ -120,15 +113,6 @@ uint64_t schedule(uint64_t last_rsp) {
 void yield() {
   scheduler->current_process->has_quantum = 0;
   call_timer_tick();
-}
-
-void sched_current_died() { scheduler->current_died = 1; }
-
-void sched_ready_queue_remove(proc_t *proc) {
-  if (!scheduler || !scheduler->ready_processes || !proc)
-    return;
-
-  queue_remove(scheduler->ready_processes, proc);
 }
 
 proc_t *get_running() {
@@ -218,3 +202,5 @@ int unblock_process_by_pid(pid_t pid_to_unblock) {
 
   return 0;
 }
+
+void sched_rm_current() { scheduler->current_process = NULL; }

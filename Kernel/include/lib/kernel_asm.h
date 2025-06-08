@@ -3,6 +3,6 @@
 
 extern void call_timer_tick();
 extern void _hlt();
-extern void _sti();
+extern void do_exit(int code);
 
 #endif // _KERNEL_ASM_H

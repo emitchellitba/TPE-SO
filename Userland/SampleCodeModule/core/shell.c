@@ -1,5 +1,7 @@
 #include <shell.h>
 
+#include <tests.h>
+
 static void execute_pipe_commands(parsed_input_t *parsed_left,
                                   parsed_input_t *parsed_right);
 
@@ -16,11 +18,11 @@ command_entry_t command_table[] = {
     {"registers", CMD_BUILTIN, .data.func = get_registers_cmd},
     {"kmsg", CMD_BUILTIN, .data.func = show_kmsg_cmd},
     {"sleep", CMD_BUILTIN, .data.func = sleep_cmd},
+    {"test", CMD_BUILTIN, .data.func = test_runner_cmd},
 
     // --- Comandos Externos (Programas) ---
     {"ps", CMD_SPAWN, .data.program_name = "ps"},
     {"programs", CMD_SPAWN, .data.program_name = "ls"},
-    {"test", CMD_SPAWN, .data.program_name = "test"},
     {"cat", CMD_SPAWN, .data.program_name = "cat"}};
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))
@@ -139,14 +141,14 @@ int shell_main(int argc, char *argv[]) {
 
       int command_idx = find_command_index(&parsed_cmd);
       if (command_idx != -1) {
-        char *argv_exec[MAX_PARAMS + 1];
-        argv_exec[0] = parsed_cmd.cmd;
+        char *actual_argv[MAX_PARAMS];
         for (int i = 0; i < parsed_cmd.param_count; i++) {
-          argv_exec[i + 1] = parsed_cmd.params[i];
+          actual_argv[i] = parsed_cmd.params[i];
         }
 
         execute_command(&command_table[command_idx], parsed_cmd.param_count,
-                        parsed_cmd.params, is_background);
+                        (parsed_cmd.param_count > 0) ? actual_argv : NULL,
+                        is_background);
       } else {
         show_command_not_found();
       }

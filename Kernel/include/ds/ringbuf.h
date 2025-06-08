@@ -2,7 +2,7 @@
 #define _DS_RINGBUF_H
 
 #include <kernel.h>
-#include <lib/memory_manager.h>
+#include <memory_manager.h>
 #include <stddef.h>
 
 KMEMORY_DECLARE

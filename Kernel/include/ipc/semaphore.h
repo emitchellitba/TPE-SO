@@ -1,7 +1,7 @@
 #ifndef SEMAPHORE_H
 #define SEMAPHORE_H
 
-#include <queue.h>
+#include <ds/queue.h>
 #include <stdint.h>
 
 extern void aquire(uint8_t *lock);
