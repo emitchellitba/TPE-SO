@@ -1,6 +1,8 @@
 #ifndef _KERNEL_ASM_H
 #define _KERNEL_ASM_H
 
+#include <stdint.h>
+
 extern void call_timer_tick();
 extern void _hlt();
 extern void acquire(uint8_t *lock);
