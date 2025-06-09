@@ -1,4 +1,5 @@
 
+#include <kernel_asm.h>
 #include <process.h>
 #include <scheduler.h>
 #include <stdint.h>
@@ -15,10 +16,10 @@ int process_wrapper(uint64_t user_argc, char **user_argv) {
   if (current_p && current_p->entry) {
     ret_val = current_p->entry(user_argc, user_argv);
   } else {
-    proc_kill(get_running(), -1);
+    do_exit(-1);
   }
 
-  proc_kill(get_running(), ret_val);
+  do_exit(ret_val);
 
   call_timer_tick();
   while (1) // No se deberia llegar a este punto pues un call_timer_tick debe

@@ -1,5 +1,6 @@
 %include "macros.inc"
 
+GLOBAL do_exit
 GLOBAL acquire
 GLOBAL release
 GLOBAL cpu_vendor
@@ -207,6 +208,11 @@ acquire:
 release:
     mov byte [rdi], 1
     ret
+
+do_exit:
+	mov rax, 0x15
+	int 80h
+	ret
 
 section .bss
     register_array resq 17

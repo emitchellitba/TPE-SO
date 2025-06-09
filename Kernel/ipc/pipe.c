@@ -143,14 +143,14 @@ static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
   acquire(&(pipe->lock));
 
   while (ringbuf_available(pipe->buffer) >= PIPE_BUFFER_SIZE) {
-    if (pipe->readers_wait_queue == 0) {
+    if (pipe->readers == 0) {
       release(&(pipe->lock));
       return -EPIPE;
     }
 
     release(&(pipe->lock));
     enqueue(pipe->writers_wait_queue, get_running());
-    block_current(BLK_PIPE_WRITE, pipe->writers);
+    block_current(BLK_PIPE_WRITE, pipe->writers_wait_queue);
     acquire(&(pipe->lock));
   }
 
@@ -181,7 +181,7 @@ static int pipe_close_write(pipe_t *pipe) {
 
   if (pipe->writers == 0) {
     while (pipe->readers_wait_queue->count > 0)
-      proc_ready(dequeue(pipe->readers));
+      proc_ready(dequeue(pipe->readers_wait_queue));
   }
 
   if (pipe->readers == 0 && pipe->writers == 0)

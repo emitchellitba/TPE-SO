@@ -4,6 +4,7 @@
 #include <queue.h>
 #include <ringbuf.h>
 #include <scheduler.h>
+#include <tty.h>
 #include <videoDriver.h>
 
 static void handle_ctrl_d();
@@ -220,13 +221,7 @@ static void handle_ctrl_d() {
 }
 
 static void handle_ctrl_c() {
-  if (waiting_queue->count > 0) {
-    char etx = ETX;
-    char nl = '\n';
-    ringbuf_write(kbuff, 1, &etx);
-    ringbuf_write(kbuff, 1, &nl);
-    proc_ready(dequeue(waiting_queue));
-  }
+  signal_kill_tty();
   return;
 }
 

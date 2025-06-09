@@ -1,6 +1,7 @@
 GLOBAL call_timer_tick
 call_timer_tick:
 	int 20h
+    _cli
 	ret
 
 GLOBAL kernel_syscall_create_process

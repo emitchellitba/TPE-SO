@@ -94,11 +94,11 @@ int proc_init(proc_t *proc, const char *name, proc_main_function entry,
   else
     set_default_fds(proc);
 
+  proc_t *parent = get_running();
   if (!background) { /* Ceder foreground */
-    set_foreground_process(proc);
+    set_foreground_process(proc, parent);
   }
 
-  proc_t *parent = get_running();
   proc->name = name;
   proc->parent = parent;
   proc->entry = entry;
@@ -138,7 +138,7 @@ void proc_kill(struct proc *proc, int exit_code) {
   proc_log(LOG_INFO, "Killing process %s (PID: %d)\n", proc->name, proc->pid);
 
   /* Devolver el foreground */
-  set_foreground_process(proc->parent);
+  set_foreground_process(proc->parent, proc);
 
   /* Eliminarlo del flujo del scheduler */
   if (proc->status == RUNNING) {

@@ -8,6 +8,9 @@
 
 proc_t *foreground_process = NULL;
 
+/* Esta funcion le indica al tty que debe matar al proceso foreground */
+void signal_kill_tty() { proc_kill(foreground_process, 0); }
+
 int read_from_keyboard(char *buffer, size_t count) {
   if (!foreground_process || count == 0 || !buffer)
     return -EINVAL;
@@ -22,17 +25,11 @@ int read_from_keyboard(char *buffer, size_t count) {
     return 0; /* EOF */
   }
 
-  if (buffer[0] == ETX) {
-    /* Ctrl+C */
-    proc_kill(foreground_process, 0);
-    return -ECANCELED;
-  }
-
   return n;
 }
 
-/* Funcion segura para ceder el foreground */
-void set_foreground_process(proc_t *proc) {
+/* Funcion segura para ceder el foreground del caller a proc */
+void set_foreground_process(proc_t *proc, proc_t *caller) {
   if (!proc)
     return;
 
@@ -43,7 +40,10 @@ void set_foreground_process(proc_t *proc) {
     return;
   }
 
-  proc_t *prev = get_running();
+  if (!caller)
+    return;
+
+  proc_t *prev = caller;
 
   if (prev && prev->mode == FG) {
     prev->mode = BG;
