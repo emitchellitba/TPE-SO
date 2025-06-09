@@ -61,6 +61,15 @@ uint64_t my_sem_post(semaphore_t *sem);
 uint64_t my_sem_wait(semaphore_t *sem);
 
 /**
+ * @brief Intenta realizar la operación trywait (down no bloqueante) sobre el
+ * semáforo.
+ *        Si el valor es mayor que 0, lo decrementa; si no, retorna 1.
+ * @param sem Puntero al semáforo.
+ * @return 0 si se pudo decrementar, 1 si no se pudo (valor era 0), -1 en error.
+ */
+uint64_t my_sem_trywait(semaphore_t *sem);
+
+/**
  * @brief Indica si el semáforo está abierto y en uso.
  * @param sem Puntero al semáforo.
  * @return 1 si está abierto, 0 si no.

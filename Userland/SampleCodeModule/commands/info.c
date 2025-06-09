@@ -1,6 +1,7 @@
 #include <info.h>
 
 #include <shell.h>
+#include <tests.h>
 
 extern command_entry_t command_table[];
 

@@ -11,7 +11,7 @@ int sleeping_process_main(void);
  * que el scheduler los intercala correctamente
  */
 int sched_test_main(int argc, char *argv[]) {
-  load_program("sleeping_program", sleeping_process_main);
+  load_program("sleeping_program", (uint64_t)&sleeping_process_main);
 
   for (int i = 0; i < 10; i++) {
     int pid = spawn_process_bg("sleeping_program", 0, NULL, NULL);

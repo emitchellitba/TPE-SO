@@ -115,7 +115,8 @@ void pipe_free(struct pipe_t *pipe) {
   kmm_free(pipe, kernel_mem);
 }
 
-static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
+static ssize_t pipe_read(void *resource, void *buf, size_t size) {
+  pipe_t *pipe = (pipe_t *)resource;
   acquire(&(pipe->lock));
 
   while (!ringbuf_available(pipe->buffer)) {
@@ -139,7 +140,8 @@ static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
   return n;
 }
 
-static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
+static ssize_t pipe_write(void *resource, const void *buf, size_t size) {
+  pipe_t *pipe = (pipe_t *)resource;
   acquire(&(pipe->lock));
 
   while (ringbuf_available(pipe->buffer) >= PIPE_BUFFER_SIZE) {
@@ -163,7 +165,8 @@ static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
   return n;
 }
 
-static int pipe_close_read(pipe_t *pipe) {
+static int pipe_close_read(void *resource) {
+  pipe_t *pipe = (pipe_t *)resource;
   if (!pipe)
     return -1;
   if (pipe->readers > 0)
@@ -173,7 +176,8 @@ static int pipe_close_read(pipe_t *pipe) {
   return 0;
 }
 
-static int pipe_close_write(pipe_t *pipe) {
+static int pipe_close_write(void *resource) {
+  pipe_t *pipe = (pipe_t *)resource;
   if (!pipe)
     return -1;
   if (pipe->writers > 0)
@@ -189,14 +193,16 @@ static int pipe_close_write(pipe_t *pipe) {
   return 0;
 }
 
-static int pipe_add_ref_write(pipe_t *pipe) {
+static int pipe_add_ref_write(void *resource) {
+  pipe_t *pipe = (pipe_t *)resource;
   if (!pipe)
     return -1;
   pipe->writers++;
   return 0;
 }
 
-static int pipe_add_ref_read(pipe_t *pipe) {
+static int pipe_add_ref_read(void *resource) {
+  pipe_t *pipe = (pipe_t *)resource;
   if (!pipe)
     return -1;
   pipe->readers++;

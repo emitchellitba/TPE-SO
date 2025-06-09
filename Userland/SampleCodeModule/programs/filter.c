@@ -1,3 +1,5 @@
+#include <libu.h>
+#include <stdLibrary.h>
 
 /**
  * filter - Filtra las vocales del input

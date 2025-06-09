@@ -353,7 +353,7 @@ int64_t sys_spawn_process(va_list args) {
     return -ENOMEM;
   }
 
-  proc_init(new_proc, name, entry, fds, background);
+  proc_init(new_proc, name, (proc_main_function)entry, fds, background);
 
   execv(new_proc, argc, argv);
 
@@ -424,9 +424,7 @@ int64_t sys_unblock(va_list args) {
   return unblock_process_by_pid((pid_t)pid);
 }
 
-int64_t sys_copy_fd(va_list args) {
-  //
-}
+int64_t sys_copy_fd(va_list args) { return 0; }
 
 int64_t sys_close_fd(va_list args) {
   int fd = va_arg(args, int);
@@ -527,14 +525,16 @@ int64_t sys_create_sem(va_list args) {
   syscall_log(LOG_INFO, "sys_create_sem(id=%d, initial_value=%d)\n", id,
               initial_value);
 
-  return my_sem_create(id, initial_value);
+  semaphore_t *sem_ref = my_sem_create(id, initial_value);
+  return (int64_t)sem_ref;
 }
 
 int64_t sys_open_sem(va_list args) {
-  uint64_t id = va_arg(args, char *);
+  uint64_t id = va_arg(args, uint64_t);
   syscall_log(LOG_INFO, "sys_open_sem(id=%d)\n", id);
 
-  return my_sem_open(id);
+  semaphore_t *sem_ref = my_sem_open(id);
+  return (int64_t)sem_ref;
 }
 
 int64_t sys_close_sem(va_list args) {

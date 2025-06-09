@@ -26,7 +26,7 @@ static pid_t proc_pid_alloc() {
   return -1; // No hay PIDs disponibles
 }
 
-static void reparent_to_init(proc_t *child);
+static int reparent_to_init(proc_t *child);
 
 /* ---- FUNCIONES DEL MODULO ----- */
 
@@ -346,7 +346,7 @@ int64_t change_priority(proc_t *child, priority_t new_priority) {
   return 0;
 }
 
-static void reparent_to_init(proc_t *child) {
+static int reparent_to_init(proc_t *child) {
   if (!child)
     return -1;
 

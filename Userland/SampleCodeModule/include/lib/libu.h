@@ -33,6 +33,8 @@ DECLARE_WRAPPER(rm_program, (char *name))
 DECLARE_WRAPPER(get_programs, (char **buffer, int max_count))
 DECLARE_WRAPPER(spawn_process,
                 (const char *name, int argc, char **argv, int *fds))
+DECLARE_WRAPPER(spawn_process_bg,
+                (const char *name, int argc, char **argv, int *fds))
 DECLARE_WRAPPER(kill_proc, (int pid))
 DECLARE_WRAPPER(change_priority, (int pid, int new_priority))
 DECLARE_WRAPPER(block_proc, (int pid))

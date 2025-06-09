@@ -1,5 +1,6 @@
 #include <kernel.h>
 
+int64_t syscall_dispatcher(uint64_t rax, ...);
 extern void initialize_idle(void);
 
 memory_manager_adt kernel_mem;

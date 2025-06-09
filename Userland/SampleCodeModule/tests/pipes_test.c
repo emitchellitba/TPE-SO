@@ -12,10 +12,10 @@ int long_writer(int argc, char *argv[]);
 
 int pipes_test_main(int argc, char *argv[]) {
   /* Se cargan los procesos */
-  load_program("writer", writer);
-  load_program("reader", reader);
-  load_program("lonely_reader", lonely_reader);
-  load_program("long_writer", long_writer);
+  load_program("writer", (uint64_t)&writer);
+  load_program("reader", (uint64_t)&reader);
+  load_program("lonely_reader", (uint64_t)&lonely_reader);
+  load_program("long_writer", (uint64_t)&long_writer);
 
   /* Se crean los pipes de lectura y escritura para reader y writer */
   int res = pipe_create(pipe_id);

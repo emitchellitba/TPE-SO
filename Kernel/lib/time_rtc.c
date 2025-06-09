@@ -38,10 +38,7 @@ unsigned long ticks = 0; // Variable global para contar los ticks del PIT
 void timer_handler() {
   ticks++;
 
-  struct qnode *next;
   queue_for(node, sleeping_proc_queue) {
-    // Save next node in case we remove the current one
-    next = node->next;
     sleeping_proc_t *sp = (sleeping_proc_t *)node->value;
     if (sp->wake_up_tick <= ticks) {
       unblock_process_by_pid(sp->pid);

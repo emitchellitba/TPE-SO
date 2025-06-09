@@ -1,3 +1,5 @@
+#include <libu.h>
+#include <stdLibrary.h>
 
 /**
  * wc - word count program

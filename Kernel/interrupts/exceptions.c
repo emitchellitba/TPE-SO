@@ -26,7 +26,17 @@ void exceptionDispatcher(int exception) {
 void printRegisters() {
   for (int i = 0; i < CANT_REGS; i++) {
     print(regs_strings[i], str_len(regs_strings[i]), STDOUT);
-    print_hex(register_array[i]);
+    uint64_t value = register_array[i];
+    char hex_str[19];
+    hex_str[0] = '0';
+    hex_str[1] = 'x';
+    for (int j = 0; j < 16; j++) {
+      int shift = (15 - j) * 4;
+      uint8_t digit = (value >> shift) & 0xF;
+      hex_str[2 + j] = (digit < 10) ? ('0' + digit) : ('A' + digit - 10);
+    }
+    hex_str[18] = '\0';
+    print(hex_str, 18, STDOUT);
     print("\n", 1, STDOUT);
   }
 }

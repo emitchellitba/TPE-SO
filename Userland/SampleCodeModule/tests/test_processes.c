@@ -94,4 +94,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
   }
 
   rm_program("endless_loop_print");
+
+  return 0;
 }

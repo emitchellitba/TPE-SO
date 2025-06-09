@@ -242,7 +242,7 @@ static void execute_pipe_commands(parsed_input_t *parsed_left,
   char *argv_right[] = {parsed_right->cmd, NULL};
   int argc_right = 1;
 
-  int fds_right[2] = {read_fd, STDOUT, -1};
+  int fds_right[3] = {read_fd, STDOUT, -1};
   int pid_right =
       spawn_process_bg(parsed_right->cmd, argc_right, argv_right, fds_right);
   if (pid_right < 0) {

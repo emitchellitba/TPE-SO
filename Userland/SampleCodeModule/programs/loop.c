@@ -1,5 +1,5 @@
 #include <libu.h>
-#include <stdlib.h>
+#include <stdLibrary.h>
 #include <sys/types.h>
 
 #define TIME_INTERVAL 3 // Intervalo de tiempo en segundos entre cada iteración

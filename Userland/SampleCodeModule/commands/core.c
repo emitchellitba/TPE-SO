@@ -1,7 +1,7 @@
 #include <core.h>
 
 #include <libu.h>
-#include <stdLibrary.h>F
+#include <stdLibrary.h>
 
 int kill_cmd(int argc, char **argv) {
   if (argc < 2) {

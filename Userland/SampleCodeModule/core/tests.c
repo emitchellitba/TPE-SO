@@ -55,9 +55,15 @@ int test_runner_cmd(int argc, char **argv) {
   printf("--- Running Test: %s (program: %s) ---\n", display_name_to_run,
          program_to_run);
 
-  char *test_argv[] = {(char *)program_to_run, NULL};
+  int test_argc = argc - 1;
+  char *test_argv[test_argc + 1];
+  test_argv[0] = (char *)program_to_run;
+  for (int i = 2; i < argc; i++) {
+    test_argv[i - 1] = argv[i];
+  }
+  test_argv[test_argc] = NULL;
 
-  int pid = spawn_process(program_to_run, 1, test_argv, NULL);
+  int pid = spawn_process(program_to_run, test_argc, test_argv, NULL);
 
   if (pid < 0) {
     printf("Error spawning test process '%s'\n", program_to_run);

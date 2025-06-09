@@ -70,8 +70,29 @@ typedef struct vbe_mode_info_structure *VBEInfoPtr;
 
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 
+static void clear_screen_text_log() {
+  currentX = 0;
+  currentY = 0;
+  top_left_screen = 0;
+  mooving_matrix = 0;
+}
+
+static void deleteChar() {
+  if (posX == 0 && posY != 0) {
+    posX = SCREEN_WIDTH_PIXELS - CHAR_WIDTH;
+    posY -= CHAR_HEIGHT;
+    drawcharSize(' ', font_color, background_color);
+    posX = SCREEN_WIDTH_PIXELS - CHAR_WIDTH;
+    posY -= CHAR_HEIGHT;
+  } else {
+    posX -= CHAR_WIDTH;
+    drawcharSize(' ', font_color, background_color);
+    posX -= CHAR_WIDTH;
+  }
+}
+
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
-  uint8_t *framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
+  uint8_t *framebuffer = (uint8_t *)(uint64_t)VBE_mode_info->framebuffer;
   uint64_t offset =
       (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
   framebuffer[offset] = (hexColor)&0xFF;
@@ -80,7 +101,7 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
 }
 
 void putPixelRGB(char R, char G, char B, uint64_t x, uint64_t y) {
-  uint8_t *framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
+  uint8_t *framebuffer = (uint8_t *)(uint64_t)VBE_mode_info->framebuffer;
   uint64_t offset =
       (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
   framebuffer[offset] = R;
@@ -104,12 +125,6 @@ int print_str(char *string, int length, int isErr) {
 void printStd(const char *buffer, size_t count) { print(buffer, count, 1); }
 
 void printErr(const char *buffer, size_t count) { print(buffer, count, 0); }
-
-void print_hex(uint64_t num) {
-  char buffer[20];
-  uint_to_base(num, buffer, 16);
-  printStd(buffer, str_len(buffer));
-}
 
 void clear_screen() {
   for (int i = 0; i < SCREEN_WIDTH_PIXELS; i++) {
@@ -192,13 +207,6 @@ void scroll_down() {
     drawcharSize(' ', font_color, background_color);
   }
   posY -= CHAR_HEIGHT;
-}
-
-void clear_screen_text_log() {
-  currentX = 0;
-  currentY = 0;
-  top_left_screen = 0;
-  mooving_matrix = 0;
 }
 
 int can_move_top_left_pointer() { // esta funcion corrige posibles errores/bugs
@@ -335,20 +343,6 @@ void change_bg_color() {
   clear_screen();
 }
 
-void deleteChar() {
-  if (posX == 0 && posY != 0) {
-    posX = SCREEN_WIDTH_PIXELS - CHAR_WIDTH;
-    posY -= CHAR_HEIGHT;
-    drawcharSize(' ', font_color, background_color);
-    posX = SCREEN_WIDTH_PIXELS - CHAR_WIDTH;
-    posY -= CHAR_HEIGHT;
-  } else {
-    posX -= CHAR_WIDTH;
-    drawcharSize(' ', font_color, background_color);
-    posX -= CHAR_WIDTH;
-  }
-}
-
 void drawcharSize(unsigned char c, color fcolor, color bcolor) {
   // chequeo si entra el caracter, sino salto de linea
   if (posX > SCREEN_WIDTH_PIXELS - CHAR_WIDTH) {
@@ -362,7 +356,7 @@ void drawcharSize(unsigned char c, color fcolor, color bcolor) {
 
   int cx, cy;
   int mask[8] = {128, 64, 32, 16, 8, 4, 2, 1};
-  unsigned char *glyph = get_font() + ((int)(c - 32) * 16);
+  const unsigned char *glyph = get_font() + ((int)(c - 32) * 16);
 
   // guardo valor original de x e y
   int x = posX;
