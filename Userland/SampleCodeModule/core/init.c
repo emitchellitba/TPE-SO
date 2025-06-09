@@ -59,8 +59,11 @@ int init_main(int argc, char **argv) {
 
     int pid, status;
     while ((pid = wait(&status)) > 0) {
-      if (pid == shell_pid)
+      if (pid == shell_pid) {
+        printf("\n\nShell process died!\n");
+        printf("Restarting shell...\n");
         break;
+      }
     }
   }
 

@@ -64,3 +64,19 @@ cat .gdbitni
 cat .gdbinit
 quit
 exit
+cd root
+gdb
+b pipe_read
+gdb
+gdb
+y
+gdb
+gdb
+gdb
+gdb
+y
+gdb
+gdb
+gdb
+cd root
+gdb

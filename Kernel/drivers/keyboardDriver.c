@@ -6,6 +6,9 @@
 #include <scheduler.h>
 #include <videoDriver.h>
 
+static void handle_ctrl_d();
+static void handle_ctrl_c();
+
 typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 
 #define LEFT_SHIFT_PRESSED 0x2A
@@ -27,6 +30,7 @@ struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
 unsigned int arrow = 0;
+unsigned int ctrl = 0;
 
 static int current_line_len = 0;
 
@@ -76,6 +80,12 @@ void handle_key_press() {
   unsigned int scanCode = get_scan_code();
 
   switch (scanCode) {
+  case 0x1D:
+    ctrl = 1;
+    return;
+  case 0x9D:
+    ctrl = 0;
+    return;
   case LEFT_SHIFT_PRESSED:
   case RIGHT_SHIFT_PRESSED:
     shift = 1;
@@ -109,6 +119,24 @@ void handle_key_press() {
 
   if (scanCode > 0x80)
     return;
+
+  if (ctrl) {
+    unsigned char c = printableAscii[scanCode][0];
+
+    if (c == 'd') { /* CTRL + D */
+      print_str("\n^D", 3, 0);
+
+      handle_ctrl_d();
+      return;
+    }
+
+    if (c == 'c') { /* CTRL + C */
+      print_str("\n^C", 3, 0);
+
+      handle_ctrl_c();
+      return;
+    }
+  }
 
   if (arrow) {
     ringbuf_write(kbuff, 1, (char *)&arrow);
@@ -158,4 +186,29 @@ void handle_key_press() {
 
     current_line_len = 0;
   }
+}
+
+static void handle_ctrl_d() {
+  if (waiting_queue->count > 0) {
+    if (current_line_len == 0) {
+      char veof = VEOF;
+      ringbuf_write(kbuff, 1, &veof);
+    }
+
+    char nl = '\n';
+    ringbuf_write(kbuff, 1, &nl);
+    proc_ready(dequeue(waiting_queue));
+  }
+  return;
+}
+
+static void handle_ctrl_c() {
+  if (waiting_queue->count > 0) {
+    char etx = ETX;
+    char nl = '\n';
+    ringbuf_write(kbuff, 1, &etx);
+    ringbuf_write(kbuff, 1, &nl);
+    proc_ready(dequeue(waiting_queue));
+  }
+  return;
 }

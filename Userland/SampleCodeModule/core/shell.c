@@ -83,6 +83,11 @@ static int get_input() {
       ;
   }
 
+  if (n == 0) { // EOF
+    printf("\n");
+    return 0;
+  }
+
   input_buffer[n] = '\0';
 
   if (input_buffer[n - 1] == '\n') {

@@ -1,19 +1,34 @@
 /* Modulo que intermedia entre las syscalls y el acceso a la terminal */
 #include <tty.h>
 
+#include <keyboardDriver.h>
+#include <lib/error.h>
+#include <process.h>
 #include <stdlib.h>
 
 proc_t *foreground_process = NULL;
 
 int read_from_keyboard(char *buffer, size_t count) {
   if (!foreground_process || count == 0 || !buffer)
-    return -1;
+    return -EINVAL;
 
-  if (get_running() != foreground_process) {
-    return -2;
+  if (get_running() != foreground_process)
+    return -EPERM;
+
+  int n = read_line(buffer, count);
+
+  if (buffer[0] == VEOF) { /* Ctrl+D */
+    buffer[0] = '\0';
+    return 0; /* EOF */
   }
 
-  return read_line(buffer, count);
+  if (buffer[0] == ETX) {
+    /* Ctrl+C */
+    proc_kill(foreground_process, 0);
+    return -ECANCELED;
+  }
+
+  return n;
 }
 
 /* Funcion segura para ceder el foreground */

@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define ETX 3
+#define VEOF 4
+
 extern uint8_t esc;
 
 void handle_key_press();
