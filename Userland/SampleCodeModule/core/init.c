@@ -9,6 +9,8 @@ extern int loop_main(int argc, char *argv[]);
 extern int nice_main(int argc, char *argv[]);
 extern int block_main(int argc, char *argv[]);
 extern int phylo_main(int argc, char *argv[]);
+extern int wc_main(int argc, char *argv[]);
+extern int filter_main(int argc, char *argv[]);
 
 extern int rd_wr_test_main(int argc, char *argv[]);
 extern int pipes_test_main(int argc, char *argv[]);
@@ -44,6 +46,8 @@ static void load_programs() {
   load_program("block", (uint64_t)&block_main);
   load_program("test_runner_cmd", (uint64_t)&test_runner_cmd);
   load_program("phylo", (uint64_t)&phylo_main);
+  load_program("wc", (uint64_t)&wc_main);
+  load_program("filter", (uint64_t)&filter_main);
 
   load_program("pipes_test", (uint64_t)&pipes_test_main);
   load_program("rd_wr_test", (uint64_t)&rd_wr_test_main);

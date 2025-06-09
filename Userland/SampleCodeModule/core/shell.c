@@ -22,6 +22,8 @@ command_entry_t command_table[] = {
     {"ps", CMD_SPAWN, .data.program_name = "ps"},
     {"programs", CMD_SPAWN, .data.program_name = "ls"},
     {"cat", CMD_SPAWN, .data.program_name = "cat"},
+    {"wc", CMD_SPAWN, .data.program_name = "wc"},
+    {"filter", CMD_SPAWN, .data.program_name = "filter"},
     {"loop", CMD_SPAWN, .data.program_name = "loop"},
     {"chprio", CMD_SPAWN, .data.program_name = "chprio"},
     {"block", CMD_SPAWN, .data.program_name = "block"},
@@ -29,7 +31,6 @@ command_entry_t command_table[] = {
     {"sleep", CMD_SPAWN, .data.program_name = "sleep"},
     {"phylo", CMD_SPAWN, .data.program_name = "phylo"},
     {"test", CMD_SPAWN, .data.program_name = "test_runner_cmd"},
-
 };
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))
