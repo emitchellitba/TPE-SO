@@ -27,12 +27,12 @@ int my_ksem_init(semaphore_t *sem, uint64_t value) {
 
 semaphore_t *my_sem_create(uint64_t id, uint64_t value) {
   if (id < MAX_SEMAPHORES && !semaphore_table[id].in_use) {
+    semaphore_table[id].waiting_process_queue = queue_new();
     if (!semaphore_table[id].waiting_process_queue) {
       return NULL; // Error creating the waiting queue
     }
     semaphore_table[id].value = value;
     semaphore_table[id].in_use = 1;
-    semaphore_table[id].waiting_process_queue = queue_new();
     semaphore_table[id].lock = 1;
     return &semaphore_table[id];
   } else {
