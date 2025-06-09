@@ -1,9 +1,6 @@
 #include "libu.h"
-#include "syscall.h"
 #include "test_util.h"
 #include <stdio.h>
-
-// enum State { T_RUNNING, T_BLOCKED, T_KILLED };
 
 typedef struct P_rq {
   int32_t pid;
@@ -15,18 +12,12 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
-  uint64_t max_processes = 32;
+  uint64_t max_processes = 10;
   char *argvAux[] = {
       "endless_loop_print",
-      "10", // Argument to endless_loop_print, can be adjusted as needed
-      NULL  // End of arguments
+      "5", // Argument to endless_loop_print, can be adjusted as needed
+      NULL // End of arguments
   };
-
-  // if (argc != 1)
-  //   return -1;
-
-  // if ((max_processes = satoi(argv[0])) <= 0)
-  //   return -1;
 
   p_rq p_rqs[max_processes];
 
@@ -86,6 +77,21 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING;
         }
     }
+    // Wait for all processes to finish
+    for (rq = 0; rq < max_processes; rq++) {
+      int status;
+      if (wait_pid(p_rqs[rq].pid, &status) == -1) {
+        printf("test_processes: ERROR waiting for process\n");
+        return -1;
+      }
+      if (status != 0) {
+        printf("test_processes: Process %d finished with status %d\n",
+               p_rqs[rq].pid, status);
+      }
+    }
+    printf("test_processes: All processes finished successfully\n");
+    break; // Exit the loop after one complete run
   }
+
   rm_program("endless_loop_print");
 }

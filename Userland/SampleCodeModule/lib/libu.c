@@ -7,7 +7,7 @@ DEFINE_WRAPPER(change_color, (uint8_t background), (background))
 DEFINE_WRAPPER(sleep_time, (uint64_t time), (time))
 DEFINE_WRAPPER(usleep_time, (uint64_t time), (time))
 DEFINE_WRAPPER(zoom, (int in), (in))
-DEFINE_WRAPPER(get_regist, (uint64_t * regs), (regs))
+DEFINE_WRAPPER(get_regist, (uint64_t *regs), (regs))
 // DEFINE_WRAPPER(make_sound, (int64_t time, int64_t nFrequence), (time,
 // nFrequence))
 DEFINE_WRAPPER(read, (int fd, char *buffer, size_t count), (fd, buffer, count))
