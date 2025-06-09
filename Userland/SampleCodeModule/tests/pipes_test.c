@@ -11,34 +11,50 @@ int lonely_reader(int argc, char *argv[]);
 int long_writer(int argc, char *argv[]);
 
 int pipes_test_main(int argc, char *argv[]) {
+  /* Se cargan los procesos */
+  load_program("writer", writer);
+  load_program("reader", reader);
+  load_program("lonely_reader", lonely_reader);
+  load_program("long_writer", long_writer);
+
+  /* Se crean los pipes de lectura y escritura para reader y writer */
   int res = pipe_create(pipe_id);
   if (res < 0) {
     printf("Error creating pipe: %d\n", res);
     return 1;
   }
 
-  load_program("writer", writer);
-  load_program("reader", reader);
-
-  // Se instancia primero el writer para que se cree antes el fd de escritura y
-  // no se retorne EOF inmediatamente
-  char *writer_argv[] = {"writer", NULL};
-  int writer_pid = spawn_process_bg("writer", 1, writer_argv, NULL);
-  if (writer_pid < 0) {
-    printf("Error spawning writer process: %d\n", writer_pid);
+  int writer_fd = pipe_open(pipe_id, WRITE_PIPE);
+  if (writer_fd < 0) {
+    printf("Error opening pipe for writing: %d\n", writer_fd);
+    pipe_close(pipe_id);
+    return 1;
+  }
+  int reader_fd = pipe_open(pipe_id, READ_PIPE);
+  if (reader_fd < 0) {
+    printf("Error opening pipe for reading: %d\n", reader_fd);
     pipe_close(pipe_id);
     return 1;
   }
 
   char *reader_argv[] = {"reader", NULL};
-  int reader_pid = spawn_process_bg("reader", 1, reader_argv, NULL);
+  int reader_fds[] = {reader_fd, 1, 2, -1};
+  int reader_pid = spawn_process_bg("reader", 1, reader_argv, reader_fds);
   if (reader_pid < 0) {
     printf("Error spawning reader process: %d\n", reader_pid);
     pipe_close(pipe_id);
     return 1;
   }
 
-  load_program("lonely_reader", lonely_reader);
+  char *writer_argv[] = {"writer", NULL};
+  int writer_fds[] = {0, writer_fd, 2, -1};
+  int writer_pid = spawn_process_bg("writer", 1, writer_argv, writer_fds);
+  if (writer_pid < 0) {
+    printf("Error spawning writer process: %d\n", writer_pid);
+    pipe_close(pipe_id);
+    return 1;
+  }
+
   char *lonely_reader_argv[] = {"lonely_reader", NULL};
   int lonely_reader_pid =
       spawn_process_bg("lonely_reader", 1, lonely_reader_argv, NULL);
@@ -47,7 +63,6 @@ int pipes_test_main(int argc, char *argv[]) {
     return 1;
   }
 
-  load_program("long_writer", long_writer);
   char *long_writer_argv[] = {"long_writer", NULL};
   int long_writer_pid =
       spawn_process_bg("long_writer", 1, long_writer_argv, NULL);
@@ -76,14 +91,8 @@ int pipes_test_main(int argc, char *argv[]) {
 }
 
 int writer(int argc, char *argv[]) {
-  int write_fd = pipe_open(pipe_id, WRITE_PIPE);
-  if (write_fd < 0) {
-    printf("Error opening pipe for writing: %d\n", write_fd);
-    return 1;
-  }
-
   const char *message = "Hello from process writer: \n";
-  ssize_t n = write(write_fd, message, str_len(message));
+  ssize_t n = write(1, message, str_len(message));
   if (n < 0) {
     printf("Error writing to pipe: %d\n", n);
     pipe_close(pipe_id);
@@ -95,15 +104,10 @@ int writer(int argc, char *argv[]) {
 }
 
 int reader(int argc, char *argv[]) {
-  int read_fd = pipe_open(pipe_id, READ_PIPE);
-  if (read_fd < 0) {
-    printf("Error opening pipe for reading: %d\n", read_fd);
-    return 1;
-  }
   char buf[64] = {0};
-  ssize_t n = read(read_fd, buf, sizeof(buf));
+  ssize_t n = read(0, buf, sizeof(buf));
 
-  const char *prefix = "Hello from process reader: \n";
+  const char *prefix = "Reader writing: ";
   write(1, prefix, str_len(prefix));
   write(1, buf, n);
 
@@ -120,7 +124,7 @@ int lonely_reader(int argc, char *argv[]) {
   char buf[64] = {0};
   ssize_t n = read(read_fd, buf, sizeof(buf));
 
-  const char *prefix = "Hello from lonely reader: \n";
+  const char *prefix = "\nLonely reader is writing this \n";
   write(1, prefix, str_len(prefix));
   write(1, buf, n);
 
@@ -143,7 +147,7 @@ int long_writer(int argc, char *argv[]) {
   ssize_t n = write(write_fd, message, sizeof(message));
 
   // Codigo no alcanzable
-  const char *prefix = "Hello from long writer: \n";
+  const char *prefix = "\nLong writer is writing this \n";
   write(1, prefix, str_len(prefix));
 
   if (n < 0) {

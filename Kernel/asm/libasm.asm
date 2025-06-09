@@ -1,6 +1,6 @@
 %include "macros.inc"
 
-GLOBAL aquire
+GLOBAL acquire
 GLOBAL release
 GLOBAL cpu_vendor
 GLOBAL get_sec
@@ -196,7 +196,7 @@ load_registers_array:
     popState
     ret
 
-aquire:
+acquire:
     mov al, 0
 .retry
     xchg [rdi], al

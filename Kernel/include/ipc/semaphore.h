@@ -4,7 +4,7 @@
 #include <ds/queue.h>
 #include <stdint.h>
 
-extern void aquire(uint8_t *lock);
+extern void acquire(uint8_t *lock);
 extern void release(uint8_t *lock);
 
 #define MAX_SEMAPHORES 1024
@@ -21,6 +21,14 @@ typedef struct semaphore {
  * @brief Inicializa la tabla de semáforos.
  */
 void my_sem_init();
+
+/**
+ * @brief Inicializa un semáforo con el id y valor inicial dados. Enfocado a
+ * semaforos de kernel.
+ * @param sem Punteor al semáforo a inicializar.
+ * @param value Valor inicial del semáforo.
+ */
+int my_ksem_init(semaphore_t *sem, uint64_t value);
 
 /**
  * @brief Crea un semáforo con el id y valor inicial dados.
@@ -65,6 +73,5 @@ uint64_t my_sem_wait(semaphore_t *sem);
  * @return 1 si está abierto, 0 si no.
  */
 uint8_t sem_is_open(semaphore_t *sem);
-void my_sem_init();
 
 #endif

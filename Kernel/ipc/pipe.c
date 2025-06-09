@@ -1,7 +1,10 @@
 #include <pipe.h>
 
+#include <kernel_asm.h>
 #include <lib.h>
+#include <lib/error.h>
 #include <queue.h>
+#include <semaphore.h>
 
 static file_ops_t pipe_read_ops;
 static file_ops_t pipe_write_ops;
@@ -10,12 +13,11 @@ typedef struct pipe_t {
   struct ringbuf *buffer;
   int readers;
   int writers;
-  uint64_t read_sem;
-  uint64_t write_sem;
   char id[32];
   bool in_use;
-  struct queue *read_queue;
-  struct queue *write_queue;
+  uint8_t lock;
+  struct queue *readers_wait_queue;
+  struct queue *writers_wait_queue;
 } pipe_t;
 
 typedef struct {
@@ -75,16 +77,18 @@ pipe_t *create_pipe(const char *id) {
       str_ncpy(pipe->id, id, sizeof(pipe->id));
       pipe->in_use = true;
 
-      pipe->read_queue = queue_new();
-      if (!pipe->read_queue) {
+      pipe->lock = 1;
+      pipe->readers = 0;
+      pipe->writers = 0;
+      pipe->readers_wait_queue = queue_new();
+      if (!pipe->readers_wait_queue) {
         ringbuf_free(pipe->buffer);
         kmm_free(pipe, kernel_mem);
         return NULL;
       }
-
-      pipe->write_queue = queue_new();
-      if (!pipe->write_queue) {
-        queue_free(pipe->read_queue);
+      pipe->writers_wait_queue = queue_new();
+      if (!pipe->writers_wait_queue) {
+        queue_free(pipe->readers_wait_queue);
         ringbuf_free(pipe->buffer);
         kmm_free(pipe, kernel_mem);
         return NULL;
@@ -99,49 +103,64 @@ pipe_t *create_pipe(const char *id) {
 }
 
 void pipe_free(struct pipe_t *pipe) {
-  if (pipe) {
-    pipe->in_use = false;
+  if (!pipe)
+    return;
 
-    if (pipe->buffer)
-      ringbuf_free(pipe->buffer);
-    kmm_free(pipe, kernel_mem);
-  }
+  pipe->in_use = false;
+
+  ringbuf_free(pipe->buffer);
+  queue_free(pipe->readers_wait_queue);
+  queue_free(pipe->writers_wait_queue);
+
+  kmm_free(pipe, kernel_mem);
 }
 
 static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
-  while (!ringbuf_available(pipe->buffer)) {
-    if (pipe->writers == 0)
-      return 0; // EOF
+  acquire(&(pipe->lock));
 
-    enqueue(pipe->read_queue, get_running());
-    block_current(BLK_PIPE_READ, pipe->read_queue);
+  while (!ringbuf_available(pipe->buffer)) {
+    if (pipe->writers == 0) {
+      release(&(pipe->lock));
+      return 0; // EOF: no writers and no data
+    }
+
+    release(&(pipe->lock));
+    enqueue(pipe->readers_wait_queue, get_running());
+    block_current(BLK_PIPE_READ, pipe->readers_wait_queue);
+    acquire(&(pipe->lock));
   }
 
-  proc_ready(dequeue(pipe->write_queue));
+  size_t n = ringbuf_read(pipe->buffer, size, (char *)buf);
 
-  return ringbuf_read(pipe->buffer, size, (char *)buf);
+  /* Notificar a escritores */
+  proc_ready(dequeue(pipe->writers_wait_queue));
+
+  release(&(pipe->lock));
+  return n;
 }
 
 static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
-  size_t total_written = 0;
-  const char *cbuf = (const char *)buf;
+  acquire(&(pipe->lock));
 
-  while (total_written < size) {
-    int n =
-        ringbuf_write(pipe->buffer, size - total_written, cbuf + total_written);
-    total_written += n;
-
-    if (n > 0) {
-      proc_ready(dequeue(pipe->read_queue));
+  while (ringbuf_available(pipe->buffer) >= PIPE_BUFFER_SIZE) {
+    if (pipe->readers_wait_queue == 0) {
+      release(&(pipe->lock));
+      return -EPIPE;
     }
 
-    if (total_written < size) {
-      enqueue(pipe->write_queue, get_running());
-      block_current(BLK_PIPE_WRITE, pipe->write_queue);
-    }
+    release(&(pipe->lock));
+    enqueue(pipe->writers_wait_queue, get_running());
+    block_current(BLK_PIPE_WRITE, pipe->writers);
+    acquire(&(pipe->lock));
   }
 
-  return total_written;
+  size_t n = ringbuf_write(pipe->buffer, size, (char *)buf);
+
+  /* Notificar a lectores */
+  proc_ready(dequeue(pipe->readers_wait_queue));
+
+  release(&(pipe->lock));
+  return n;
 }
 
 static int pipe_close_read(pipe_t *pipe) {
@@ -161,8 +180,8 @@ static int pipe_close_write(pipe_t *pipe) {
     pipe->writers--;
 
   if (pipe->writers == 0) {
-    while (pipe->read_queue->count > 0)
-      proc_ready(dequeue(pipe->read_queue));
+    while (pipe->readers_wait_queue->count > 0)
+      proc_ready(dequeue(pipe->readers));
   }
 
   if (pipe->readers == 0 && pipe->writers == 0)

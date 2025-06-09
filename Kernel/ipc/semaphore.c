@@ -15,6 +15,16 @@ void my_sem_init() {
   }
 }
 
+int my_ksem_init(semaphore_t *sem, uint64_t value) {
+  sem->id = MAX_SEMAPHORES;
+  sem->value = value;
+  sem->in_use = 1;
+  sem->waiting_process_queue = queue_new();
+  if (!sem->waiting_process_queue)
+    return -1;
+  return 0;
+}
+
 semaphore_t *my_sem_create(uint64_t id, uint64_t value) {
   if (id < MAX_SEMAPHORES && !semaphore_table[id].in_use) {
     if (!semaphore_table[id].waiting_process_queue) {
@@ -52,7 +62,7 @@ uint64_t my_sem_post(semaphore_t *sem) {
     return -1; // Error: semáforo no válido o no está en uso
   }
 
-  aquire(&(sem->lock)); // Adquirir lock para proteger el semáforo
+  acquire(&(sem->lock)); // Adquirir lock para proteger el semáforo
 
   proc_t *process_to_wake = (proc_t *)dequeue(sem->waiting_process_queue);
 
@@ -86,7 +96,7 @@ uint64_t my_sem_wait(semaphore_t *sem) {
     return -1; // Error: semáforo no está abierto
   }
   while (1) {
-    aquire(&(sem->lock));
+    acquire(&(sem->lock));
     if (sem->value > 0) {
       sem->value--;
       release(&(sem->lock));
