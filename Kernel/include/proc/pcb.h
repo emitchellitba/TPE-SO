@@ -1,6 +1,7 @@
 #ifndef _PCB_H_
 #define _PCB_H_
 
+#include <proc_info.h>
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -25,14 +26,6 @@ typedef struct fd_entry {
 typedef uint8_t priority_t;
 
 typedef int (*proc_main_function)(int argc, char **argv);
-
-typedef enum proc_state_t {
-  DEAD,
-  READY,
-  RUNNING,
-  ZOMBIE,
-  BLOCKED
-} proc_state_t;
 
 typedef enum block_reason {
   BLK_NONE,      // No está bloqueado o razón no específica

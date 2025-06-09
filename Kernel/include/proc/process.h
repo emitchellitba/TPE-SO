@@ -13,18 +13,6 @@
 
 #define STACK_SIZE (8192U) /* 8 KiB */
 #define QUANTUM_DEFAULT 2
-#define QUANTUM_MAX 5
-
-typedef struct {
-  int pid;
-  int ppid;
-  char name[32];
-  int state;
-  int priority;
-  int mode;
-  uint64_t stack_base_address;
-  uint64_t current_stack_pointer;
-} proc_info_t;
 
 extern file_ops_t video_ops;
 extern file_ops_t video_err_ops;

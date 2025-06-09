@@ -14,7 +14,7 @@ int ps_main(int argc, char *argv[]) {
   for (int i = 0; i < n; i++) {
     printf("%-5d %-5d %-16s %-10s %-8d %-3s %-18lx %-18lx\n", procs[i].pid,
            procs[i].ppid, procs[i].name, state_names[procs[i].state],
-           procs[i].priority, procs[i].background ? "BG" : "FG",
+           procs[i].priority, procs[i].mode ? "BG" : "FG",
            procs[i].stack_base_address, procs[i].current_stack_pointer);
   }
 
