@@ -63,6 +63,7 @@ static syscall_func_t syscall_table[] = {
     sys_close_sem,       // 37
     sys_sem_post,        // 38
     sys_sem_wait,        // 39
+    sys_sem_trywait,     // 40
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -558,4 +559,10 @@ int64_t sys_sem_wait(va_list args) {
   syscall_log(LOG_INFO, "sys_sem_wait(sem_id=%d)\n", sem_ref->id);
 
   return my_sem_wait(sem_ref);
+}
+
+int64_t sys_sem_trywait(va_list args) {
+    uint64_t sem = va_arg(args, uint64_t);
+    semaphore_t *sem_ref = (semaphore_t *)sem;
+    return my_sem_trywait(sem_ref);
 }

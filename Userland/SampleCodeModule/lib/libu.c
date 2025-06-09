@@ -46,6 +46,7 @@ DEFINE_WRAPPER(my_sem_open, (uint64_t id), (id))
 DEFINE_WRAPPER(my_sem_close, (semaphore_t * sem), (sem))
 DEFINE_WRAPPER(my_sem_post, (semaphore_t * sem), (sem))
 DEFINE_WRAPPER(my_sem_wait, (semaphore_t * sem), (sem))
+DEFINE_WRAPPER(my_sem_trywait, (semaphore_t *sem), (sem))
 
 extern int64_t _spawn_process(const char *name, int argc, char *argv[],
                               int fds[], int background);

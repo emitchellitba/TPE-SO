@@ -68,5 +68,6 @@ DECLARE_SYSCALL(sys_open_sem)
 DECLARE_SYSCALL(sys_close_sem)
 DECLARE_SYSCALL(sys_sem_post)
 DECLARE_SYSCALL(sys_sem_wait)
+DECLARE_SYSCALL(sys_sem_trywait)
 
 #endif

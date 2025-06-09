@@ -54,5 +54,6 @@ DECLARE_WRAPPER(my_sem_open, (uint64_t id))
 DECLARE_WRAPPER(my_sem_close, (semaphore_t * sem))
 DECLARE_WRAPPER(my_sem_post, (semaphore_t * sem))
 DECLARE_WRAPPER(my_sem_wait, (semaphore_t * sem))
+DECLARE_WRAPPER(my_sem_trywait, (semaphore_t *sem))
 
 #endif // LIBU_H

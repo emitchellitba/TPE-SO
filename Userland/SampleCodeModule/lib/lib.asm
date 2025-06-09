@@ -339,3 +339,10 @@ EXPORT_FUNC my_sem_post
 EXPORT_FUNC my_sem_wait
 
     do_syscall_direct 0x27
+
+;-------------------------------------------------------------------------------
+; 0x28 - my_sem_trywait
+;-------------------------------------------------------------------------------
+EXPORT_FUNC my_sem_trywait
+
+    do_syscall_direct 0x28
