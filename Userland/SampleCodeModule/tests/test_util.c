@@ -74,8 +74,6 @@ void endless_loop_print(int argc, char *argv[]) {
 
   int64_t pid = get_pid();
 
-  // printf("Process %d started with wait time %d ", pid, wait);
-
   while (1) {
     printf("%d\n", pid);
     sleep_time(wait);

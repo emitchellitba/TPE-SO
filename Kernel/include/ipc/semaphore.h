@@ -2,20 +2,13 @@
 #define SEMAPHORE_H
 
 #include <ds/queue.h>
+#include <shared_info.h>
 #include <stdint.h>
 
 extern void acquire(uint8_t *lock);
 extern void release(uint8_t *lock);
 
 #define MAX_SEMAPHORES 1024
-
-typedef struct semaphore {
-  uint8_t lock;
-  uint8_t in_use;
-  uint64_t id;
-  uint64_t value;
-  struct queue *waiting_process_queue;
-} semaphore_t;
 
 /**
  * @brief Inicializa la tabla de semáforos.
@@ -42,7 +35,7 @@ semaphore_t *my_sem_create(uint64_t id, uint64_t value);
  * @brief Libera el semáforo pasado como parámetro.
  * @param sem Puntero al semáforo a destruir.
  */
-void my_sem_destroy(semaphore_t *sem);
+uint64_t my_sem_destroy(semaphore_t *sem);
 
 /**
  * @brief Abre un semáforo existente (lo busca por id).

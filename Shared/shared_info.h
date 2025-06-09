@@ -1,7 +1,15 @@
-#ifndef _PROC_INFO_H
-#define _PROC_INFO_H
+#ifndef _SHARED_INFO_H
+#define _SHARED_INFO_H
 
 #include <stdint.h>
+
+typedef struct semaphore {
+  uint8_t lock;
+  uint8_t in_use;
+  uint64_t id;
+  uint64_t value;
+  struct queue *waiting_process_queue;
+} semaphore_t;
 
 typedef enum block_reason
 {
@@ -40,4 +48,4 @@ typedef struct
 
 #define QUANTUM_MAX 5
 
-#endif // _PROC_INFO_H
+#endif // _SHARED_INFO_H

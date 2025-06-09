@@ -30,6 +30,8 @@ void test_prio() {
   };
   uint64_t i;
 
+  load_program("endless_loop_print", (uint64_t)&endless_loop_print);
+
   for (i = 0; i < TOTAL_PROCESSES; i++) {
     pids[i] = spawn_process("endless_loop_print", 2, argv, NULL);
     printf("Spawned process with PID: %d\n", pids[i]);
@@ -69,5 +71,6 @@ void test_prio() {
     printf("Process %d finished with status %d\n", pid, status);
   }
 
+  rm_program("endless_loop_print");
   printf("DONE!\n");
 }

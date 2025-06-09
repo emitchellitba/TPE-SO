@@ -1,7 +1,7 @@
 #ifndef _PCB_H_
 #define _PCB_H_
 
-#include <proc_info.h>
+#include <shared_info.h>
 #include <stdint.h>
 #include <sys/types.h>
 

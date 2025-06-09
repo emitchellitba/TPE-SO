@@ -2,8 +2,8 @@
 #define PROC_H
 
 #include <pcb.h>
-#include <proc_info.h>
 #include <queue.h>
+#include <shared_info.h>
 #include <stdint.h>
 #include <sys/types.h>
 

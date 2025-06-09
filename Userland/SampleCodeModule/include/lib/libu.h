@@ -2,12 +2,13 @@
 #define LIBU_H
 
 #include <lib/wrappers.h>
-#include <proc_info.h>
+#include <shared_info.h>
 
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
 
+// TODO: mover esto a shared ¿?
 #define READ_PIPE 0
 #define WRITE_PIPE 1
 
@@ -47,5 +48,12 @@ DECLARE_WRAPPER(set_canonical_mode, (int enable))
 DECLARE_WRAPPER(get_tty_mode, (void))
 DECLARE_WRAPPER(m_malloc, (size_t size))
 DECLARE_WRAPPER(m_free, (void *ptr))
+DECLARE_WRAPPER(mem_dump, (void))
+DECLARE_WRAPPER(my_sem_create, (uint64_t id, uint64_t initial_value))
+DECLARE_WRAPPER(my_sem_open, (uint64_t id))
+DECLARE_WRAPPER(my_sem_close, (semaphore_t * sem))
+DECLARE_WRAPPER(my_sem_post, (semaphore_t * sem))
+DECLARE_WRAPPER(my_sem_wait, (semaphore_t * sem))
+DECLARE_WRAPPER(my_sem_trywait, (semaphore_t * sem))
 
 #endif // LIBU_H
