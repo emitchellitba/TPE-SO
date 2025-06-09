@@ -538,7 +538,7 @@ int64_t sys_open_sem(va_list args) {
 
 int64_t sys_close_sem(va_list args) {
   uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t* sem_ref = (semaphore_t*)sem; 
+  semaphore_t *sem_ref = (semaphore_t *)sem;
   syscall_log(LOG_INFO, "sys_close_sem(sem_id=%d)\n", sem_ref->id);
 
   return my_sem_destroy(sem_ref);
@@ -546,7 +546,7 @@ int64_t sys_close_sem(va_list args) {
 
 int64_t sys_sem_post(va_list args) {
   uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t* sem_ref = (semaphore_t*)sem; 
+  semaphore_t *sem_ref = (semaphore_t *)sem;
   syscall_log(LOG_INFO, "sys_sem_post(sem_id=%d)\n", sem_ref->id);
 
   return my_sem_post(sem_ref);
@@ -554,7 +554,7 @@ int64_t sys_sem_post(va_list args) {
 
 int64_t sys_sem_wait(va_list args) {
   uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t* sem_ref = (semaphore_t*)sem;
+  semaphore_t *sem_ref = (semaphore_t *)sem;
   syscall_log(LOG_INFO, "sys_sem_wait(sem_id=%d)\n", sem_ref->id);
 
   return my_sem_wait(sem_ref);

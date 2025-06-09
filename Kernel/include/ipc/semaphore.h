@@ -2,8 +2,8 @@
 #define SEMAPHORE_H
 
 #include <ds/queue.h>
-#include <stdint.h>
 #include <shared_info.h>
+#include <stdint.h>
 
 extern void acquire(uint8_t *lock);
 extern void release(uint8_t *lock);

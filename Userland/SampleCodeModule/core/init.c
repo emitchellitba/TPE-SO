@@ -19,7 +19,6 @@ extern int test_mm(uint64_t argc, char *argv[]);
 extern void test_prio(void);
 extern int test_processes(uint64_t argc, char *argv[]);
 extern int test_sync(uint64_t argc, char *argv[]);
-extern void endless_loop_print(int argc, char *argv[]);
 extern int test_runner_cmd(int argc, char **argv);
 
 #define SHELL_PROGRAM_NAME "shell"
@@ -55,8 +54,6 @@ static void load_programs() {
   load_program("test_prio", (uint64_t)&test_prio);
   load_program("test_processes", (uint64_t)&test_processes);
   load_program("test_sync", (uint64_t)&test_sync);
-
-  load_program("endless_loop_print", (uint64_t)&endless_loop_print);
 }
 
 int init_main(int argc, char **argv) {

@@ -1,16 +1,17 @@
+#include "libu.h"
 #include "syscall.h"
 #include "test_util.h"
 #include <stdint.h>
 #include <stdio.h>
 
-#define SEM_ID "sem"
+#define SEM_ID 0
 #define TOTAL_PAIR_PROCESSES 2
 
 int64_t global; // shared memory
 
 void slowInc(int64_t *p, int64_t inc) {
   uint64_t aux = *p;
-  my_yield(); // This makes the race condition highly probable
+  yield();
   aux += inc;
   *p = aux;
 }
@@ -31,7 +32,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     return -1;
 
   if (use_sem)
-    if (!my_sem_open(SEM_ID, 1)) {
+    if (!my_sem_open(SEM_ID)) {
       printf("test_sync: ERROR opening semaphore\n");
       return -1;
     }
@@ -52,6 +53,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
+  load_program("my_process_inc", (uint64_t)&my_process_inc);
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
   if (argc != 2)
@@ -64,15 +66,17 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = my_create_process("my_process_inc", 3, argvDec);
+    pids[i] = spawn_process("my_process_inc", 3, argvDec, NULL);
     pids[i + TOTAL_PAIR_PROCESSES] =
-        my_create_process("my_process_inc", 3, argvInc);
+        spawn_process("my_process_inc", 3, argvInc, NULL);
   }
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
     my_wait(pids[i]);
     my_wait(pids[i + TOTAL_PAIR_PROCESSES]);
   }
+
+  rm_program("my_process_inc");
 
   printf("Final value: %d\n", global);
 

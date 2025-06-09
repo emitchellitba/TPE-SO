@@ -40,12 +40,12 @@ DEFINE_WRAPPER(get_tty_mode, (void), ())
 DEFINE_WRAPPER(m_malloc, (size_t size), (size))
 DEFINE_WRAPPER(m_free, (void *ptr), (ptr))
 DEFINE_WRAPPER(mem_dump, (void), ())
-DEFINE_WRAPPER(my_sem_create, (uint64_t id, uint64_t initial_value), (id, initial_value))
+DEFINE_WRAPPER(my_sem_create, (uint64_t id, uint64_t initial_value),
+               (id, initial_value))
 DEFINE_WRAPPER(my_sem_open, (uint64_t id), (id))
-DEFINE_WRAPPER(my_sem_close, (semaphore_t* sem), (sem))
-DEFINE_WRAPPER(my_sem_post, (semaphore_t* sem), (sem))
-DEFINE_WRAPPER(my_sem_wait, (semaphore_t* sem), (sem))
-
+DEFINE_WRAPPER(my_sem_close, (semaphore_t * sem), (sem))
+DEFINE_WRAPPER(my_sem_post, (semaphore_t * sem), (sem))
+DEFINE_WRAPPER(my_sem_wait, (semaphore_t * sem), (sem))
 
 extern int64_t _spawn_process(const char *name, int argc, char *argv[],
                               int fds[], int background);
