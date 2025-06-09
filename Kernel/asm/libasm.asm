@@ -206,7 +206,7 @@ aquire:
     ret
 
 do_exit:
-	mov rax, 14h
+	mov rax, 15h
 	int 80h
 	ret
 

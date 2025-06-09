@@ -29,28 +29,33 @@ static syscall_func_t syscall_table[] = {
     sys_change_color,    // 3
     sys_get_time,        // 4
     sys_sleep,           // 5
-    sys_zoom,            // 6
-    sys_fill_out_buffer, // 7
-    sys_beep,            // 8
-    sys_read_kmsg,       // 9
-    sys_pipe_create,     // 10
-    sys_pipe_open,       // 11
-    sys_pipe_close,      // 12
-    sys_get_procs,       // 13
-    sys_load_program,    // 14
-    sys_rm_program,      // 15
-    sys_get_programs,    // 16
-    sys_spawn_process,   // 17
-    sys_kill_proc,       // 18
-    sys_change_priority, // 19
-    sys_exit,            // 20
-    sys_block,           // 21
-    sys_unblock,         // 22
-    sys_copy_fd,         // 23
-    sys_close_fd,        // 24
-    sys_wait_pid,        // 25
-    sys_wait,            // 26
-    sys_get_pid,         // 27
+    sys_usleep,          // 6
+    sys_zoom,            // 7
+    sys_fill_out_buffer, // 8
+    sys_beep,            // 9
+    sys_read_kmsg,       // 10
+    sys_pipe_create,     // 11
+    sys_pipe_open,       // 12
+    sys_pipe_close,      // 13
+    sys_get_procs,       // 14
+    sys_load_program,    // 15
+    sys_rm_program,      // 16
+    sys_get_programs,    // 17
+    sys_spawn_process,   // 18
+    sys_kill_proc,       // 19
+    sys_change_priority, // 20
+    sys_exit,            // 21
+    sys_block,           // 22
+    sys_unblock,         // 23
+    sys_copy_fd,         // 24
+    sys_close_fd,        // 25
+    sys_wait_pid,        // 26
+    sys_wait,            // 27
+    sys_get_pid,         // 28
+    sys_yield,           // 29
+    sys_malloc,          // 30
+    sys_free,            // 31
+    sys_mem_dump,        // 32
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -157,9 +162,16 @@ int64_t sys_get_time(va_list args) {
 }
 
 int64_t sys_sleep(va_list args) {
-  uint32_t ticks = va_arg(args, uint32_t);
+  uint64_t ticks = va_arg(args, uint64_t);
   syscall_log(LOG_INFO, "sleep(ticks=%u)\n", ticks);
   sleep(ticks);
+  return 0;
+}
+
+int64_t sys_usleep(va_list args) {
+  uint64_t microseconds = va_arg(args, uint64_t);
+  syscall_log(LOG_INFO, "usleep(microseconds=%u)\n", microseconds);
+  usleep(microseconds);
   return 0;
 }
 
@@ -451,4 +463,32 @@ int64_t sys_get_pid(va_list args) {
   syscall_log(LOG_INFO, "sys_get_pid()\n");
   proc_t *current_process = get_running();
   return current_process->pid;
+}
+
+int64_t sys_yield(va_list args) {
+  (void)args; // No se usan argumentos
+  syscall_log(LOG_INFO, "sys_yield()\n");
+  yield();
+  return 0;
+}
+
+int64_t sys_malloc(va_list args) {
+  size_t size = va_arg(args, size_t);
+  syscall_log(LOG_INFO, "sys_malloc(size=%zu)\n", size);
+  return (int64_t)kmalloc(kernel_mem, size);
+}
+
+int64_t sys_free(va_list args) {
+  void *ptr = va_arg(args, void *);
+  syscall_log(LOG_INFO, "sys_free(ptr=%p)\n", ptr);
+  kmm_free(kernel_mem, ptr);
+  return 0;
+}
+
+int64_t sys_mem_dump(va_list args) {
+  // Esta syscall es para depuración, no debería estar en producción
+  (void)args; // No se usan argumentos
+  syscall_log(LOG_INFO, "sys_mem_dump()\n");
+  kmm_dump_state(kernel_mem);
+  return 0;
 }

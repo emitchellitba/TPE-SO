@@ -23,7 +23,10 @@ command_entry_t command_table[] = {
     // --- Comandos Externos (Programas) ---
     {"ps", CMD_SPAWN, .data.program_name = "ps"},
     {"programs", CMD_SPAWN, .data.program_name = "ls"},
-    {"cat", CMD_SPAWN, .data.program_name = "cat"}};
+    {"cat", CMD_SPAWN, .data.program_name = "cat"},
+    {"loop", CMD_SPAWN, .data.program_name = "loop"},
+    {"chprio", CMD_SPAWN, .data.program_name = "chprio"},
+    {"block", CMD_SPAWN, .data.program_name = "block"}};
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))
 

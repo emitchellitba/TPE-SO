@@ -2,6 +2,7 @@
 #define LIBU_H
 
 #include <lib/wrappers.h>
+#include <proc_info.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -13,29 +14,14 @@
 #define SPAWN_USE_DEFAULT_IO 0x1
 #define SPAWN_INHERIT_FDS 0x2
 
-typedef enum proc_state_t {
-  DEAD,
-  READY,
-  RUNNING,
-  ZOMBIE,
-  BLOCKED
-} proc_state_t;
-
 typedef int (*main_func_t)(int argc, char *argv[]);
 
 typedef int (*shell_command)(int params_count, char *params[]);
 
-typedef struct {
-  int pid;
-  int ppid;
-  char name[32];
-  int state;
-  int priority;
-} proc_info_t;
-
 DECLARE_WRAPPER(read, (int fd, char *buffer, size_t count))
 DECLARE_WRAPPER(write, (int fd, const char *buffer, size_t count))
-DECLARE_WRAPPER(sleep_time, (int time))
+DECLARE_WRAPPER(sleep_time, (uint64_t time))
+DECLARE_WRAPPER(usleep_time, (uint64_t time))
 DECLARE_WRAPPER(read_kmsg, (char *log, size_t size))
 DECLARE_WRAPPER(pipe_create, (char *id))
 DECLARE_WRAPPER(pipe_open, (char *id, int mode))
@@ -56,5 +42,6 @@ DECLARE_WRAPPER(close_fd, (int fd))
 DECLARE_WRAPPER(wait_pid, (int pid, int *status))
 DECLARE_WRAPPER(wait, (int *status))
 DECLARE_WRAPPER(get_pid, (void))
+DECLARE_WRAPPER(yield, (void))
 
 #endif // LIBU_H

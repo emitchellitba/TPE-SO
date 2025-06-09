@@ -27,6 +27,8 @@ typedef struct {
   unsigned long wake_up_tick;
 } sleeping_proc_t;
 
+static uint64_t tick_frequency = 18;  // Frecuencia del PIT en Hz (18.2 Hz por defecto)
+
 static struct queue *sleeping_proc_queue = QUEUE_NEW();
 
 unsigned long ticks = 0; // Variable global para contar los ticks del PIT
@@ -48,12 +50,32 @@ void timer_handler() {
   }
 }
 
-void sleep(int ticksToWait) {
+uint64_t seconds_to_ticks(uint64_t seconds) {
+    return seconds * tick_frequency;
+}
+
+uint64_t ticks_to_seconds(uint64_t ticks) {
+    return ticks / tick_frequency;
+}
+
+void sleep_helper(uint64_t ticksToWait) {
   sleeping_proc_t *current = kmalloc(kernel_mem, sizeof(sleeping_proc_t));
   current->pid = get_running()->pid;
   current->wake_up_tick = ticks + ticksToWait;
   enqueue(sleeping_proc_queue, current);
-  block_current(BLK_SLEEP, NULL);
+  block_current(BLK_SLEEP, sleeping_proc_queue);
+}
+
+void usleep(uint64_t microsecondsToWait) {
+  uint64_t ticksToWait = (seconds_to_ticks(microsecondsToWait)) / 1000000;
+  if (ticksToWait == 0) {
+    return;
+  }
+  sleep_helper(ticksToWait);
+}
+
+void sleep(uint64_t secondsToWait) {
+  sleep_helper(seconds_to_ticks(secondsToWait));
 }
 
 void set_pit_frequency(uint32_t frequency) {
@@ -63,6 +85,8 @@ void set_pit_frequency(uint32_t frequency) {
 
   outb(PIT_CHANNEL0_PORT, (uint8_t)(divisor & 0xFF));
   outb(PIT_CHANNEL0_PORT, (uint8_t)((divisor >> 8) & 0xFF));
+
+  tick_frequency = frequency;
 }
 
 void get_time(date_time *dt) {

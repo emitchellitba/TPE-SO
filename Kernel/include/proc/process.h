@@ -6,6 +6,7 @@
 #include <filedesc.h>
 #include <lib.h>
 #include <stdint.h>
+#include <proc_info.h>
 
 /* TODO: Crear una seccion para codigos de errores */
 #define NOMEMERR 1;
@@ -13,31 +14,12 @@
 
 #define STACK_SIZE (8192U) /* 8 KiB */
 #define QUANTUM_DEFAULT 2
-#define QUANTUM_MAX 5
 
 #define FD_MAX 16
 
 typedef int (*proc_main_function)(int argc, char **argv);
 
-typedef struct {
-  int pid;
-  int ppid;
-  char name[32];
-  int state;
-  int priority;
-} proc_info_t;
-// TODO: MOVER ESTE proc_info_t a una librera compartida entre kernel y userland
-
 typedef uint8_t priority_t;
-
-// En tu process.h o similar
-typedef enum proc_state_t {
-  DEAD,
-  READY,
-  RUNNING,
-  ZOMBIE,
-  BLOCKED
-} proc_state_t;
 
 typedef enum block_reason {
   BLK_NONE,      // No está bloqueado o razón no específica

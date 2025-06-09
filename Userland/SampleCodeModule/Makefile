@@ -9,7 +9,7 @@ OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
 
 INCLUDE_DIRS=$(shell find include -type d)
-INCLUDE_FLAGS=$(addprefix -I,$(INCLUDE_DIRS))
+INCLUDE_FLAGS=$(addprefix -I,$(INCLUDE_DIRS)) -I../../Shared
 
 all: $(MODULE)
 
