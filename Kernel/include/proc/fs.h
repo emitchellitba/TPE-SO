@@ -4,7 +4,7 @@
 #include <lib.h>
 #include <stdlib.h>
 
-#define MAX_FILE_ENTRIES 16
+#define MAX_FILE_ENTRIES 64
 #define MAX_FILE_NAME_LEN 32
 
 typedef void (*fs_entry_point_t)(void);

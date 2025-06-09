@@ -14,7 +14,7 @@ int sched_test_main(int argc, char *argv[]) {
   load_program("sleeping_program", sleeping_process_main);
 
   for (int i = 0; i < 10; i++) {
-    int pid = spawn_process("sleeping_program", 0, NULL, NULL);
+    int pid = spawn_process_bg("sleeping_program", 0, NULL, NULL);
     if (pid < 0) {
       write(STDERR, "Error spawning process\n", 24);
       return 1;
@@ -34,7 +34,7 @@ int sleeping_process_main(void) {
   int pid = get_pid();
   for (int i = 0; i < 2; i++) {
     printf("Process %d started, sleeping for 5 seconds...\n", pid);
-    sleep_time(100);
+    sleep_time(5);
   }
   return 0;
 }

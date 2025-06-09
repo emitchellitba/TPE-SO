@@ -24,13 +24,13 @@ int ps_main(int argc, char *argv[]) {
     if (ppid_str)
       printf("%-5d %-5s %-16s %-10s %-16s %-12d %-9s 0x%-16x 0x%-16x\n",
              procs[i].pid, ppid_str, procs[i].name, state_names[procs[i].state],
-             block_reason, procs[i].priority, procs[i].mode ? "BG" : "FG",
+             block_reason, procs[i].priority, procs[i].mode ? "FG" : "BG",
              procs[i].stack_base_address, procs[i].current_stack_pointer);
     else
       printf("%-5d %-5d %-16s %-10s %-16s %-12d %-9s 0x%-16x 0x%-16x\n",
              procs[i].pid, procs[i].ppid, procs[i].name,
              state_names[procs[i].state], block_reason, procs[i].priority,
-             procs[i].mode ? "BG" : "FG", procs[i].stack_base_address,
+             procs[i].mode ? "FG" : "BG", procs[i].stack_base_address,
              procs[i].current_stack_pointer);
   }
 

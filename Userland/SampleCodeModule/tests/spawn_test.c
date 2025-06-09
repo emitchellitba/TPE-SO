@@ -15,7 +15,7 @@ int spawn_test_main(void) {
 
   for (int j = 0; j < 3; j++) {
     for (i = 0; i < 10; i++) {
-      pid = spawn_process("sleep", 2, (char *[]){"sleep", "20", NULL}, NULL);
+      pid = spawn_process("sleep", 2, (char *[]){"sleep", "5", NULL}, NULL);
       if (pid < 0) {
         printf("Error spawning process %d\n", i);
         return -1;

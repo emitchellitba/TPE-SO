@@ -380,10 +380,13 @@ static void fill_out_buffer(uint64_t *buffer) {
 
 int64_t sys_change_priority(va_list args) {
   int64_t pid = va_arg(args, int64_t);
-  priority_t new_priority = va_arg(args, priority_t);
+  int64_t new_priority = va_arg(args, int64_t);
   syscall_log(LOG_INFO, "change_priority(pid=%ld, new_priority=%d)\n", pid,
               new_priority);
-  return change_priority(pid, new_priority);
+
+  proc_t *proc = get_proc_by_pid(pid);
+
+  return change_priority(proc, (priority_t)new_priority);
 }
 
 int64_t sys_exit(va_list args) {

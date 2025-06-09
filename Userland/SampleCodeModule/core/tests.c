@@ -18,7 +18,7 @@ static test_entry_t test_table[] = {
 // --- FUNCIONES ---
 
 void print_available_tests() {
-  printf("\nTests disponibles (ejecute con 'test <nombre>'):\n");
+  printf("\nAvailable tests (run with 'test <name>'):\n");
   for (int i = 0; i < TOTAL_TESTS; i++) {
     printf("  - %s: %s\n", test_table[i].display_name,
            test_table[i].description);
@@ -27,8 +27,8 @@ void print_available_tests() {
 
 int test_runner_cmd(int argc, char **argv) {
   if (argc < 2) {
-    printf("\nUso: test <nombre_del_test>\n");
-    printf("Escriba 'help -test' para ver una lista de tests disponibles.\n");
+    printf("\nUsage: test <test_name>\n");
+    printf("Type 'help tests' to see a list of available tests.\n");
     return -1;
   }
 

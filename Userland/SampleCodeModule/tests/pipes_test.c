@@ -23,7 +23,7 @@ int pipes_test_main(int argc, char *argv[]) {
   // Se instancia primero el writer para que se cree antes el fd de escritura y
   // no se retorne EOF inmediatamente
   char *writer_argv[] = {"writer", NULL};
-  int writer_pid = spawn_process("writer", 1, writer_argv, NULL);
+  int writer_pid = spawn_process_bg("writer", 1, writer_argv, NULL);
   if (writer_pid < 0) {
     printf("Error spawning writer process: %d\n", writer_pid);
     pipe_close(pipe_id);
@@ -31,7 +31,7 @@ int pipes_test_main(int argc, char *argv[]) {
   }
 
   char *reader_argv[] = {"reader", NULL};
-  int reader_pid = spawn_process("reader", 1, reader_argv, NULL);
+  int reader_pid = spawn_process_bg("reader", 1, reader_argv, NULL);
   if (reader_pid < 0) {
     printf("Error spawning reader process: %d\n", reader_pid);
     pipe_close(pipe_id);
@@ -41,7 +41,7 @@ int pipes_test_main(int argc, char *argv[]) {
   load_program("lonely_reader", lonely_reader);
   char *lonely_reader_argv[] = {"lonely_reader", NULL};
   int lonely_reader_pid =
-      spawn_process("lonely_reader", 1, lonely_reader_argv, NULL);
+      spawn_process_bg("lonely_reader", 1, lonely_reader_argv, NULL);
   if (lonely_reader_pid < 0) {
     printf("Error spawning lonely reader process: %d\n", lonely_reader_pid);
     return 1;
@@ -49,7 +49,8 @@ int pipes_test_main(int argc, char *argv[]) {
 
   load_program("long_writer", long_writer);
   char *long_writer_argv[] = {"long_writer", NULL};
-  int long_writer_pid = spawn_process("long_writer", 1, long_writer_argv, NULL);
+  int long_writer_pid =
+      spawn_process_bg("long_writer", 1, long_writer_argv, NULL);
   if (long_writer_pid < 0) {
     printf("Error spawning long writer process: %d\n", long_writer_pid);
     return 1;
@@ -84,11 +85,12 @@ int writer(int argc, char *argv[]) {
   const char *message = "Hello from process writer: \n";
   ssize_t n = write(write_fd, message, str_len(message));
   if (n < 0) {
-    printf("Error writing to pipe: %zd\n", n);
+    printf("Error writing to pipe: %d\n", n);
     pipe_close(pipe_id);
     return 1;
   }
 
+  usleep_time(500 * 1000);
   return 0;
 }
 
@@ -145,7 +147,7 @@ int long_writer(int argc, char *argv[]) {
   write(1, prefix, str_len(prefix));
 
   if (n < 0) {
-    printf("Error writing to pipe: %zd\n", n);
+    printf("Error writing to pipe: %d\n", n);
     pipe_close(pipe_id);
     return 1;
   }

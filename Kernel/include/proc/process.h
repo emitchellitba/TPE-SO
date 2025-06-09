@@ -33,7 +33,7 @@ pid_t wait_pid(pid_t pid, int *exit_status);
 
 proc_t *get_proc_by_pid(pid_t pid);
 
-int64_t change_priority(pid_t pid, priority_t new_priority);
+int64_t change_priority(proc_t *child, priority_t new_priority);
 
 void return_from_syscall(proc_t *proc, int retval);
 

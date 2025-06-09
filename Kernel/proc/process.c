@@ -325,28 +325,14 @@ int copy_fd(proc_t *target, proc_t *source, int targetfd, int srcfd) {
   return 0;
 }
 
-int64_t change_priority(pid_t pid, priority_t new_priority) {
-  proc_t *parent = get_running();
-  proc_t *child = NULL;
-  int found = 0;
-
-  for (int i = 0; i < parent->child_count && found == 0; i++) {
-    if (parent->children[i] == pid) {
-      found = 1;
-    }
-  }
-
-  if (!found) {
-    proc_log(LOG_ERR, "PID %d is not a child of current process (PID %d)\n",
-             pid, parent->pid);
+int64_t change_priority(proc_t *child, priority_t new_priority) {
+  if (!child)
     return -1;
-  }
 
-  child = get_proc_by_pid(pid);
-  if (!child) {
-    proc_log(LOG_ERR, "Process with PID %d not found\n", pid);
+  proc_t *parent = child->parent;
+
+  if (parent != get_running())
     return -1;
-  }
 
   if (new_priority <= 0 || new_priority > QUANTUM_MAX) {
     proc_log(LOG_ERR, "Invalid priority value: %d\n", new_priority);
@@ -355,7 +341,8 @@ int64_t change_priority(pid_t pid, priority_t new_priority) {
 
   child->priority = new_priority;
   child->has_quantum = new_priority;
-  proc_log(LOG_INFO, "Changed priority of PID %d to %d\n", pid, new_priority);
+  proc_log(LOG_INFO, "Changed priority of PID %d to %d\n", child->pid,
+           new_priority);
   return 0;
 }
 
