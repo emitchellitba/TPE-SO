@@ -7,7 +7,7 @@ DEFINE_WRAPPER(change_color, (uint8_t background), (background))
 DEFINE_WRAPPER(sleep_time, (uint64_t time), (time))
 DEFINE_WRAPPER(usleep_time, (uint64_t time), (time))
 DEFINE_WRAPPER(zoom, (int in), (in))
-DEFINE_WRAPPER(get_regist, (uint64_t * regs), (regs))
+DEFINE_WRAPPER(get_regist, (uint64_t *regs), (regs))
 // DEFINE_WRAPPER(make_sound, (int64_t time, int64_t nFrequence), (time,
 // nFrequence))
 DEFINE_WRAPPER(read, (int fd, char *buffer, size_t count), (fd, buffer, count))
@@ -37,6 +37,8 @@ DEFINE_WRAPPER(get_pid, (void), ())
 DEFINE_WRAPPER(yield, (void), ())
 DEFINE_WRAPPER(set_canonical_mode, (int enable), (enable))
 DEFINE_WRAPPER(get_tty_mode, (void), ())
+DEFINE_WRAPPER(m_malloc, (size_t size), (size))
+DEFINE_WRAPPER(m_free, (void *ptr), (ptr))
 
 extern int64_t _spawn_process(const char *name, int argc, char *argv[],
                               int fds[], int background);

@@ -17,7 +17,6 @@ command_entry_t command_table[] = {
     {"clear", CMD_BUILTIN, .data.func = clear_cmd},
     {"registers", CMD_BUILTIN, .data.func = get_registers_cmd},
     {"kill", CMD_BUILTIN, .data.func = kill_cmd},
-    {"test", CMD_BUILTIN, .data.func = test_runner_cmd},
 
     // --- Comandos Externos (Programas) ---
     {"ps", CMD_SPAWN, .data.program_name = "ps"},
@@ -28,6 +27,8 @@ command_entry_t command_table[] = {
     {"block", CMD_SPAWN, .data.program_name = "block"},
     {"lazy", CMD_SPAWN, .data.program_name = "lazy"},
     {"sleep", CMD_SPAWN, .data.program_name = "sleep"},
+    {"test", CMD_SPAWN, .data.program_name = "test_runner_cmd"},
+
 };
 
 #define TOTAL_CMDS (sizeof(command_table) / sizeof(command_table[0]))

@@ -310,7 +310,7 @@ int64_t sys_rm_program(va_list args) {
 
 int64_t sys_get_programs(va_list args) {
   /* recibe un buffer de strings y una cantidad maxima */
-  char(*buffer)[MAX_FILE_NAME_LEN] = va_arg(args, char(*)[MAX_FILE_NAME_LEN]);
+  char (*buffer)[MAX_FILE_NAME_LEN] = va_arg(args, char (*)[MAX_FILE_NAME_LEN]);
   int max_count = va_arg(args, int);
   syscall_log(LOG_INFO, "ls_programs()\n");
 

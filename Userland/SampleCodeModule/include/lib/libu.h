@@ -34,6 +34,8 @@ DECLARE_WRAPPER(spawn_process,
                 (const char *name, int argc, char **argv, int *fds))
 DECLARE_WRAPPER(kill_proc, (int pid))
 DECLARE_WRAPPER(change_priority, (int pid, int new_priority))
+DECLARE_WRAPPER(block_proc, (int pid))
+DECLARE_WRAPPER(unblock_proc, (int pid))
 DECLARE_WRAPPER(proc_exit, (int code))
 DECLARE_WRAPPER(copy_fd, (int pid, int target_fd, int src_fd))
 DECLARE_WRAPPER(close_fd, (int fd))
@@ -43,5 +45,7 @@ DECLARE_WRAPPER(get_pid, (void))
 DECLARE_WRAPPER(yield, (void))
 DECLARE_WRAPPER(set_canonical_mode, (int enable))
 DECLARE_WRAPPER(get_tty_mode, (void))
+DECLARE_WRAPPER(m_malloc, (size_t size))
+DECLARE_WRAPPER(m_free, (void *ptr))
 
 #endif // LIBU_H

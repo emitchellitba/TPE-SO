@@ -11,6 +11,11 @@ static test_entry_t test_table[] = {
      "Prueba la creacion y terminacion de procesos y su intercalado."},
     {"spawn", "spawn_test", "Prueba la creacion de procesos y su terminacion."},
     {"arguments", "args_test", "Prueba el paso de argumentos a los procesos."},
+    {"memory", "test_mm", "Prueba la asignación y liberación de memoria."},
+    {"priority", "test_prio", "Prueba el cambio de prioridad de procesos."},
+    {"processes", "test_processes",
+     "Prueba la creación y terminación de procesos."},
+    {"sync", "test_sync", "Prueba la sincronización entre procesos."},
 };
 
 #define TOTAL_TESTS (sizeof(test_table) / sizeof(test_table[0]))
