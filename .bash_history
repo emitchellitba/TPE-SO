@@ -80,3 +80,8 @@ gdb
 gdb
 cd root
 gdb
+cd root
+gdb
+gdb
+gdb
+exit

@@ -40,10 +40,12 @@ semaphore_t *my_sem_create(uint64_t id, uint64_t value) {
   }
 }
 
-void my_sem_destroy(semaphore_t *sem) {
+uint64_t my_sem_destroy(semaphore_t *sem) {
   if (sem_is_open(sem)) {
     sem->in_use = 0;
     queue_free(sem->waiting_process_queue); // Liberar la cola de espera
+  } else {
+    return -1; // Error: semáforo no está abierto o es inválido
   }
 }
 

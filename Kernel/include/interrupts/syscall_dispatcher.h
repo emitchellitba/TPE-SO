@@ -63,5 +63,10 @@ DECLARE_SYSCALL(sys_free)
 DECLARE_SYSCALL(sys_mem_dump)
 DECLARE_SYSCALL(sys_set_canonical)
 DECLARE_SYSCALL(sys_get_tty_mode)
+DECLARE_SYSCALL(sys_create_sem)
+DECLARE_SYSCALL(sys_open_sem)
+DECLARE_SYSCALL(sys_close_sem)
+DECLARE_SYSCALL(sys_sem_post)
+DECLARE_SYSCALL(sys_sem_wait)
 
 #endif

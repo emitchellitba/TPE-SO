@@ -58,6 +58,11 @@ static syscall_func_t syscall_table[] = {
     sys_mem_dump,        // 32
     sys_set_canonical,   // 33
     sys_get_tty_mode,    // 34
+    sys_create_sem,      // 35
+    sys_open_sem,        // 36
+    sys_close_sem,       // 37
+    sys_sem_post,        // 38
+    sys_sem_wait,        // 39
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -513,4 +518,44 @@ int64_t sys_get_tty_mode(va_list args) {
   syscall_log(LOG_INFO, "sys_get_tty_mode()\n");
 
   return get_canonical_mode();
+}
+
+int64_t sys_create_sem(va_list args) {
+  uint64_t id = va_arg(args, uint64_t);
+  uint64_t initial_value = va_arg(args, uint64_t);
+  syscall_log(LOG_INFO, "sys_create_sem(id=%d, initial_value=%d)\n", id,
+              initial_value);
+
+  return my_sem_create(id, initial_value);
+}
+
+int64_t sys_open_sem(va_list args) {
+  uint64_t id = va_arg(args, char *);
+  syscall_log(LOG_INFO, "sys_open_sem(id=%d)\n", id);
+
+  return my_sem_open(id);
+}
+
+int64_t sys_close_sem(va_list args) {
+  uint64_t sem = va_arg(args, uint64_t);
+  semaphore_t* sem_ref = (semaphore_t*)sem; 
+  syscall_log(LOG_INFO, "sys_close_sem(sem_id=%d)\n", sem_ref->id);
+
+  return my_sem_destroy(sem_ref);
+}
+
+int64_t sys_sem_post(va_list args) {
+  uint64_t sem = va_arg(args, uint64_t);
+  semaphore_t* sem_ref = (semaphore_t*)sem; 
+  syscall_log(LOG_INFO, "sys_sem_post(sem_id=%d)\n", sem_ref->id);
+
+  return my_sem_post(sem_ref);
+}
+
+int64_t sys_sem_wait(va_list args) {
+  uint64_t sem = va_arg(args, uint64_t);
+  semaphore_t* sem_ref = (semaphore_t*)sem;
+  syscall_log(LOG_INFO, "sys_sem_wait(sem_id=%d)\n", sem_ref->id);
+
+  return my_sem_wait(sem_ref);
 }
