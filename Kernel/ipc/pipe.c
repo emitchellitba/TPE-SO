@@ -114,7 +114,7 @@ static ssize_t pipe_read(pipe_t *pipe, void *buf, size_t size) {
       return 0; // EOF
 
     enqueue(pipe->read_queue, get_running());
-    block_current(0, pipe->read_queue);
+    block_current(BLK_PIPE_READ, pipe->read_queue);
   }
 
   proc_ready(dequeue(pipe->write_queue));
@@ -137,7 +137,7 @@ static ssize_t pipe_write(pipe_t *pipe, const void *buf, size_t size) {
 
     if (total_written < size) {
       enqueue(pipe->write_queue, get_running());
-      block_current(0, pipe->write_queue);
+      block_current(BLK_PIPE_WRITE, pipe->write_queue);
     }
   }
 

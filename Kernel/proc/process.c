@@ -215,6 +215,7 @@ int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
       buffer[count].state = process_table[i]->status;
       buffer[count].priority = process_table[i]->priority;
       buffer[count].mode = process_table[i]->mode;
+      buffer[count].block_reason = process_table[i]->block_reason;
       buffer[count].stack_base_address =
           (uint64_t)process_table[i]->stack_start;
       buffer[count].current_stack_pointer =

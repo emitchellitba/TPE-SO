@@ -27,18 +27,6 @@ typedef uint8_t priority_t;
 
 typedef int (*proc_main_function)(int argc, char **argv);
 
-typedef enum block_reason {
-  BLK_NONE,      // No está bloqueado o razón no específica
-  BLK_KEYBOARD,  // Esperando entrada del teclado
-  BLK_ARBITRARY, // Bloqueado por syscall sys_block
-  BLK_SEMAPHORE, // Esperando en un semáforo
-  BLK_CHILD,
-  BLK_SLEEP,      // Esperando a que un proceso hijo termine (waitpid)
-  BLK_PIPE_READ,  // Esperando para leer de un pipe
-  BLK_PIPE_WRITE, // Esperando para escribir en un pipe
-  BLK_TERMINAL,   // Esperando en un terminal
-} block_reason_t;
-
 #define FD_MAX 16
 #define MAX_CHILDREN 64
 
