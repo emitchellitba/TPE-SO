@@ -56,6 +56,8 @@ static syscall_func_t syscall_table[] = {
     sys_malloc,          // 30
     sys_free,            // 31
     sys_mem_dump,        // 32
+    sys_set_canonical,   // 33
+    sys_get_tty_mode,    // 34
 };
 
 #define NUM_SYSCALLS (sizeof(syscall_table) / sizeof(syscall_table[0]))
@@ -491,4 +493,24 @@ int64_t sys_mem_dump(va_list args) {
   syscall_log(LOG_INFO, "sys_mem_dump()\n");
   kmm_dump_state(kernel_mem);
   return 0;
+}
+
+int64_t sys_set_canonical(va_list args) {
+  int enable = va_arg(args, int);
+  syscall_log(LOG_INFO, "sys_set_canonical(enable=%d)\n", enable);
+
+  if (enable) {
+    set_canonical_mode(1);
+  } else {
+    set_canonical_mode(0);
+  }
+
+  return 0;
+}
+
+int64_t sys_get_tty_mode(va_list args) {
+  (void)args;
+  syscall_log(LOG_INFO, "sys_get_tty_mode()\n");
+
+  return get_canonical_mode();
 }

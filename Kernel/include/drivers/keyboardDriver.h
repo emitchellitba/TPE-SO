@@ -11,5 +11,7 @@ extern uint8_t esc;
 
 void handle_key_press();
 int read_line(char *buffer, size_t count);
+void set_canonical_mode(int mode);
+int get_canonical_mode();
 
 #endif

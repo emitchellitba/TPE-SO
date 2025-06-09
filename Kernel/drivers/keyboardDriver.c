@@ -26,6 +26,8 @@ typedef enum { LEFT = 1, UP, DOWN, RIGHT } ARROWS;
 
 extern unsigned int get_scan_code();
 
+static int canonical_mode = 1;
+
 struct ringbuf *kbuff = RINGBUF_NEW(KBUFF_SIZE);
 unsigned int shift = 0;
 unsigned int capsLock = 0;
@@ -50,6 +52,10 @@ static unsigned char printableAscii[58][2] = {
 
 /** No deberia ejecutarse si no hay una linea disponible */
 static int get_line(char *buffer, size_t count) {
+  if (!canonical_mode) {
+    return ringbuf_read(kbuff, count, buffer);
+  }
+
   int n = ringbuf_read_until(kbuff, buffer, count, '\n');
   if (n == count && buffer[count - 1] != '\n') {
     char rest_buffer[128];
@@ -58,7 +64,12 @@ static int get_line(char *buffer, size_t count) {
   return n;
 }
 
-static int next_line_length() { return ringbuf_find(kbuff, '\n'); }
+static int next_line_length() {
+  if (canonical_mode)
+    return ringbuf_find(kbuff, '\n');
+  else
+    return ringbuf_available(kbuff);
+}
 
 /**
  * Funcion que expone el driver para leer una linea de teclado.
@@ -180,12 +191,18 @@ void handle_key_press() {
   if (c == '\n') {
     ringbuf_write(kbuff, 1, (char *)&c);
     print_str((char *)&c, 1, 0);
-    if (waiting_queue->count > 0) {
-      proc_ready(dequeue(waiting_queue));
+
+    if (canonical_mode) {
+      if (waiting_queue->count > 0) {
+        proc_ready(dequeue(waiting_queue));
+      }
     }
 
     current_line_len = 0;
   }
+
+  if (ringbuf_available(kbuff) && !canonical_mode && waiting_queue->count > 0)
+    proc_ready(dequeue(waiting_queue));
 }
 
 static void handle_ctrl_d() {
@@ -212,3 +229,11 @@ static void handle_ctrl_c() {
   }
   return;
 }
+
+void set_canonical_mode(int mode) {
+  if (mode == 0 || mode == 1) {
+    canonical_mode = mode;
+  }
+}
+
+int get_canonical_mode() { return canonical_mode; }

@@ -35,6 +35,8 @@ DEFINE_WRAPPER(wait_pid, (int pid, int *status), (pid, status))
 DEFINE_WRAPPER(wait, (int *status), (status))
 DEFINE_WRAPPER(get_pid, (void), ())
 DEFINE_WRAPPER(yield, (void), ())
+DEFINE_WRAPPER(set_canonical_mode, (int enable), (enable))
+DEFINE_WRAPPER(get_tty_mode, (void), ())
 
 extern int64_t _spawn_process(const char *name, int argc, char *argv[],
                               int fds[], int background);

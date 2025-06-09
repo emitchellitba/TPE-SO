@@ -61,5 +61,7 @@ DECLARE_SYSCALL(sys_yield)
 DECLARE_SYSCALL(sys_malloc)
 DECLARE_SYSCALL(sys_free)
 DECLARE_SYSCALL(sys_mem_dump)
+DECLARE_SYSCALL(sys_set_canonical)
+DECLARE_SYSCALL(sys_get_tty_mode)
 
 #endif

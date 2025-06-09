@@ -41,5 +41,7 @@ DECLARE_WRAPPER(wait_pid, (int pid, int *status))
 DECLARE_WRAPPER(wait, (int *status))
 DECLARE_WRAPPER(get_pid, (void))
 DECLARE_WRAPPER(yield, (void))
+DECLARE_WRAPPER(set_canonical_mode, (int enable))
+DECLARE_WRAPPER(get_tty_mode, (void))
 
 #endif // LIBU_H
