@@ -1,6 +1,7 @@
 #include <keyboardDriver.h>
 
 #include <lib.h>
+#include <queue.h>
 #include <ringbuf.h>
 #include <scheduler.h>
 #include <videoDriver.h>
@@ -29,9 +30,7 @@ unsigned int arrow = 0;
 
 static int current_line_len = 0;
 
-static struct queue *kbd_read_queue = QUEUE_NEW(); /* Kbd read wait queue */
-
-int isReading = 0;
+struct queue *waiting_queue = QUEUE_NEW();
 
 static unsigned char printableAscii[58][2] = {
     {0, 0},     {27, 27},    {'1', '!'},   {'2', '@'}, {'3', '#'},   {'4', '$'},
@@ -57,10 +56,17 @@ static int get_line(char *buffer, size_t count) {
 
 static int next_line_length() { return ringbuf_find(kbuff, '\n'); }
 
+/**
+ * Funcion que expone el driver para leer una linea de teclado.
+ * Esta funcion solo debe ser llamada por el proceso que tenga el foreground.
+ */
 int read_line(char *buffer, size_t count) {
   while (next_line_length() == 0) {
-    enqueue(kbd_read_queue, get_running());
-    block_current(0, NULL);
+    if (waiting_queue->count > 0) {
+      return -1;
+    }
+    enqueue(waiting_queue, get_running());
+    block_current(BLK_TERMINAL, waiting_queue);
   }
 
   return get_line(buffer, count);
@@ -146,7 +152,9 @@ void handle_key_press() {
   if (c == '\n') {
     ringbuf_write(kbuff, 1, (char *)&c);
     print_str((char *)&c, 1, 0);
-    proc_ready(dequeue(kbd_read_queue));
+    if (waiting_queue->count > 0) {
+      proc_ready(dequeue(waiting_queue));
+    }
 
     current_line_len = 0;
   }

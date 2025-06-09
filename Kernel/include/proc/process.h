@@ -1,11 +1,10 @@
 #ifndef PROC_H
 #define PROC_H
 
-#include <ds/queue.h>
-#include <ds/ringbuf.h>
-#include <filedesc.h>
-#include <lib.h>
+#include <pcb.h>
+#include <queue.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 /* TODO: Crear una seccion para codigos de errores */
 #define NOMEMERR 1;
@@ -15,90 +14,42 @@
 #define QUANTUM_DEFAULT 2
 #define QUANTUM_MAX 5
 
-#define FD_MAX 16
-
-typedef int (*proc_main_function)(int argc, char **argv);
-
 typedef struct {
   int pid;
   int ppid;
   char name[32];
   int state;
   int priority;
+  int mode;
+  uint64_t stack_base_address;
+  uint64_t current_stack_pointer;
 } proc_info_t;
-// TODO: MOVER ESTE proc_info_t a una librera compartida entre kernel y userland
-
-typedef uint8_t priority_t;
-
-// En tu process.h o similar
-typedef enum proc_state_t {
-  DEAD,
-  READY,
-  RUNNING,
-  ZOMBIE,
-  BLOCKED
-} proc_state_t;
-
-typedef enum block_reason {
-  BLK_NONE,      // No está bloqueado o razón no específica
-  BLK_KEYBOARD,  // Esperando entrada del teclado
-  BLK_ARBITRARY, // Bloqueado por syscall sys_block
-  BLK_SEMAPHORE, // Esperando en un semáforo
-  BLK_CHILD,
-  BLK_SLEEP // Esperando a que un proceso hijo termine (waitpid)
-            // BLK_PIPE_READ,  // (Futuro) Esperando para leer de un pipe
-  // BLK_PIPE_WRITE, // (Futuro) Esperando para escribir en un pipe
-} block_reason_t;
-
-typedef struct proc {
-  pid_t pid;
-  const char *name;
-
-  struct proc *parent; // Puntero al proceso padre
-  pid_t children[64];  // Arreglo de PIDs de hijos
-  int child_count;     // Cantidad de hijos
-
-  uint64_t *stack_start;   // Comienzo del stack: direccion mas alta
-  uint64_t *stack_pointer; // Posicion actual del stack
-
-  proc_main_function entry; // Direccion de inicio del proceso
-
-  block_reason_t block_reason;
-  struct queue *waiting_on;
-
-  /** Valor de retorno del proceso. -1 indica que no terminó */
-  int exit;
-
-  /** Valor de retorno de la ultima syscall */
-  int syscall_retval;
-
-  proc_state_t
-      status; // Estado del proceso (0 = running, 1 = ready, 2 = zombie)
-  priority_t has_quantum;
-  priority_t priority;
-
-  fd_entry_t fds[FD_MAX]; // Tabla de descriptores de archivos
-
-  /** por si queremos implementar seniales */
-  // struct queue *sig_queue; // Cola de señales
-  // struct sigaction sigaction[SIG_MAX + 1]; // Array de handlers
-} proc_t;
 
 extern file_ops_t video_ops;
 extern file_ops_t video_err_ops;
 extern file_ops_t keyboard_ops;
 
 int proc_new(proc_t **ref);
+
 int proc_init(proc_t *proc, const char *name, proc_main_function entry,
-              int redirect, int red_fds[2]);
+              int fds[], int background);
+
 int proc_list(proc_info_t *buffer, int max_count, int *out_count);
-void proc_kill(struct proc *proc);
+
+void proc_kill(struct proc *proc, int exit_code);
+
 int proc_reap(struct proc *proc);
+
 pid_t wait_pid(pid_t pid, int *exit_status);
+
 proc_t *get_proc_by_pid(pid_t pid);
+
 int64_t change_priority(pid_t pid, priority_t new_priority);
+
 void return_from_syscall(proc_t *proc, int retval);
+
 int find_free_fd(proc_t *proc);
+
 int copy_fd(proc_t *target, proc_t *source, int target_fd, int src_fd);
 
 #endif // PROC_H

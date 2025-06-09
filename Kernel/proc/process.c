@@ -2,8 +2,10 @@
 
 #include "../include/lib/memory_manager.h"
 #include <ds/queue.h>
+#include <filedesc.h>
 #include <lib/logger.h>
 #include <stdbool.h>
+#include <tty.h>
 
 static int proc_log_level = LOG_DEBUG;
 LOGGER_DEFINE(proc, proc_log, proc_log_level)
@@ -22,15 +24,6 @@ static pid_t proc_pid_alloc() {
   }
   proc_log(LOG_ERR, "No available PIDs\n");
   return -1; // No hay PIDs disponibles
-}
-
-static void inherit_fds(proc_t *child, proc_t *parent, int red_fds[2]) {
-  for (int i = 0; i < 2; i++) {
-    fd_entry_t *src = &parent->fds[red_fds[i]];
-    child->fds[i] = *src;
-    if (src->ops && src->ops->add_ref)
-      src->ops->add_ref(src->resource);
-  }
 }
 
 static void reparent_to_init(proc_t *child);
@@ -70,10 +63,12 @@ int proc_new(proc_t **ref) {
 }
 
 /**
- * Inicializa el stack, fds y la informacion del proceso
+ * Inicializa el stack, fds y la informacion del proceso.
+ * Recibe un arreglo de file descriptors que heredara del padre.
+ * Si no se pasa arreglo, se inicializan los fds por defecto
  */
 int proc_init(proc_t *proc, const char *name, proc_main_function entry,
-              int redirect, int red_fds[2]) {
+              int fds[], int background) {
   int err = 0;
 
   if (!proc) {
@@ -93,45 +88,20 @@ int proc_init(proc_t *proc, const char *name, proc_main_function entry,
   }
   proc->stack_pointer = (uint64_t *)((char *)proc->stack_start + STACK_SIZE);
 
-  if (redirect) {
-    proc_t *running_proc = get_running();
+  /* Inicializando file descriptors */
+  if (fds)
+    inherit_fds(proc, get_running(), fds);
+  else
+    set_default_fds(proc);
 
-    if (running_proc->fds[red_fds[0]].type == FD_NONE ||
-        running_proc->fds[red_fds[1]].type == FD_NONE) {
-      kmm_free(proc->stack_start, kernel_mem);
-      return -1;
-    }
-
-    inherit_fds(proc, running_proc, red_fds);
-  } else {
-    proc->fds[0] = (fd_entry_t){
-        .resource = NULL,
-        .ops = &keyboard_ops,
-        .type = FD_TERMINAL,
-    };
-    proc->fds[1] = (fd_entry_t){
-        .resource = NULL,
-        .ops = &video_ops,
-        .type = FD_TERMINAL,
-    };
-    proc->fds[2] = (fd_entry_t){
-        .resource = NULL,
-        .ops = &video_err_ops,
-        .type = FD_TERMINAL,
-    };
+  if (!background) { /* Ceder foreground */
+    set_foreground_process(proc);
   }
 
   proc_t *parent = get_running();
   proc->name = name;
   proc->parent = parent;
   proc->entry = entry;
-
-  if (parent && parent->child_count < MAX_PROCESSES) {
-    parent->children[parent->child_count++] = proc->pid;
-  } else if (parent) {
-    proc_log(LOG_ERR, "Parent process has reached maximum children limit\n");
-    return -1; // No se puede agregar más hijos
-  }
 
   proc->priority = QUANTUM_DEFAULT;
 
@@ -141,31 +111,44 @@ int proc_init(proc_t *proc, const char *name, proc_main_function entry,
   proc->block_reason = BLK_NONE;
   proc->waiting_on = NULL;
 
+  if (parent && parent->child_count < MAX_PROCESSES) {
+    parent->children[parent->child_count++] = proc->pid;
+  } else if (parent) {
+    proc_log(LOG_ERR, "Parent process has reached maximum children limit\n");
+    return -1; // No se puede agregar más hijos
+  }
+
   return 0;
 }
 
 /**
  * Mata un proceso. Cambia su estado a ZOMBIE y libera sus recursos del kernel.
  */
-void proc_kill(struct proc *proc) {
+void proc_kill(struct proc *proc, int exit_code) {
   if (!proc) {
     proc_log(LOG_ERR, "Cannot kill a NULL process\n");
     return;
   }
 
-  if (proc->pid == 1) {
+  if (proc->pid == 0 || proc->pid == 1) {
     proc_log(LOG_ERR, "Cannot kill the init process (PID: %d)\n", proc->pid);
     return;
   }
 
   proc_log(LOG_INFO, "Killing process %s (PID: %d)\n", proc->name, proc->pid);
 
+  /* Devolver el foreground */
+  set_foreground_process(proc->parent);
+
   /* Eliminarlo del flujo del scheduler */
-  sched_rm_current();
+  if (proc->status == RUNNING) {
+    sched_rm_current();
+  }
   queue_remove(proc->waiting_on, proc);
 
   /* Cambiar estado del proceso */
   proc->status = ZOMBIE;
+  proc->exit = exit_code;
 
   /* Liberar recursos del kernel utilizados por el proceso (stack) */
   kmm_free(proc->stack_start, kernel_mem);
@@ -185,10 +168,6 @@ void proc_kill(struct proc *proc) {
       reparent_to_init(child);
   }
 
-  /* Liberar el nombre */
-  kmm_free((void *)proc->name, kernel_mem);
-  proc->name = NULL;
-
   /* Despertar al padre si lo hay y está esperando al hijo */
   if (proc->parent && proc->parent->status == BLOCKED &&
       proc->parent->block_reason == BLK_CHILD) {
@@ -206,6 +185,10 @@ void proc_kill(struct proc *proc) {
  * recolecta el resultado del proceso.
  */
 int proc_reap(struct proc *proc) {
+  /* Liberar el nombre */
+  kmm_free((void *)proc->name, kernel_mem);
+  proc->name = NULL;
+
   process_table[proc->pid] = NULL;
   process_count--;
 
@@ -221,11 +204,21 @@ int proc_list(proc_info_t *buffer, int max_count, int *out_count) {
       buffer[count].pid = process_table[i]->pid;
       buffer[count].ppid =
           process_table[i]->parent ? process_table[i]->parent->pid : -1;
-      str_ncpy(buffer[count].name, process_table[i]->name,
-               sizeof(buffer[count].name) - 1);
+      if (process_table[i]->name) {
+        str_ncpy(buffer[count].name, process_table[i]->name,
+                 sizeof(buffer[count].name) - 1);
+      } else {
+        str_ncpy(buffer[count].name, "<CLEANED>",
+                 sizeof(buffer[count].name) - 1);
+      }
       buffer[count].name[sizeof(buffer[count].name) - 1] = '\0';
       buffer[count].state = process_table[i]->status;
       buffer[count].priority = process_table[i]->priority;
+      buffer[count].mode = process_table[i]->mode;
+      buffer[count].stack_base_address =
+          (uint64_t)process_table[i]->stack_start;
+      buffer[count].current_stack_pointer =
+          (uint64_t)process_table[i]->stack_pointer;
       count++;
     }
   }
@@ -299,6 +292,7 @@ pid_t wait_pid(pid_t pid, int *exit_status) {
   }
 }
 
+/* No utilizada pero es de utilidad para syscalls bloqueantes */
 void return_from_syscall(proc_t *proc, int retval) {
   if (!proc) {
     proc_log(LOG_ERR, "Cannot return from syscall for a NULL process\n");
@@ -368,7 +362,7 @@ static void reparent_to_init(proc_t *child) {
   if (!child)
     return -1;
 
-  proc_t *init_process = get_proc_by_pid(0);
+  proc_t *init_process = get_proc_by_pid(1);
 
   child->parent = init_process;
 

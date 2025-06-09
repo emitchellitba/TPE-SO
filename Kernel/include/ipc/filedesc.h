@@ -1,28 +1,10 @@
 #ifndef _FD_H_
 #define _FD_H_
 
-#include <keyboardDriver.h>
-#include <stdlib.h>
+#include <pcb.h>
 #include <sys/types.h>
-#include <videoDriver.h>
 
-typedef enum { FD_NONE, FD_PIPE, FD_TERMINAL } FDType;
-
-#define READ_LINE_BLOCKED -2
-
-// Abstraccion de operaciones de archivo para acceder a
-// distintos tipos de recursos.
-typedef struct file_ops {
-  ssize_t (*read)(void *resource, void *buf, size_t count);
-  ssize_t (*write)(void *resource, const void *buf, size_t count);
-  int (*close)(void *resource);
-  int (*add_ref)(void *resource);
-} file_ops_t;
-
-typedef struct fd_entry {
-  void *resource;
-  file_ops_t *ops;
-  FDType type;
-} fd_entry_t;
+void set_default_fds(proc_t *proc);
+int inherit_fds(proc_t *target, proc_t *source, int fds[]);
 
 #endif // _FD_H_

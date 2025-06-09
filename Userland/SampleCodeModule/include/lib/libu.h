@@ -3,6 +3,9 @@
 
 #include <lib/wrappers.h>
 
+#define SPAWN_REDIRECT (1 << 0)
+#define SPAWN_BACKGROUND (1 << 1)
+
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
@@ -31,6 +34,9 @@ typedef struct {
   char name[32];
   int state;
   int priority;
+  int background;
+  uint64_t stack_base_address;
+  uint64_t current_stack_pointer;
 } proc_info_t;
 
 DECLARE_WRAPPER(read, (int fd, char *buffer, size_t count))
@@ -44,10 +50,8 @@ DECLARE_WRAPPER(get_procs, (proc_info_t * procs, size_t size))
 DECLARE_WRAPPER(load_program, (char *name, int entry))
 DECLARE_WRAPPER(rm_program, (char *name))
 DECLARE_WRAPPER(get_programs, (char **buffer, int max_count))
-DECLARE_WRAPPER(spawn_process, (const char *name, int argc, char **argv))
-DECLARE_WRAPPER(spawn_process_redirect,
-                (const char *name, int argc, char **argv, int redirect,
-                 int red_fds[2]))
+DECLARE_WRAPPER(spawn_process,
+                (const char *name, int argc, char **argv, int *fds))
 DECLARE_WRAPPER(kill_proc, (int pid))
 DECLARE_WRAPPER(change_priority, (int pid, int new_priority))
 DECLARE_WRAPPER(proc_exit, (int code))

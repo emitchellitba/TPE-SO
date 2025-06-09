@@ -2,15 +2,20 @@
 
 extern int ps_main(int argc, char *argv[]);
 extern int ls_main(int argc, char *argv[]);
+extern int cat_main(int argc, char *argv[]);
+extern int lazy_main(void);
+extern int sleep_main(int argc, char *argv[]);
+
 extern int rd_wr_test_main(int argc, char *argv[]);
 extern int pipes_test_main(int argc, char *argv[]);
-extern int cat_main(int argc, char *argv[]);
 extern int sched_test_main(int argc, char *argv[]);
+extern int spawn_test_main(void);
+extern int args_test_main(int argc, char *argv[]);
 
 #define SHELL_PROGRAM_NAME "shell"
 
 static int run_shell(int argc, char *argv[], int *pid) {
-  *pid = spawn_process(SHELL_PROGRAM_NAME, argc, argv);
+  *pid = spawn_process(SHELL_PROGRAM_NAME, argc, argv, NULL);
 
   if (*pid < 0) {
     return -1;
@@ -23,10 +28,14 @@ static void load_programs() {
   load_program("ps", (uint64_t)&ps_main);
   load_program("ls", (uint64_t)&ls_main);
   load_program("cat", (uint64_t)&cat_main);
+  load_program("lazy", (uint64_t)&lazy_main);
+  load_program("sleep", (uint64_t)&sleep_main);
 
   load_program("pipes_test", (uint64_t)&pipes_test_main);
   load_program("rd_wr_test", (uint64_t)&rd_wr_test_main);
   load_program("sched_test", (uint64_t)&sched_test_main);
+  load_program("spawn_test", (uint64_t)&spawn_test_main);
+  load_program("args_test", (uint64_t)&args_test_main);
 }
 
 int init_main(int argc, char **argv) {

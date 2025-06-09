@@ -14,7 +14,7 @@ int rd_wr_test_main(int argc, char *argv[]) {
 
   printf("Leidos %d caracteres desde STDIN: %s\n", n, buffer);
 
-  write(STDOUT, "Esto fue escrito en STDOUT!\n", 24);
+  printf("Esto esta siendo escrito en STDOUT.\n");
 
   return 0;
 }

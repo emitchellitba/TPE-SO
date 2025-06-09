@@ -12,7 +12,7 @@ char *reg_strings[] = {
 #define NUM_REGISTERS (sizeof(reg_strings) / sizeof(reg_strings[0]))
 
 int get_registers_cmd() {
-  printf(" REGISTROS: \n");
+  printf(" Registers: \n");
   uint64_t regsStatus[17] = {0};
   get_regist(regsStatus);
   for (int i = 0; i < 17; i++) {
@@ -24,14 +24,14 @@ int get_registers_cmd() {
 }
 
 int help_cmd(int argc, char *argv[]) {
-  if (argc > 0 && str_cmp(argv[0], "-test") == 0) {
+  if (argc >= 2 && str_cmp(argv[1], "tests") == 0) {
     print_available_tests();
   } else {
-    printf("Lista de comandos:\n");
+    printf("Command list:\n");
     for (int i = 0; i < get_total_commands(); i++) {
       printf("\t- %s\n", command_table[i].name);
     }
-    printf("\nPara ver los tests disponibles, escribe 'help -test'.\n");
+    printf("\nTo see the available tests, type 'help tests'.\n");
   }
   return 0;
 }
@@ -51,15 +51,6 @@ int print_local_date_time_cmd() {
   load_date_time(dt);
   printf("%d/%d/%d %d:%d:%d\n", dt->day, dt->month, dt->year, dt->hour, dt->min,
          dt->sec);
-
-  return 0;
-}
-
-int show_kmsg_cmd() {
-  char log[KMSG_BUFF_SIZE];
-  size_t size = KMSG_BUFF_SIZE;
-  read_kmsg(log, size);
-  printf("%s", log);
 
   return 0;
 }

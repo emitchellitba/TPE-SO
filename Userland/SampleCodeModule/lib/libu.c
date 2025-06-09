@@ -32,14 +32,13 @@ DEFINE_WRAPPER(wait_pid, (int pid, int *status), (pid, status))
 DEFINE_WRAPPER(wait, (int *status), (status))
 DEFINE_WRAPPER(get_pid, (void), ())
 
-extern int64_t _spawn_process(char *name, int argc, char **argv, int redirect,
-                              int fds[2]);
+extern int64_t _spawn_process(const char *name, int argc, char *argv[],
+                              int fds[], int background);
 
-int64_t spawn_process_redirect(const char *name, int argc, char **argv,
-                               int redirect, int red_fds[2]) {
-  return _spawn_process(name, argc, argv, redirect, red_fds);
+int64_t spawn_process(const char *name, int argc, char *argv[], int fds[]) {
+  return _spawn_process(name, argc, argv, fds, 0);
 }
 
-int64_t spawn_process(const char *name, int argc, char **argv) {
-  return _spawn_process(name, argc, argv, 0, NULL);
+int64_t spawn_process_bg(const char *name, int argc, char *argv[], int fds[]) {
+  return _spawn_process(name, argc, argv, fds, 1);
 }

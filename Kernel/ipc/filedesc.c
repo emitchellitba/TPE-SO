@@ -1,38 +1,49 @@
 #include <ipc/filedesc.h>
 
-// TODO: Estas operaciones deberian estar en sus respectivos drivers
-static ssize_t video_write_stdout(void *resource, const void *buf,
-                                  size_t count) {
-  const char *cbuf = (const char *)buf;
+#include <process.h>
 
-  // TODO: Mejorar codigo de videoDriver.c
-  printStd(cbuf, count);
+extern file_ops_t keyboard_ops;
+extern file_ops_t video_ops;
+extern file_ops_t video_err_ops;
 
-  return count;
+void set_default_fds(proc_t *proc) {
+  if (!proc) {
+    return;
+  }
+
+  proc->fds[0] = (fd_entry_t){
+      .resource = NULL,
+      .ops = &keyboard_ops,
+      .type = FD_TERMINAL,
+  };
+  proc->fds[1] = (fd_entry_t){
+      .resource = NULL,
+      .ops = &video_ops,
+      .type = FD_TERMINAL,
+  };
+  proc->fds[2] = (fd_entry_t){
+      .resource = NULL,
+      .ops = &video_err_ops,
+      .type = FD_TERMINAL,
+  };
 }
 
-static ssize_t video_write_stderr(void *resource, const void *buf,
-                                  size_t count) {
-  const char *cbuf = (const char *)buf;
+int inherit_fds(proc_t *target, proc_t *source, int fds[]) {
+  if (!target || !source || !fds) {
+    return -1;
+  }
 
-  printStd(cbuf, count);
+  for (int i = 0; i < FD_MAX; i++) {
+    if (fds[i] < 0 || fds[i] >= FD_MAX)
+      break;
 
-  return count;
+    fd_entry_t *source_fd = &source->fds[fds[i]];
+    if (source_fd->ops && source_fd->ops->add_ref) {
+      source_fd->ops->add_ref(source_fd->resource);
+    }
+
+    target->fds[i] = *source_fd;
+  }
+
+  return 0;
 }
-
-static ssize_t kb_read(void *resource, void *buf, size_t count) {
-  char *cbuf = (char *)buf;
-
-  int n = read_line(cbuf, count);
-
-  return n;
-}
-
-file_ops_t keyboard_ops = {
-    .read = kb_read, .write = NULL, .close = NULL, .add_ref = NULL};
-
-file_ops_t video_ops = {
-    .read = NULL, .write = video_write_stdout, .close = NULL, .add_ref = NULL};
-
-file_ops_t video_err_ops = {
-    .read = NULL, .write = video_write_stderr, .close = NULL, .add_ref = NULL};

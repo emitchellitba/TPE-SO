@@ -94,13 +94,7 @@ int64_t sys_read(va_list args) {
     return -EBADF;
   }
 
-  int n = fd_entry->ops->read(fd_entry->resource, buffer, count);
-
-  if (n == READ_LINE_BLOCKED) {
-    return current_process->syscall_retval;
-  }
-
-  return n;
+  return fd_entry->ops->read(fd_entry->resource, buffer, count);
 }
 
 int64_t sys_write(va_list args) {
@@ -320,8 +314,8 @@ int64_t sys_spawn_process(va_list args) {
   char *name = va_arg(args, char *);
   int argc = va_arg(args, int);
   char **argv = va_arg(args, char **);
-  int redirect = va_arg(args, int);
   int *fds = va_arg(args, int *);
+  int background = va_arg(args, int);
   syscall_log(LOG_INFO, "execv(name=%s, argc=%d, argv=%p)\n", name, argc, argv);
 
   int err = 0;
@@ -339,7 +333,7 @@ int64_t sys_spawn_process(va_list args) {
     return -ENOMEM;
   }
 
-  proc_init(new_proc, name, entry, redirect, fds);
+  proc_init(new_proc, name, entry, fds, background);
 
   execv(new_proc, argc, argv);
 
@@ -351,11 +345,21 @@ int64_t sys_spawn_process(va_list args) {
 int64_t sys_kill_proc(va_list args) {
   int64_t pid = va_arg(args, int64_t);
 
-  // TODO: Pid no puede ser ni 0 ni 1 (idle e init)
   syscall_log(LOG_INFO, "kill_proc(pid=%ld)\n", pid);
-  // return kill_proc(pid);
+
+  if (pid == 0 || pid == 1)
+    return -EPERM;
+
+  proc_t *proc = get_proc_by_pid(pid);
+  if (proc == NULL)
+    return -ESRCH;
+
+  proc_kill(proc, 128 + SIGKILL);
+
+  return 0;
 }
 
+// TODO: Mover esta funcion
 static void fill_out_buffer(uint64_t *buffer) {
   for (int64_t i = 0; i < 17; i++) {
     buffer[i] = register_array[i];
@@ -376,14 +380,7 @@ int64_t sys_exit(va_list args) {
 
   proc_t *current_process = get_running();
 
-  if (!current_process) {
-    syscall_log(LOG_CRIT, "exit called with no current process\n");
-    return -EFAULT;
-  }
-
-  current_process->exit = code;
-
-  proc_kill(current_process);
+  proc_kill(current_process, code);
 
   call_timer_tick();
 

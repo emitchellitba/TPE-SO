@@ -19,8 +19,8 @@
 #include <videoDriver.h>
 
 #define INVALID_SYS_ID -1
-
-#define WAIT_PID -1 // Special value to wait for any child process
+#define SIGKILL 9
+#define WAIT_PID -1
 
 #define DECLARE_SYSCALL(name) int64_t name(va_list args);
 

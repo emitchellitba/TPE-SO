@@ -14,7 +14,7 @@ int sched_test_main(int argc, char *argv[]) {
   load_program("sleeping_program", sleeping_process_main);
 
   for (int i = 0; i < 10; i++) {
-    int pid = spawn_process("sleeping_program", 0, NULL);
+    int pid = spawn_process("sleeping_program", 0, NULL, NULL);
     if (pid < 0) {
       write(STDERR, "Error spawning process\n", 24);
       return 1;
@@ -22,7 +22,7 @@ int sched_test_main(int argc, char *argv[]) {
   }
 
   int status;
-  while (wait(status) > 0)
+  while (wait(&status) > 0)
     ;
 
   rm_program("sleeping_program");

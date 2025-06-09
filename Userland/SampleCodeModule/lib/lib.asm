@@ -218,8 +218,8 @@ EXPORT_FUNC get_programs
 ;   1 - name
 ;   2 - argc
 ;   3 - argv
-;   4 - redirect
-;   5 - redirect_fds
+;   4 - fds
+;   5 - background
 ;-------------------------------------------------------------------------------
 EXPORT_FUNC spawn_process
     do_syscall_direct 0x11

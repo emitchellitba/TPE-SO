@@ -6,9 +6,12 @@
 
 static test_entry_t test_table[] = {
     {"pipes", "pipes_test", "Prueba la creación y comunicación de pipes."},
-    {"read_write", "rd_wr_test", "Prueba lecturas y escrituras bloqueantes."},
-    {"sched_test", "sched_test",
-     "Prueba la creacion y terminacion de procesos y su intercalado."}};
+    {"rd_wr", "rd_wr_test", "Prueba lecturas y escrituras bloqueantes."},
+    {"scheduler", "sched_test",
+     "Prueba la creacion y terminacion de procesos y su intercalado."},
+    {"spawn", "spawn_test", "Prueba la creacion de procesos y su terminacion."},
+    {"arguments", "args_test", "Prueba el paso de argumentos a los procesos."},
+};
 
 #define TOTAL_TESTS (sizeof(test_table) / sizeof(test_table[0]))
 
@@ -23,13 +26,13 @@ void print_available_tests() {
 }
 
 int test_runner_cmd(int argc, char **argv) {
-  if (argc < 1) {
+  if (argc < 2) {
     printf("\nUso: test <nombre_del_test>\n");
     printf("Escriba 'help -test' para ver una lista de tests disponibles.\n");
     return -1;
   }
 
-  const char *display_name_to_run = argv[0];
+  const char *display_name_to_run = argv[1];
   const char *program_to_run = NULL;
 
   for (int i = 0; i < TOTAL_TESTS; i++) {
@@ -49,7 +52,7 @@ int test_runner_cmd(int argc, char **argv) {
 
   char *test_argv[] = {(char *)program_to_run, NULL};
 
-  int pid = spawn_process(program_to_run, 1, test_argv);
+  int pid = spawn_process(program_to_run, 1, test_argv, NULL);
 
   if (pid < 0) {
     printf("Error spawning test process '%s'\n", program_to_run);
