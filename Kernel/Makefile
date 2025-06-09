@@ -31,7 +31,7 @@ STATICLIBS=
 
 
 INCLUDE_DIRS=$(shell find ./include -type d)
-INCLUDE_FLAGS=$(foreach dir,$(INCLUDE_DIRS),-I$(dir))
+INCLUDE_FLAGS=$(foreach dir,$(INCLUDE_DIRS),-I$(dir)) -I../Shared
 ASM_INCLUDE_FLAGS=-Iasm
 
 

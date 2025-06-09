@@ -23,7 +23,10 @@ command_entry_t command_table[] = {
     {"ps", CMD_SPAWN, .data.program_name = "ps"},
     {"programs", CMD_SPAWN, .data.program_name = "ls"},
     {"cat", CMD_SPAWN, .data.program_name = "cat"},
-    {"lazy", CMD_SPAWN, .data.program_name = "lazy"},
+    {"loop", CMD_SPAWN, .data.program_name = "loop"},
+    {"chprio", CMD_SPAWN, .data.program_name = "chprio"},
+    {"block", CMD_SPAWN, .data.program_name = "block"} {
+        "lazy", CMD_SPAWN, .data.program_name = "lazy"},
     {"sleep", CMD_SPAWN, .data.program_name = "sleep"},
 };
 

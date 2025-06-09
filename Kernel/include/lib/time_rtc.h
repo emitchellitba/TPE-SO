@@ -11,6 +11,7 @@ typedef struct {
   uint8_t year;
 } date_time;
 
+// TODO: Por qué están comentadas estas funciones?
 // extern int get_sec();
 // extern int get_min();
 // extern int get_hour();
@@ -19,8 +20,8 @@ typedef struct {
 // extern int get_year();
 void get_time(date_time *dt);
 void timer_handler();
-int ticks_elapsed();
-int seconds_elapsed();
-void sleep(int ticksToWait);
+void usleep(uint64_t microsecondsToWait);
+void sleep(uint64_t ticksToWait);
+void set_pit_frequency(uint32_t frequency);
 
 #endif

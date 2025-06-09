@@ -5,6 +5,9 @@ extern int ls_main(int argc, char *argv[]);
 extern int cat_main(int argc, char *argv[]);
 extern int lazy_main(void);
 extern int sleep_main(int argc, char *argv[]);
+extern int loop_main(int argc, char *argv[]);
+extern int nice_main(int argc, char *argv[]);
+extern int block_main(int argc, char *argv[]);
 
 extern int rd_wr_test_main(int argc, char *argv[]);
 extern int pipes_test_main(int argc, char *argv[]);
@@ -30,6 +33,9 @@ static void load_programs() {
   load_program("cat", (uint64_t)&cat_main);
   load_program("lazy", (uint64_t)&lazy_main);
   load_program("sleep", (uint64_t)&sleep_main);
+  load_program("loop", (uint64_t)&loop_main);
+  load_program("chprio", (uint64_t)&nice_main);
+  load_program("block", (uint64_t)&block_main);
 
   load_program("pipes_test", (uint64_t)&pipes_test_main);
   load_program("rd_wr_test", (uint64_t)&rd_wr_test_main);
