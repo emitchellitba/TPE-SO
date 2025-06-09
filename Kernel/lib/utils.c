@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java:
+// https://pvs-studio.com
+
 #include <utils.h>
 
 uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base) {
