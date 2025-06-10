@@ -53,9 +53,9 @@ DECLARE_WRAPPER(m_free, (void *ptr))
 DECLARE_WRAPPER(mem_dump, (void))
 DECLARE_WRAPPER(my_sem_create, (uint64_t id, uint64_t initial_value))
 DECLARE_WRAPPER(my_sem_open, (uint64_t id))
-DECLARE_WRAPPER(my_sem_close, (semaphore_t * sem))
-DECLARE_WRAPPER(my_sem_post, (semaphore_t * sem))
-DECLARE_WRAPPER(my_sem_wait, (semaphore_t * sem))
-DECLARE_WRAPPER(my_sem_trywait, (semaphore_t * sem))
+DECLARE_WRAPPER(my_sem_close, (uint64_t id))
+DECLARE_WRAPPER(my_sem_post, (uint64_t id))
+DECLARE_WRAPPER(my_sem_wait, (uint64_t id))
+DECLARE_WRAPPER(my_sem_trywait, (uint64_t id))
 
 #endif // LIBU_H

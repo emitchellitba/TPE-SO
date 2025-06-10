@@ -51,6 +51,8 @@ void drawcharSize(unsigned char c, color fcolor, color bcolor);
 
 void print(const char *c, size_t count, FDS fd);
 
+void utoa(uint64_t value, char *buffer, int base);
+
 void clear_screen();
 
 uint8_t getHexDigit(uint64_t number, int position);

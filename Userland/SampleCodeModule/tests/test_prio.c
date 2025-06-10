@@ -38,7 +38,6 @@ void test_prio() {
 
   for (i = 0; i < TOTAL_PROCESSES; i++) {
     pids[i] = spawn_process("endless_loop_print", 2, argv, NULL);
-    printf("Spawned process with PID: %d\n", pids[i]);
   }
 
   sleep_time(5);

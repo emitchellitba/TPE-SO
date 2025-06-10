@@ -170,6 +170,7 @@ int shell_main(int argc, char *argv[]) {
   while (1) {
     show_prompt();
 
+    set_canonical_mode(1);
     if (!get_input())
       continue;
 

@@ -4,8 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Tamaño total del heap (por ejemplo 16 MB)
-#define HEAP_SIZE 0x1000000
+#define HEAP_SIZE 16777216UL
 
 #define HEAP_BASE 0x00600000
 
@@ -16,6 +15,7 @@ typedef struct memory_manager_cdt *memory_manager_adt;
 typedef struct {
   uint64_t total_size;
   uint64_t free;
+  uint64_t reserved;
 } memory_info;
 
 #if defined(USE_BUDDY_MM)
@@ -50,26 +50,26 @@ void buddy_kmm_dump_state(memory_manager_adt mem);
 /* === Simple Memory Manager === */
 
 // Inicializa el manejador simple sobre el bloque dado
-memory_manager_adt dummy_kmm_init(void *restrict memory_to_manage);
+memory_manager_adt my_kmm_init(void *memory_to_manage);
 
 // Asigna un bloque de memoria del tamaño solicitado
-void *dummy_kmalloc(memory_manager_adt restrict memory_manager, size_t size);
+void *my_kmalloc(memory_manager_adt restrict memory_manager, size_t size);
 
 // Libera una dirección previamente asignada
-void dummy_kmm_free(void *ptr, memory_manager_adt mem);
+void my_kmm_free(void *ptr, memory_manager_adt mem);
 
 // Devuelve la cantidad de memoria libre y total (opcional)
-int64_t dummy_kmm_mem_info(memory_info *info, memory_manager_adt mem);
+int64_t my_kmm_mem_info(memory_info *info, memory_manager_adt mem);
 
 // Muestra el estado actual de la memoria simple
-void dummy_kmm_dump_state(memory_manager_adt mem);
+void my_kmm_dump_state(memory_manager_adt mem);
 
 // Alias genéricos para usar el mismo nombre en ambas implementaciones
-#define kmm_init dummy_kmm_init
-#define kmalloc dummy_kmalloc
-#define kmm_free dummy_kmm_free
-#define kmm_dump_state dummy_kmm_dump_state
-#define kmm_mem_info dummy_kmm_mem_info
+#define kmm_init my_kmm_init
+#define kmalloc my_kmalloc
+#define kmm_free my_kmm_free
+#define kmm_dump_state my_kmm_dump_state
+#define kmm_mem_info my_kmm_mem_info
 
 #endif
 

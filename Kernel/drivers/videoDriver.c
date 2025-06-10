@@ -347,6 +347,27 @@ void change_bg_color() {
   clear_screen();
 }
 
+void utoa(uint64_t value, char *buffer, int base) {
+  // Simple implementación para base 10
+  char temp[32];
+  int i = 0;
+  if (value == 0) {
+    buffer[0] = '0';
+    buffer[1] = '\0';
+    return;
+  }
+  while (value > 0) {
+    temp[i++] = "0123456789ABCDEF"[value % base];
+    value /= base;
+  }
+  // Invertir
+  int j = 0;
+  while (i > 0) {
+    buffer[j++] = temp[--i];
+  }
+  buffer[j] = '\0';
+}
+
 void drawcharSize(unsigned char c, color fcolor, color bcolor) {
   // chequeo si entra el caracter, sino salto de linea
   if (posX > SCREEN_WIDTH_PIXELS - CHAR_WIDTH) {
