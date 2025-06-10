@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java:
+// https://pvs-studio.com
+
 #include "libu.h"
 #include "test_util.h"
 #include <stdint.h>
@@ -56,7 +60,6 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     slowInc(&global, inc);
     if (use_sem)
       my_sem_post(SEM_ID);
-    return 0;
   }
   return 0;
 }

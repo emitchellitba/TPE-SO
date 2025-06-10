@@ -182,7 +182,7 @@ int8_t phylo_main() {
   my_sem_open(SEM_QUIT);
 
   int quit = 0;
-  while (!quit) {
+  do {
     // Chequeo no bloqueante para agregar
     if (my_sem_trywait(SEM_ADD) == 0) {
       if (phylo_count < MAX_PHY) {
@@ -212,11 +212,12 @@ int8_t phylo_main() {
       rm_program("phylo_input");
       my_sem_close(SEM_ID);
       printf("El asado terminó. ¡Gracias por participar!\n");
-      return 0;
+      break;
+      ;
     }
     // Opcional: sleep para evitar busy waiting
     sleep_time(1);
-  }
+  } while (!quit);
 
   return 0;
 }

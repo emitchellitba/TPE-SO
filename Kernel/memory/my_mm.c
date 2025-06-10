@@ -1,3 +1,7 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java:
+// https://pvs-studio.com
+
 #include "../include/drivers/videoDriver.h"
 #include "../include/lib/memory_manager.h"
 
@@ -77,7 +81,8 @@ void my_kmm_dump_state(memory_manager_adt mem) {
   if (my_kmm_mem_info(&info, mem) == 0) {
     char buf[32];
 
-    print_str("\n=== my Memory Manager State ===\n", 36, 0);
+    char *msg = "\n=== my Memory Manager State ===\n";
+    print_str(msg, str_len(msg), 0);
 
     print_str("Total Memory: ", 14, 0);
     utoa(info.total_size, buf, 10);
