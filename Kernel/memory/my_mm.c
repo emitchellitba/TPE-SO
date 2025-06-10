@@ -1,10 +1,6 @@
-#include <stdint.h>
-#include <stdlib.h>
 
+#include "../include/drivers/videoDriver.h"
 #include "../include/lib/memory_manager.h"
-#include "../include/naiveConsole.h"
-
-#define MANAGED_MEMORY_SIZE 1048576
 
 typedef struct memory_manager_cdt {
   char *next_address;
@@ -13,7 +9,7 @@ typedef struct memory_manager_cdt {
   size_t used_size;
 } memory_manager_cdt;
 
-memory_manager_adt dummy_kmm_init(void *memory_to_manage) {
+memory_manager_adt my_kmm_init(void *memory_to_manage) {
   if (memory_to_manage == NULL) {
     return NULL;
   }
@@ -21,15 +17,14 @@ memory_manager_adt dummy_kmm_init(void *memory_to_manage) {
   memory_manager_cdt *aux = (memory_manager_cdt *)memory_to_manage;
 
   aux->next_address = (char *)memory_to_manage + sizeof(memory_manager_cdt);
-  aux->end_address = (char *)memory_to_manage + MANAGED_MEMORY_SIZE;
-  aux->total_size = MANAGED_MEMORY_SIZE - sizeof(memory_manager_cdt);
+  aux->end_address = (char *)memory_to_manage + HEAP_SIZE;
+  aux->total_size = HEAP_SIZE - sizeof(memory_manager_cdt);
   aux->used_size = 0;
 
   return (memory_manager_adt)aux;
 }
 
-void *dummy_kmalloc(memory_manager_adt memory_manager,
-                    const size_t to_allocate) {
+void *my_kmalloc(memory_manager_adt memory_manager, const size_t to_allocate) {
   if (memory_manager == NULL || to_allocate == 0) {
     return NULL;
   }
@@ -46,7 +41,7 @@ void *dummy_kmalloc(memory_manager_adt memory_manager,
   return ptr;
 }
 
-void dummy_kmm_free(void *ptr, memory_manager_adt m) {
+void my_kmm_free(void *ptr, memory_manager_adt m) {
   if (ptr == NULL || m == NULL) {
     return;
   }
@@ -57,7 +52,7 @@ void dummy_kmm_free(void *ptr, memory_manager_adt m) {
   }
 }
 
-int64_t dummy_kmm_mem_info(memory_info *info, memory_manager_adt mem) {
+int64_t my_kmm_mem_info(memory_info *info, memory_manager_adt mem) {
   if (info == NULL || mem == NULL) {
     return -1;
   }
@@ -69,25 +64,32 @@ int64_t dummy_kmm_mem_info(memory_info *info, memory_manager_adt mem) {
   return 0;
 }
 
-void dummy_kmm_dump_state(memory_manager_adt mem) {
+void my_kmm_dump_state(memory_manager_adt mem) {
   if (mem == NULL) {
     return;
   }
 
   memory_info info;
-  if (dummy_kmm_mem_info(&info, mem) == 0) {
-    ncPrint("\n=== Dummy Memory Manager State ===\n");
-    ncPrint("Total Memory: ");
-    ncPrintDec(info.total_size);
-    ncPrint(" bytes\n");
-    ncPrint("Used Memory: ");
+  if (my_kmm_mem_info(&info, mem) == 0) {
+    char buf[32];
 
-    ncPrintDec(mem->used_size);
+    print_str("\n=== my Memory Manager State ===\n", 36, 0);
 
-    ncPrint(" bytes\n");
-    ncPrint("Free Memory: ");
-    ncPrintDec(info.free);
-    ncPrint(" bytes\n");
-    ncPrint("===============================\n");
+    print_str("Total Memory: ", 14, 0);
+    utoa(info.total_size, buf, 10);
+    print_str(buf, 0, 0);
+    print_str(" bytes\n", 7, 0);
+
+    print_str("Used Memory: ", 13, 0);
+    utoa(mem->used_size, buf, 10);
+    print_str(buf, 0, 0);
+    print_str(" bytes\n", 7, 0);
+
+    print_str("Free Memory: ", 13, 0);
+    utoa(info.free, buf, 10);
+    print_str(buf, 0, 0);
+    print_str(" bytes\n", 7, 0);
+
+    print_str("===============================\n", 32, 0);
   }
 }

@@ -1,174 +1,214 @@
-#include "memory_manager.h"
-#include <stddef.h>
-#include <stdint.h>
-#include <unistd.h> // syscall write
+#include "../include/drivers/videoDriver.h"
+#include "../include/lib/memory_manager.h"
 
-#define MIN_ORDER 5  // 2^5 = 32 bytes mínimo
-#define MAX_ORDER 24 // 2^24 = 16MB
-#define NUM_ORDERS (MAX_ORDER - MIN_ORDER + 1)
+#define MAX_ORDER 18
+#define MIN_ORDER                                                              \
+  3 // Lo mantenés igual, si querés bloques mínimos de 64 bytes (2^(3+6))
 
-typedef struct Block {
-  struct Block *next;
-} Block;
+#define BLOCKSIZE(order) (1UL << ((order) + 6))
+
+#define GET_BUDDY(ptr, base, order)                                            \
+  ((void *)((((uintptr_t)(ptr) - (uintptr_t)(base)) ^ BLOCKSIZE(order)) +      \
+            (uintptr_t)(base)))
+
+typedef struct block {
+  struct block *next;
+  int order;
+  int is_free;
+} block_t;
 
 typedef struct memory_manager_cdt {
-  Block *free_lists[NUM_ORDERS];
-  uint8_t *base;
+  void *base;
+  void *end;
+  block_t *free_lists[MAX_ORDER + 1];
 } memory_manager_cdt;
 
-static inline size_t order_to_size(int order) {
-  return 1UL << (order + MIN_ORDER);
+// Calculamos heap size automáticamente
+#define HEAP_SIZE BLOCKSIZE(MAX_ORDER)
+
+memory_manager_adt buddy_kmm_init(void *memory_to_manage) {
+  if (!memory_to_manage)
+    return NULL;
+
+  memory_manager_cdt *m = (memory_manager_cdt *)memory_to_manage;
+
+  m->base = (void *)((uintptr_t)memory_to_manage + sizeof(memory_manager_cdt));
+  m->end = (void *)((uintptr_t)m->base + HEAP_SIZE);
+
+  for (int i = 0; i <= MAX_ORDER; i++)
+    m->free_lists[i] = NULL;
+
+  block_t *block = (block_t *)m->base;
+  block->order = MAX_ORDER;
+  block->is_free = 1;
+  block->next = NULL;
+  m->free_lists[MAX_ORDER] = block;
+
+  return m;
 }
 
-static inline int size_to_order(size_t size) {
-  size += (1UL << MIN_ORDER) - 1;
+static int get_order(size_t size) {
+  size += sizeof(block_t);
   int order = 0;
-  size >>= MIN_ORDER;
-  while (size >>= 1)
+  while (order <= MAX_ORDER && BLOCKSIZE(order) < size)
     order++;
   return order;
 }
 
-static inline uintptr_t align_up(uintptr_t addr, size_t align) {
-  return (addr + align - 1) & ~(align - 1);
-}
-
-static inline Block *buddy_of(Block *block, int order, uint8_t *base) {
-  uintptr_t offset = (uintptr_t)block - (uintptr_t)base;
-  uintptr_t buddy_offset = offset ^ order_to_size(order);
-  return (Block *)(base + buddy_offset);
-}
-
-memory_manager_adt buddy_kmm_init(void *const restrict memory_to_manage) {
-  memory_manager_adt manager = (memory_manager_adt)memory_to_manage;
-  uintptr_t base_addr =
-      (uintptr_t)memory_to_manage + sizeof(memory_manager_cdt);
-  base_addr = align_up(base_addr, 1UL << MIN_ORDER);
-  manager->base = (uint8_t *)base_addr;
-
-  for (int i = 0; i < NUM_ORDERS; i++) {
-    manager->free_lists[i] = NULL;
-  }
-
-  Block *initial_block = (Block *)manager->base;
-  initial_block->next = NULL;
-  manager->free_lists[NUM_ORDERS - 1] = initial_block;
-
-  return manager;
-}
-
-void *buddy_kmalloc(memory_manager_adt const restrict mem, const size_t size) {
-  if (!size)
+static block_t *alloc_block(memory_manager_cdt *m, int order) {
+  if (order > MAX_ORDER)
     return NULL;
 
-  size_t required = size + sizeof(size_t); // Save order before user data
-  int order = size_to_order(required);
-  if (order >= NUM_ORDERS)
-    return NULL;
-
-  int current = order;
-  while (current < NUM_ORDERS && mem->free_lists[current] == NULL) {
-    current++;
+  if (m->free_lists[order]) {
+    block_t *block = m->free_lists[order];
+    m->free_lists[order] = block->next;
+    block->is_free = 0;
+    block->next = NULL;
+    return block;
   }
 
-  if (current == NUM_ORDERS)
+  block_t *big_block = alloc_block(m, order + 1);
+  if (!big_block)
     return NULL;
 
-  while (current > order) {
-    Block *split = mem->free_lists[current];
-    mem->free_lists[current] = split->next;
+  size_t half_size = BLOCKSIZE(order);
+  block_t *buddy = (block_t *)((uintptr_t)big_block + half_size);
 
-    current--;
-    size_t block_size = order_to_size(current);
-    Block *buddy = (Block *)((uint8_t *)split + block_size);
-    buddy->next = NULL;
+  buddy->order = order;
+  buddy->is_free = 1;
+  buddy->next = m->free_lists[order];
+  m->free_lists[order] = buddy;
 
-    split->next = NULL;
-    mem->free_lists[current] = split;
-    mem->free_lists[current]->next = buddy;
-  }
+  big_block->order = order;
+  big_block->is_free = 0;
+  big_block->next = NULL;
 
-  Block *block = mem->free_lists[order];
-  mem->free_lists[order] = block->next;
-
-  *((size_t *)block) = order;
-  return (uint8_t *)block + sizeof(size_t);
+  return big_block;
 }
 
-void buddy_kmm_free(void *ptr, memory_manager_adt mem) {
-  if (!ptr)
+static void free_block(memory_manager_cdt *m, block_t *block) {
+  int order = block->order;
+
+  if (block->is_free)
     return;
 
-  uint8_t *block_ptr = (uint8_t *)ptr - sizeof(size_t);
-  int order = *((size_t *)block_ptr);
+  block->is_free = 1;
 
-  Block *block = (Block *)block_ptr;
-  block->next = NULL;
+  while (order < MAX_ORDER) {
+    block_t *buddy = (block_t *)GET_BUDDY(block, m->base, order);
 
-  while (order < NUM_ORDERS) {
-    Block *buddy = buddy_of(block, order, mem->base);
-    Block **curr = &mem->free_lists[order];
-    Block *prev = NULL;
+    block_t **curr = &m->free_lists[order];
+    block_t *prev = NULL;
+    int buddy_found = 0;
 
-    while (*curr && *curr != buddy) {
+    while (*curr) {
+      if (*curr == buddy) {
+        buddy_found = 1;
+        break;
+      }
       prev = *curr;
       curr = &(*curr)->next;
     }
 
-    if (*curr == buddy) {
-      if (prev)
-        prev->next = buddy->next;
-      else
-        mem->free_lists[order] = buddy->next;
-
-      if ((uintptr_t)block > (uintptr_t)buddy) {
-        Block *tmp = block;
-        block = buddy;
-        buddy = tmp;
-      }
-
-      order++;
-    } else {
+    if (!buddy_found || !buddy->is_free || buddy->order != order)
       break;
-    }
+
+    if (prev)
+      prev->next = buddy->next;
+    else
+      m->free_lists[order] = buddy->next;
+
+    block = (block < buddy) ? block : buddy;
+    block->order = order + 1;
+    block->is_free = 1;
+    order++;
   }
 
-  block->next = mem->free_lists[order];
-  mem->free_lists[order] = block;
+  block->next = m->free_lists[order];
+  m->free_lists[order] = block;
 }
 
-int64_t buddy_kmm_mem_info(memory_info *info, memory_manager_adt mem) {
-  if (!info)
+void *buddy_kmalloc(memory_manager_adt m_, size_t size) {
+  if (!m_ || size == 0)
+    return NULL;
+
+  memory_manager_cdt *m = (memory_manager_cdt *)m_;
+  int order = get_order(size);
+  block_t *block = alloc_block(m, order);
+
+  if (!block)
+    return NULL;
+
+  return (void *)((uintptr_t)block + sizeof(block_t));
+}
+
+void buddy_kmm_free(void *ptr, memory_manager_adt m_) {
+  if (!ptr || !m_)
+    return;
+
+  memory_manager_cdt *m = (memory_manager_cdt *)m_;
+  block_t *block = (block_t *)((uintptr_t)ptr - sizeof(block_t));
+
+  if (block->is_free)
+    return;
+
+  free_block(m, block);
+}
+
+int64_t buddy_kmm_mem_info(memory_info *info, memory_manager_adt m_) {
+  if (!info || !m_)
     return -1;
 
-  uint64_t total = 0, free = 0;
-  for (int i = 0; i < NUM_ORDERS; i++) {
-    size_t block_size = order_to_size(i);
-    for (Block *b = mem->free_lists[i]; b; b = b->next) {
-      free += block_size;
+  memory_manager_cdt *m = (memory_manager_cdt *)m_;
+
+  info->total_size = (uintptr_t)m->end - (uintptr_t)m->base;
+  info->free = 0;
+
+  for (int i = 0; i <= MAX_ORDER; i++) {
+    block_t *curr = m->free_lists[i];
+    while (curr) {
+      info->free += BLOCKSIZE(i);
+      curr = curr->next;
     }
-    total += block_size * (1UL << (NUM_ORDERS - i - 1)); // estimation
   }
 
-  info->total_size = HEAP_SIZE;
-  info->free = free;
+  info->reserved = info->total_size - info->free;
+
   return 0;
 }
 
-void buddy_kmm_dump_state(memory_manager_adt mem) {
-  // char buffer[128];
-  // const char *prefix = "Buddy Dump:\n";
-  // write(1, prefix, sizeof("Buddy Dump:\n") - 1);
+void buddy_kmm_dump_state(memory_manager_adt m_) {
+  if (!m_)
+    return;
 
-  // for (int i = 0; i < NUM_ORDERS; i++) {
-  //     int count = 0;
-  //     for (Block *b = mem->free_lists[i]; b; b = b->next) {
-  //         count++;
-  //     }
+  memory_manager_cdt *m = (memory_manager_cdt *)m_;
 
-  //     int len = 0;
-  //     size_t block_size = order_to_size(i);
-  //     len = snprintf(buffer, sizeof(buffer), "Order %d (size %zu): %d
-  //     blocks\n", i, block_size, count); write(1, buffer, len);
-  // }
+  print_str("=== Buddy Allocator Dump ===\n", 27, 0);
+
+  for (int i = 0; i <= MAX_ORDER; i++) {
+    int count = 0;
+    block_t *curr = m->free_lists[i];
+    while (curr) {
+      count++;
+      curr = curr->next;
+    }
+
+    print_str("Order ", 6, 0);
+    if (i >= 10) {
+      char c = '0' + (i / 10);
+      print_str(&c, 1, 0);
+    }
+    char c = '0' + (i % 10);
+    print_str(&c, 1, 0);
+
+    print_str(": ", 2, 0);
+    print_str("Count: ", 7, 0);
+    if (count >= 10) {
+      char c = '0' + (count / 10);
+      print_str(&c, 1, 0);
+    }
+    char c2 = '0' + (count % 10);
+    print_str(&c2, 1, 0);
+    print_str("\n", 1, 0);
+  }
 }

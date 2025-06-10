@@ -42,8 +42,10 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     return -1;
   }
 
+  semaphore_t *sem;
   if (use_sem) {
-    if (!my_sem_open(SEM_ID)) {
+    sem = my_sem_open(SEM_ID);
+    if (!sem) {
       printf("my_process_inc: ERROR opening semaphore %d\n", SEM_ID);
       return -1;
     }
@@ -52,13 +54,14 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   uint64_t i;
   for (i = 0; i < n; i++) {
     if (use_sem)
-      my_sem_wait(SEM_ID);
+      my_sem_wait(sem);
     slowInc(&global, inc);
     if (use_sem)
-      my_sem_post(SEM_ID);
+      my_sem_post(sem);
+    return 0; // Exit after incrementing/decrementing
   }
   if (use_sem) {
-    my_sem_close(SEM_ID);
+    my_sem_close(sem);
   }
   return 0;
 }
