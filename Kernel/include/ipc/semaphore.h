@@ -21,7 +21,7 @@ void my_sem_init();
  * @param sem Punteor al semáforo a inicializar.
  * @param value Valor inicial del semáforo.
  */
-semaphore_t* my_ksem_init(uint64_t, uint64_t value);
+semaphore_t *my_ksem_init(uint64_t, uint64_t value);
 
 /**
  * @brief Crea un semáforo con el id y valor inicial dados.

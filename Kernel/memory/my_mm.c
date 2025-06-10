@@ -1,6 +1,7 @@
-
 #include "../include/drivers/videoDriver.h"
 #include "../include/lib/memory_manager.h"
+
+#define HEAP_SIZE (1 << 20) // 1MB por ejemplo, ajustar según tu proyecto
 
 typedef struct memory_manager_cdt {
   char *next_address;
@@ -29,6 +30,7 @@ void *my_kmalloc(memory_manager_adt memory_manager, const size_t to_allocate) {
     return NULL;
   }
 
+  // Validación de overflow o desbordamiento
   if (memory_manager->next_address + to_allocate >
       memory_manager->end_address) {
     return NULL;
@@ -42,14 +44,20 @@ void *my_kmalloc(memory_manager_adt memory_manager, const size_t to_allocate) {
 }
 
 void my_kmm_free(void *ptr, memory_manager_adt m) {
+  // Este allocator no soporta free real, pero validamos parámetros
+
   if (ptr == NULL || m == NULL) {
     return;
   }
 
+  // Validamos que el puntero esté dentro del heap manejado
   char *start = (char *)m + sizeof(memory_manager_cdt);
   if (ptr < (void *)start || ptr >= (void *)m->end_address) {
     return;
   }
+
+  // No hacemos nada porque no hay soporte de free,
+  // pero queda validación para evitar errores
 }
 
 int64_t my_kmm_mem_info(memory_info *info, memory_manager_adt mem) {
@@ -58,12 +66,10 @@ int64_t my_kmm_mem_info(memory_info *info, memory_manager_adt mem) {
   }
 
   info->total_size = mem->total_size;
-
   info->free = mem->total_size - mem->used_size;
 
   return 0;
 }
-
 void my_kmm_dump_state(memory_manager_adt mem) {
   if (mem == NULL) {
     return;
@@ -77,17 +83,17 @@ void my_kmm_dump_state(memory_manager_adt mem) {
 
     print_str("Total Memory: ", 14, 0);
     utoa(info.total_size, buf, 10);
-    print_str(buf, 0, 0);
+    print_str(buf, str_len(buf), 0);
     print_str(" bytes\n", 7, 0);
 
     print_str("Used Memory: ", 13, 0);
     utoa(mem->used_size, buf, 10);
-    print_str(buf, 0, 0);
+    print_str(buf, str_len(buf), 0);
     print_str(" bytes\n", 7, 0);
 
     print_str("Free Memory: ", 13, 0);
     utoa(info.free, buf, 10);
-    print_str(buf, 0, 0);
+    print_str(buf, str_len(buf), 0);
     print_str(" bytes\n", 7, 0);
 
     print_str("===============================\n", 32, 0);

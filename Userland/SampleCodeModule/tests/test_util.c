@@ -29,6 +29,15 @@ uint8_t memcheck(void *start, uint8_t value, uint32_t size) {
   return 1;
 }
 
+void *my_memset(void *destination, int32_t c, uint64_t length) {
+  uint8_t chr = (uint8_t)c;
+  char *dst = (char *)destination;
+  while (length--) {
+    dst[length] = chr;
+  }
+  return destination;
+}
+
 // Parameters
 int64_t satoi(char *str) {
   uint64_t i = 0;

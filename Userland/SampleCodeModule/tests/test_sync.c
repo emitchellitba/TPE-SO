@@ -42,7 +42,6 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     return -1;
   }
 
-
   if (use_sem) {
     if (my_sem_open(SEM_ID)) {
       printf("my_process_inc: ERROR opening semaphore %d\n", SEM_ID);
@@ -84,7 +83,6 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
   printf("test_sync: Initial global value: %d\n", global);
   printf("test_sync: Running with N_ITERATIONS = %s, USE_SEMAPHORES = %s\n",
          n_iterations_str, use_sem_str);
-
 
   if (use_sem_flag) {
     if (my_sem_create(SEM_ID, 1)) {

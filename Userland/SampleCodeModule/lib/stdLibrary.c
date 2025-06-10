@@ -43,33 +43,33 @@ int itoa(int value, char *buffer) {
 }
 
 void itos(int value, char *buffer) {
-    int i = 0, neg = 0;
-    char temp[12]; // Enough for 32-bit int
+  int i = 0, neg = 0;
+  char temp[12]; // Enough for 32-bit int
 
-    if (value == 0) {
-        buffer[0] = '0';
-        buffer[1] = '\0';
-        return;
-    }
+  if (value == 0) {
+    buffer[0] = '0';
+    buffer[1] = '\0';
+    return;
+  }
 
-    if (value < 0) {
-        neg = 1;
-        value = -value;
-    }
+  if (value < 0) {
+    neg = 1;
+    value = -value;
+  }
 
-    while (value > 0) {
-        temp[i++] = (value % 10) + '0';
-        value /= 10;
-    }
+  while (value > 0) {
+    temp[i++] = (value % 10) + '0';
+    value /= 10;
+  }
 
-    if (neg)
-        temp[i++] = '-';
+  if (neg)
+    temp[i++] = '-';
 
-    // Reverse the string into buffer
-    int j = 0;
-    while (i > 0)
-        buffer[j++] = temp[--i];
-    buffer[j] = '\0';
+  // Reverse the string into buffer
+  int j = 0;
+  while (i > 0)
+    buffer[j++] = temp[--i];
+  buffer[j] = '\0';
 }
 
 int utoa(size_t value, char *buffer) {

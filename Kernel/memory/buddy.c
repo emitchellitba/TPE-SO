@@ -2,8 +2,7 @@
 #include "../include/lib/memory_manager.h"
 
 #define MAX_ORDER 18
-#define MIN_ORDER                                                              \
-  3 // Lo mantenés igual, si querés bloques mínimos de 64 bytes (2^(3+6))
+#define MIN_ORDER 3
 
 #define BLOCKSIZE(order) (1UL << ((order) + 6))
 
@@ -86,6 +85,10 @@ static block_t *alloc_block(memory_manager_cdt *m, int order) {
   return big_block;
 }
 
+static inline int is_valid_address(memory_manager_cdt *m, void *addr) {
+  return (addr >= m->base) && (addr < m->end);
+}
+
 static void free_block(memory_manager_cdt *m, block_t *block) {
   int order = block->order;
 
@@ -96,6 +99,9 @@ static void free_block(memory_manager_cdt *m, block_t *block) {
 
   while (order < MAX_ORDER) {
     block_t *buddy = (block_t *)GET_BUDDY(block, m->base, order);
+
+    if (!is_valid_address(m, buddy))
+      break;
 
     block_t **curr = &m->free_lists[order];
     block_t *prev = NULL;
@@ -149,6 +155,9 @@ void buddy_kmm_free(void *ptr, memory_manager_adt m_) {
   memory_manager_cdt *m = (memory_manager_cdt *)m_;
   block_t *block = (block_t *)((uintptr_t)ptr - sizeof(block_t));
 
+  if ((void *)block < m->base || (void *)block >= m->end)
+    return;
+
   if (block->is_free)
     return;
 
@@ -183,32 +192,42 @@ void buddy_kmm_dump_state(memory_manager_adt m_) {
 
   memory_manager_cdt *m = (memory_manager_cdt *)m_;
 
-  print_str("=== Buddy Allocator Dump ===\n", 27, 0);
+  print_str("=== Buddy Allocator Dump ===\n", 30, 0);
 
-  for (int i = 0; i <= MAX_ORDER; i++) {
-    int count = 0;
+  // Contar memoria libre sumando bloques * tamaño bloque
+  size_t free_bytes = 0;
+
+  for (int i = MIN_ORDER; i <= MAX_ORDER; i++) {
     block_t *curr = m->free_lists[i];
     while (curr) {
-      count++;
+      free_bytes += BLOCKSIZE(i);
       curr = curr->next;
     }
-
-    print_str("Order ", 6, 0);
-    if (i >= 10) {
-      char c = '0' + (i / 10);
-      print_str(&c, 1, 0);
-    }
-    char c = '0' + (i % 10);
-    print_str(&c, 1, 0);
-
-    print_str(": ", 2, 0);
-    print_str("Count: ", 7, 0);
-    if (count >= 10) {
-      char c = '0' + (count / 10);
-      print_str(&c, 1, 0);
-    }
-    char c2 = '0' + (count % 10);
-    print_str(&c2, 1, 0);
-    print_str("\n", 1, 0);
   }
+
+  size_t total_bytes = HEAP_SIZE; // total memoria
+  size_t used_bytes = total_bytes - free_bytes;
+
+  // Para mostrar en bloques mínimos
+  size_t block_min_size = BLOCKSIZE(MIN_ORDER);
+  size_t total_blocks = total_bytes / block_min_size;
+  size_t free_blocks = free_bytes / block_min_size;
+  size_t used_blocks = used_bytes / block_min_size;
+
+  char buffer[32];
+
+  print_str("Total blocks: ", 15, 0);
+  utoa(total_blocks, buffer, 10);
+  print_str(buffer, str_len(buffer), 0);
+  print_str("\n", 1, 0);
+
+  print_str("Free blocks: ", 14, 0);
+  utoa(free_blocks, buffer, 10);
+  print_str(buffer, str_len(buffer), 0);
+  print_str("\n", 1, 0);
+
+  print_str("Used blocks: ", 14, 0);
+  utoa(used_blocks, buffer, 10);
+  print_str(buffer, str_len(buffer), 0);
+  print_str("\n", 1, 0);
 }
