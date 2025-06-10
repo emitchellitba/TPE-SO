@@ -61,6 +61,8 @@ int main() {
 
   initialize_idle();
 
+  my_sem_init();
+
   char *name = "init";
   fs_load(name, (fs_entry_point_t)sampleCodeModuleAddress);
 

@@ -42,10 +42,9 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     return -1;
   }
 
-  semaphore_t *sem;
+
   if (use_sem) {
-    sem = my_sem_open(SEM_ID);
-    if (!sem) {
+    if (my_sem_open(SEM_ID)) {
       printf("my_process_inc: ERROR opening semaphore %d\n", SEM_ID);
       return -1;
     }
@@ -59,9 +58,6 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     if (use_sem)
       my_sem_post(sem);
     return 0; // Exit after incrementing/decrementing
-  }
-  if (use_sem) {
-    my_sem_close(sem);
   }
   return 0;
 }
@@ -89,8 +85,9 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
   printf("test_sync: Running with N_ITERATIONS = %s, USE_SEMAPHORES = %s\n",
          n_iterations_str, use_sem_str);
 
+
   if (use_sem_flag) {
-    if (!my_sem_create(SEM_ID, 1)) {
+    if (my_sem_create(SEM_ID, 1)) {
       printf("test_sync: ERROR creating semaphore %d\n", SEM_ID);
       rm_program("my_process_inc");
       return -1;
@@ -121,6 +118,10 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
     }
   }
 
+  if (use_sem_flag) {
+    my_sem_close(SEM_ID);
+  }
+
   printf("test_sync: All processes finished.\n");
 
   if (use_sem_flag) {
@@ -133,6 +134,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) {
     // los semáforos se limpian de otra forma (ej. al reiniciar), puedes omitir
     // esto, pero es buena práctica tenerlo. Por ahora, lo comentaré si no
     // tienes la función: my_sem_destroy(SEM_ID);
+    my_sem_close(SEM_ID);
     printf("test_sync: Semaphore %d would be destroyed here if my_sem_destroy "
            "exists.\n",
            SEM_ID);

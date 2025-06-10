@@ -36,7 +36,7 @@ char *str_chr(const char *str, int c);
 void str_ncpy(char *dest, const char *src, int n);
 void to_lower(char *str);
 unsigned int _abs(int a);
-
+void itos(int value, char *buffer);
 char *trim(char *str);
 int atoi(const char *str);
 

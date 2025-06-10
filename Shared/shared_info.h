@@ -6,6 +6,7 @@
 typedef struct semaphore {
   uint8_t lock;
   uint8_t in_use;
+  uint64_t users;
   uint64_t id;
   uint64_t value;
   struct queue *waiting_process_queue;

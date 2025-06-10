@@ -21,7 +21,7 @@ void my_sem_init();
  * @param sem Punteor al semáforo a inicializar.
  * @param value Valor inicial del semáforo.
  */
-int my_ksem_init(semaphore_t *sem, uint64_t value);
+semaphore_t* my_ksem_init(uint64_t, uint64_t value);
 
 /**
  * @brief Crea un semáforo con el id y valor inicial dados.
@@ -29,20 +29,20 @@ int my_ksem_init(semaphore_t *sem, uint64_t value);
  * @param value Valor inicial del semáforo.
  * @return Puntero al semáforo creado, o NULL si falla.
  */
-semaphore_t *my_sem_create(uint64_t id, uint64_t value);
+uint64_t my_sem_create(uint64_t id, uint64_t value);
 
 /**
  * @brief Libera el semáforo pasado como parámetro.
  * @param sem Puntero al semáforo a destruir.
  */
-uint64_t my_sem_destroy(semaphore_t *sem);
+uint64_t my_sem_destroy(uint64_t id);
 
 /**
  * @brief Abre un semáforo existente (lo busca por id).
  * @param id Identificador del semáforo.
  * @return Puntero al semáforo si existe y está en uso, o NULL si no.
  */
-semaphore_t *my_sem_open(uint64_t id);
+uint64_t my_sem_open(uint64_t id);
 
 /**
  * @brief Realiza la operación post (signal) sobre el semáforo.
@@ -50,7 +50,7 @@ semaphore_t *my_sem_open(uint64_t id);
  * @param sem Puntero al semáforo.
  * @return 0 en éxito, -1 en error.
  */
-uint64_t my_sem_post(semaphore_t *sem);
+uint64_t my_sem_post(uint64_t id);
 
 /**
  * @brief Realiza la operación wait (down) sobre el semáforo.
@@ -58,13 +58,13 @@ uint64_t my_sem_post(semaphore_t *sem);
  * @param sem Puntero al semáforo.
  * @return 0 en éxito, -1 en error.
  */
-uint64_t my_sem_wait(semaphore_t *sem);
+uint64_t my_sem_wait(uint64_t id);
 
 /**
  * @brief Indica si el semáforo está abierto y en uso.
  * @param sem Puntero al semáforo.
  * @return 1 si está abierto, 0 si no.
  */
-uint8_t sem_is_open(semaphore_t *sem);
+uint8_t sem_is_open(uint64_t id);
 
 #endif

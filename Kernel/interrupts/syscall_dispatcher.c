@@ -538,31 +538,27 @@ int64_t sys_open_sem(va_list args) {
 }
 
 int64_t sys_close_sem(va_list args) {
-  uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t *sem_ref = (semaphore_t *)sem;
-  syscall_log(LOG_INFO, "sys_close_sem(sem_id=%d)\n", sem_ref->id);
+  uint64_t sem_id = va_arg(args, uint64_t);
+  syscall_log(LOG_INFO, "sys_close_sem(sem_id=%d)\n", sem_id);
 
-  return my_sem_destroy(sem_ref);
+  return my_sem_destroy(sem_id);
 }
 
 int64_t sys_sem_post(va_list args) {
-  uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t *sem_ref = (semaphore_t *)sem;
-  syscall_log(LOG_INFO, "sys_sem_post(sem_id=%d)\n", sem_ref->id);
+  uint64_t sem_id = va_arg(args, uint64_t);
+  syscall_log(LOG_INFO, "sys_sem_post(sem_id=%d)\n", sem_id);
 
-  return my_sem_post(sem_ref);
+  return my_sem_post(sem_id);
 }
 
 int64_t sys_sem_wait(va_list args) {
-  uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t *sem_ref = (semaphore_t *)sem;
-  syscall_log(LOG_INFO, "sys_sem_wait(sem_id=%d)\n", sem_ref->id);
+  uint64_t sem_id = va_arg(args, uint64_t);
+  syscall_log(LOG_INFO, "sys_sem_wait(sem_id=%d)\n", sem_id);
 
-  return my_sem_wait(sem_ref);
+  return my_sem_wait(sem_id);
 }
 
 int64_t sys_sem_trywait(va_list args) {
-  uint64_t sem = va_arg(args, uint64_t);
-  semaphore_t *sem_ref = (semaphore_t *)sem;
-  return my_sem_trywait(sem_ref);
+  uint64_t sem_id = va_arg(args, uint64_t);
+  return my_sem_trywait(sem_id);
 }

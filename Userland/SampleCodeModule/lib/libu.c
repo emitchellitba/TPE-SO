@@ -43,10 +43,10 @@ DEFINE_WRAPPER(mem_dump, (void), ())
 DEFINE_WRAPPER(my_sem_create, (uint64_t id, uint64_t initial_value),
                (id, initial_value))
 DEFINE_WRAPPER(my_sem_open, (uint64_t id), (id))
-DEFINE_WRAPPER(my_sem_close, (semaphore_t * sem), (sem))
-DEFINE_WRAPPER(my_sem_post, (semaphore_t * sem), (sem))
-DEFINE_WRAPPER(my_sem_wait, (semaphore_t * sem), (sem))
-DEFINE_WRAPPER(my_sem_trywait, (semaphore_t * sem), (sem))
+DEFINE_WRAPPER(my_sem_close, (uint64_t id), (id))
+DEFINE_WRAPPER(my_sem_post, (uint64_t id), (id))
+DEFINE_WRAPPER(my_sem_wait, (uint64_t id), (id))
+DEFINE_WRAPPER(my_sem_trywait, (uint64_t id), (id))
 
 extern int64_t _spawn_process(const char *name, int argc, char *argv[],
                               int fds[], int background);
