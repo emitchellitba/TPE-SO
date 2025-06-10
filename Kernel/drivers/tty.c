@@ -49,7 +49,7 @@ void set_foreground_process(proc_t *proc, proc_t *caller) {
 
   proc_t *prev = caller;
 
-  if (prev && prev->mode == FG) {
+  if (prev->mode == FG) {
     prev->mode = BG;
   } else { /* El proceso corriendo no tiene el foreground para cederlo */
     return;

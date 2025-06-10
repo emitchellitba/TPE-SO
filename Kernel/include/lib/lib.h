@@ -2,8 +2,7 @@
 #define LIB_H
 
 #include <stdint.h>
-
-typedef unsigned long size_t;
+#include <sys/types.h>
 
 typedef enum { STDIN = 0, STDOUT, STDERR } FDS;
 

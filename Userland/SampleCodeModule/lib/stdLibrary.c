@@ -241,7 +241,7 @@ void put_str(char *s) {
 }
 
 void put_uint(int n) {
-  if (n / 10) {
+  if ((n / 10) > 0) {
     put_int(n / 10);
   }
   put_char(n % 10 + '0');

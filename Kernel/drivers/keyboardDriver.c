@@ -136,6 +136,9 @@ void handle_key_press() {
   if (scanCode > 0x80)
     return;
 
+  if (scanCode >= (sizeof(printableAscii) / sizeof(printableAscii[0])))
+    return;
+
   if (ctrl) {
     unsigned char c = printableAscii[scanCode][0];
 
@@ -155,15 +158,9 @@ void handle_key_press() {
   }
 
   if (arrow) {
-    ringbuf_write(kbuff, 1, (char *)&arrow);
     arrow = 0;
     return;
   }
-
-  if (scanCode == LEFT_SHIFT_PRESSED || scanCode == RIGHT_SHIFT_PRESSED ||
-      scanCode == LEFT_SHIFT_RELEASED || scanCode == RIGHT_SHIFT_RELEASED ||
-      scanCode == CAPSLOCK_PRESSED)
-    return;
 
   unsigned int col = shift ^ capsLock ? 1 : 0;
   unsigned char c = printableAscii[scanCode][col];

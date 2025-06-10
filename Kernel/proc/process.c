@@ -82,6 +82,10 @@ int proc_init(proc_t *proc, const char *name, proc_main_function entry,
   }
 
   proc->pid = proc_pid_alloc();
+  if (proc->pid < 0) {
+    err = -1;
+    return err;
+  }
   process_table[proc->pid] = proc;
 
   proc->stack_start = (uint64_t *)kmalloc(kernel_mem, STACK_SIZE);

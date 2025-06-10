@@ -25,7 +25,7 @@ int spawn_test_main(void) {
         return -1;
       }
 
-      printf("Process %d spawned with status %d\n", pid, status);
+      printf("Process %d spawned\n", pid);
     }
 
     while ((pid = wait(&status)) > 0) {

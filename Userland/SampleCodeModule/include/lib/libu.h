@@ -30,7 +30,7 @@ DECLARE_WRAPPER(pipe_close, (char *id))
 DECLARE_WRAPPER(get_procs, (proc_info_t * procs, size_t size))
 DECLARE_WRAPPER(load_program, (char *name, int entry))
 DECLARE_WRAPPER(rm_program, (char *name))
-DECLARE_WRAPPER(get_programs, (char **buffer, int max_count))
+DECLARE_WRAPPER(get_programs, (char *buffer[], int max_count))
 DECLARE_WRAPPER(spawn_process,
                 (const char *name, int argc, char **argv, int *fds))
 DECLARE_WRAPPER(spawn_process_bg,

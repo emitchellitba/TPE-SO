@@ -95,6 +95,9 @@ static int get_input() {
     return 0;
   }
 
+  if (n >= BUFF_SIZE)
+    n = BUFF_SIZE - 1;
+
   input_buffer[n] = '\0';
 
   if (input_buffer[n - 1] == '\n') {

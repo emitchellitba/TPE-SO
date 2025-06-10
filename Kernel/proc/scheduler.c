@@ -29,19 +29,6 @@ void initialize_scheduler() {
   scheduler->ready_processes = &ready_queue;
   scheduler->blocked_processes = &blocked_queue;
 
-  if (!scheduler->ready_processes) {
-    printk("CRITICAL: Failed to create ready processes queue\n");
-    kmm_free(scheduler, kernel_mem);
-    scheduler = NULL;
-    return;
-  }
-  if (!scheduler->blocked_processes) {
-    printk("CRITICAL: Failed to create blocked processes queue\n");
-    kmm_free(scheduler, kernel_mem);
-    scheduler = NULL;
-    return;
-  }
-
   scheduler->init = 1;
   scheduler->current_process = NULL;
 }
@@ -76,8 +63,11 @@ uint64_t schedule(uint64_t last_rsp) {
   if (!scheduler || !scheduler->init || !scheduler->ready_processes)
     return last_rsp;
 
-  scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
   struct queue *ready_queue = scheduler->ready_processes;
+
+  if (scheduler->current_process) {
+    scheduler->current_process->stack_pointer = (uint64_t *)last_rsp;
+  }
 
   if (ready_queue->count == 0) {
     if (!scheduler->current_process ||
@@ -158,7 +148,7 @@ int block_process_by_pid(pid_t pid_to_block) {
   proc_t *process = get_proc_by_pid(pid_to_block);
 
   if (process == NULL) {
-    return -1; // Error: Proceso no encontrado
+    return -1;
   }
 
   if (process->status == ZOMBIE || process->status == DEAD) {
@@ -170,10 +160,10 @@ int block_process_by_pid(pid_t pid_to_block) {
 
   if (process->status == BLOCKED) {
     printk("Advertencia: Proceso PID %d ya estaba bloqueado.\n", pid_to_block);
-    return 0; // O un código de error/advertencia específico
+    return 0;
   }
 
-  block(process, BLK_ARBITRARY, NULL); // Usar una razón genérica para bloqueo
+  block(process, BLK_ARBITRARY, NULL);
 
   return 0;
 }
@@ -182,26 +172,17 @@ int unblock_process_by_pid(pid_t pid_to_unblock) {
   proc_t *process = get_proc_by_pid(pid_to_unblock);
 
   if (process == NULL) {
-    return -1; // Error: Proceso no encontrado
+    return -1;
   }
 
   if (process->status != BLOCKED) {
-    // No estaba bloqueado, o está en un estado desde el cual no debería ser
-    // "desbloqueado" directamente.
     printk("Advertencia: Proceso PID %d no estaba bloqueado (estado actual: "
            "%d).\n",
            pid_to_unblock, process->status);
-    return 0; // O un código de error/advertencia específico
-  }
-  if (process->status == ZOMBIE || process->status == DEAD) {
-    printk("Error: No se puede desbloquear un proceso zombie o terminado (PID: "
-           "%d).\n",
-           pid_to_unblock);
-    return -2; // Error: Proceso zombie o terminado
+    return 0;
   }
 
-  proc_ready(
-      process); // Cambiar el estado a READY y moverlo a la cola de listos
+  proc_ready(process);
 
   return 0;
 }

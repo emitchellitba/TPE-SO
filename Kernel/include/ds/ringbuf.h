@@ -4,10 +4,9 @@
 #include <kernel.h>
 #include <memory_manager.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 KMEMORY_DECLARE
-
-typedef long int off_t;
 
 #define RING_INDEX(ring, i) ((i) % ((ring)->size))
 

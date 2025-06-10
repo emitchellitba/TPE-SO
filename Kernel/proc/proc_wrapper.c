@@ -14,7 +14,7 @@
  */
 int process_wrapper(uint64_t user_argc, char **user_argv) {
   proc_t *current_p = get_running();
-  int ret_val;
+  int ret_val = -1;
 
   if (current_p && current_p->entry) {
     ret_val = current_p->entry(user_argc, user_argv);

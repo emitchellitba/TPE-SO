@@ -17,3 +17,8 @@ settings.json
 Kernel/*.elf
 .vscode
 hooks/*
+
+# PVS Studio
+report.html
+report.log
+strace_out

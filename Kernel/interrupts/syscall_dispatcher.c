@@ -107,7 +107,7 @@ int64_t sys_read(va_list args) {
   // que devuelva un puntero a fd_entry_t
   fd_entry_t *fd_entry = &current_process->fds[fd];
 
-  if (!fd_entry || !fd_entry->ops || !fd_entry->ops->read) {
+  if (!fd_entry->ops || !fd_entry->ops->read) {
     return -EBADF;
   }
 
@@ -136,7 +136,7 @@ int64_t sys_write(va_list args) {
 
   fd_entry_t *fd_entry = &current_process->fds[fd];
 
-  if (!fd_entry || !fd_entry->ops || !fd_entry->ops->write) {
+  if (!fd_entry->ops || !fd_entry->ops->write) {
     return -EBADF;
   }
 

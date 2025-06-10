@@ -112,7 +112,8 @@ int reader(int argc, char *argv[]) {
 
   const char *prefix = "Reader writing: ";
   write(1, prefix, str_len(prefix));
-  write(1, buf, n);
+  if (n > 0)
+    write(1, buf, n);
 
   return 0;
 }
@@ -129,7 +130,8 @@ int lonely_reader(int argc, char *argv[]) {
 
   const char *prefix = "\nLonely reader is writing this \n";
   write(1, prefix, str_len(prefix));
-  write(1, buf, n);
+  if (n > 0)
+    write(1, buf, n);
 
   return 0;
 }
