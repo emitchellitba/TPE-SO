@@ -39,7 +39,7 @@ static inline struct ringbuf *ringbuf_new(size_t size) {
   ring->buf = kmalloc(kernel_mem, size * sizeof(char));
 
   if (!ring->buf) {
-    kmm_free(ring, kernel_mem);
+    kmm_free(kernel_mem, ring);
     return NULL;
   }
 
@@ -58,8 +58,8 @@ static inline void ringbuf_free(struct ringbuf *r) {
   if (!r)
     return;
 
-  kmm_free(r->buf, kernel_mem);
-  kmm_free(r, kernel_mem);
+  kmm_free(kernel_mem, r->buf);
+  kmm_free(kernel_mem, r);
 }
 
 /**

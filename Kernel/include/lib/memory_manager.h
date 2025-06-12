@@ -30,7 +30,7 @@ void *buddy_kmalloc(memory_manager_adt const restrict memory_manager,
                     const size_t size);
 
 // Libera una dirección previamente asignada
-void buddy_kmm_free(void *ptr, memory_manager_adt mem);
+void buddy_kmm_free(memory_manager_adt mem, void* ptr);
 
 // Devuelve la cantidad de memoria libre y total (opcional)
 int64_t buddy_kmm_mem_info(memory_info *info, memory_manager_adt mem);
@@ -56,7 +56,7 @@ memory_manager_adt my_kmm_init(void *memory_to_manage);
 void *my_kmalloc(memory_manager_adt restrict memory_manager, size_t size);
 
 // Libera una dirección previamente asignada
-void my_kmm_free(void *ptr, memory_manager_adt mem);
+void my_kmm_free(memory_manager_adt mem, void *ptr);
 
 // Devuelve la cantidad de memoria libre y total (opcional)
 int64_t my_kmm_mem_info(memory_info *info, memory_manager_adt mem);

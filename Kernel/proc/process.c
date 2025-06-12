@@ -159,7 +159,7 @@ void proc_kill(struct proc *proc, int exit_code) {
   proc->exit = exit_code;
 
   /* Liberar recursos del kernel utilizados por el proceso (stack) */
-  kmm_free(proc->stack_start, kernel_mem);
+  kmm_free(kernel_mem, proc->stack_start);
 
   /* Cerrar todos los file descritptors */
   for (int i = 0; i < FD_MAX; i++) {
@@ -194,13 +194,13 @@ void proc_kill(struct proc *proc, int exit_code) {
  */
 int proc_reap(struct proc *proc) {
   /* Liberar el nombre */
-  kmm_free((void *)proc->name, kernel_mem);
+  kmm_free(kernel_mem, (void *)proc->name);
   proc->name = NULL;
 
   process_table[proc->pid] = NULL;
   process_count--;
 
-  kmm_free(proc, kernel_mem);
+  kmm_free(kernel_mem, proc);
 
   return 0;
 }
