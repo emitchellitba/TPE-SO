@@ -11,7 +11,6 @@
 typedef struct {
     int is_free;        // 1 = free, 0 = in use
     size_t block_count; // Only first block of each assignation holds the count
-                        // of blocks used, others are -1 to indicate they are part of the same allocation
 } BlockInfo;
 
 typedef struct {
@@ -50,7 +49,7 @@ void* my_kmalloc(memory_manager_adt restrict mm, size_t size) {
                 if(j == 0) {
                     kmm.block_info[i + j].block_count = blocks_needed; // Only first block
                 } else {
-                    kmm.block_info[i + j].block_count = -1; // Concurrent blocks marked as used, but not the first
+                    kmm.block_info[i + j].block_count = 0; // Concurrent blocks marked as used, but not the first
                 }
             }
             return kmm.memory + i * BLOCK_SIZE;
