@@ -194,7 +194,7 @@ void proc_kill(struct proc *proc, int exit_code) {
  */
 int proc_reap(struct proc *proc) {
   /* Liberar el nombre */
-  kmm_free(kernel_mem, (void *)proc->name);
+  // kmm_free(kernel_mem, (void *)proc->name);
   proc->name = NULL;
 
   process_table[proc->pid] = NULL;
