@@ -49,14 +49,14 @@ memory_manager_adt buddy_kmm_init(void *memory_to_manage) {
 
 static int get_order(size_t size) {
   size += sizeof(block_t);
-  int order = 0;
+  int order = MIN_ORDER;
   while (order <= MAX_ORDER && BLOCKSIZE(order) < size)
     order++;
   return order;
 }
 
 static block_t *alloc_block(memory_manager_cdt *m, int order) {
-  if (order > MAX_ORDER)
+  if (order < MIN_ORDER || order > MAX_ORDER)
     return NULL;
 
   if (m->free_lists[order]) {
@@ -94,6 +94,9 @@ static void free_block(memory_manager_cdt *m, block_t *block) {
   int order = block->order;
 
   if (block->is_free)
+    return;
+
+  if (order < MIN_ORDER || order > MAX_ORDER)
     return;
 
   block->is_free = 1;
