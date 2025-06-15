@@ -47,7 +47,7 @@ void timer_handler() {
     if (sp->wake_up_tick <= ticks) {
       unblock_process_by_pid(sp->pid);
       queue_node_remove(sleeping_proc_queue, node);
-      kmm_free(sp, kernel_mem);
+      kmm_free(kernel_mem, sp);
     }
   }
 }

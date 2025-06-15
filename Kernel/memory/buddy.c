@@ -26,7 +26,7 @@ typedef struct memory_manager_cdt {
   block_t *free_lists[MAX_ORDER + 1];
 } memory_manager_cdt;
 
-memory_manager_adt buddy_kmm_init(void *memory_to_manage) {
+memory_manager_adt buddy_kmm_init(void *const restrict memory_to_manage) {
   if (!memory_to_manage)
     return NULL;
 
@@ -138,7 +138,7 @@ static void free_block(memory_manager_cdt *m, block_t *block) {
   m->free_lists[order] = block;
 }
 
-void *buddy_kmalloc(memory_manager_adt m_, size_t size) {
+void *buddy_kmalloc(memory_manager_adt const restrict m_, size_t size) {
   if (!m_ || size == 0)
     return NULL;
 
@@ -152,7 +152,7 @@ void *buddy_kmalloc(memory_manager_adt m_, size_t size) {
   return (void *)((uintptr_t)block + sizeof(block_t));
 }
 
-void buddy_kmm_free(void *ptr, memory_manager_adt m_) {
+void buddy_kmm_free(memory_manager_adt m_, void *ptr) {
   if (!ptr || !m_)
     return;
 

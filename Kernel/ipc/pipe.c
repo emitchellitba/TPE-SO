@@ -74,7 +74,7 @@ pipe_t *create_pipe(const char *id) {
 
       pipe->buffer = ringbuf_new(PIPE_BUFFER_SIZE);
       if (!pipe->buffer) {
-        kmm_free(pipe, kernel_mem);
+        kmm_free(kernel_mem, pipe);
         return NULL;
       }
 
@@ -87,14 +87,14 @@ pipe_t *create_pipe(const char *id) {
       pipe->readers_wait_queue = queue_new();
       if (!pipe->readers_wait_queue) {
         ringbuf_free(pipe->buffer);
-        kmm_free(pipe, kernel_mem);
+        kmm_free(kernel_mem, pipe);
         return NULL;
       }
       pipe->writers_wait_queue = queue_new();
       if (!pipe->writers_wait_queue) {
         queue_free(pipe->readers_wait_queue);
         ringbuf_free(pipe->buffer);
-        kmm_free(pipe, kernel_mem);
+        kmm_free(kernel_mem, pipe);
         return NULL;
       }
 
@@ -116,7 +116,7 @@ void pipe_free(struct pipe_t *pipe) {
   queue_free(pipe->readers_wait_queue);
   queue_free(pipe->writers_wait_queue);
 
-  kmm_free(pipe, kernel_mem);
+  kmm_free(kernel_mem, pipe);
 }
 
 static ssize_t pipe_read(void *resource, void *buf, size_t size) {

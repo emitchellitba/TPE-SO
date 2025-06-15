@@ -115,7 +115,7 @@ static inline void *dequeue(struct queue *queue) {
     queue->tail = NULL;
 
   void *value = head->value;
-  kmm_free(head, kernel_mem);
+  kmm_free(kernel_mem, head);
 
   return value;
 }
@@ -135,12 +135,12 @@ static inline void queue_remove(struct queue *queue, void *value) {
         --queue->count;
         queue->tail = queue->tail->prev;
         queue->tail->next = NULL;
-        kmm_free(node, kernel_mem);
+        kmm_free(kernel_mem, node);
       } else {
         --queue->count;
         node->prev->next = node->next;
         node->next->prev = node->prev;
-        kmm_free(node, kernel_mem);
+        kmm_free(kernel_mem, node);
       }
 
       break;
@@ -165,7 +165,7 @@ static inline void queue_node_remove(struct queue *queue, struct qnode *node) {
     queue->tail = node->prev;
 
   --queue->count;
-  kmm_free(node, kernel_mem);
+  kmm_free(kernel_mem, node);
   return;
 }
 
@@ -181,7 +181,7 @@ static inline void queue_free(struct queue *queue) {
   }
 
   // free the queue itself
-  kmm_free(queue, kernel_mem);
+  kmm_free(kernel_mem, queue);
 }
 
 /**

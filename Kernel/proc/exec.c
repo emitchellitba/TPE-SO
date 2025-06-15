@@ -148,7 +148,7 @@ int execv(struct proc *proc, int argc, char *const argv[]) {
   */
   uint64_t *user_argv_on_stack = (uint64_t *)proc_stack_current_addr;
 
-  kmm_free(user_argv_ptr_array_kernel_buf, kernel_mem);
+  kmm_free(kernel_mem, user_argv_ptr_array_kernel_buf);
   user_argv_ptr_array_kernel_buf = NULL;
 
   proc_stack_current_addr = push_argc_argv_to_stack(proc_stack_current_addr,
